@@ -1,0 +1,135 @@
+[gd_scene format=3 uid="uid://kvucga56re18"]
+
+[ext_resource type="Shader" uid="uid://yrkr1fp74sdl" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur.gdshader" id="2_gbx52"]
+[ext_resource type="Script" uid="uid://djxy55kr6xgtr" path="res://addons/dc_kit/ui/info_panel/info_panel.gd" id="2_try4t"]
+[ext_resource type="Script" uid="uid://do0p117rpnomi" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur_rect.gd" id="3_4bocb"]
+[ext_resource type="Texture2D" uid="uid://34hh7ng6y1kh" path="res://addons/dc_kit/assets/images/arrow-up-left.svg" id="3_rooy4"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ch5o3"]
+shader = ExtResource("2_gbx52")
+shader_parameter/blur_radius = 80.0
+shader_parameter/blur_strength = 1.0
+shader_parameter/glass_color = Color(0.039, 0.055, 0.078, 0.65)
+shader_parameter/darken = 0.75
+shader_parameter/frost_grain = 0.045
+shader_parameter/frost_scale = 8.0
+shader_parameter/chroma_shift = 0.8
+shader_parameter/scanline_str = 0.0
+shader_parameter/edge_vignette = 0.22
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcaev"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0t350"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_a3arl"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r8mqv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gqs6l"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hyq7i"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dmqdy"]
+
+[node name="info_panel" type="PanelContainer" unique_id=100523913]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"MutedBorderPanel"
+script = ExtResource("2_try4t")
+
+[node name="FrostBlurRect" type="ColorRect" parent="." unique_id=1986560961]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_ch5o3")
+layout_mode = 2
+script = ExtResource("3_4bocb")
+darken = 0.75
+metadata/_custom_type_script = "uid://do0p117rpnomi"
+
+[node name="RootVBox" type="VBoxContainer" parent="." unique_id=378115158]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Header" type="PanelContainer" parent="RootVBox" unique_id=1696403786]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bcaev")
+
+[node name="Button" type="Button" parent="RootVBox/Header" unique_id=1295783051]
+layout_mode = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_0t350")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_a3arl")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_r8mqv")
+theme_override_styles/hover_pressed = SubResource("StyleBoxEmpty_gqs6l")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_hyq7i")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_dmqdy")
+expand_icon = true
+
+[node name="MarginContainer" type="MarginContainer" parent="RootVBox/Header" unique_id=350611890]
+layout_mode = 2
+mouse_filter = 2
+mouse_behavior_recursive = 1
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RootVBox/Header/MarginContainer" unique_id=2096185842]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="RootVBox/Header/MarginContainer/HBoxContainer" unique_id=1047952888]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+size_flags_stretch_ratio = 20.0
+theme_override_font_sizes/font_size = 28
+text = "Placeholder Test"
+clip_text = true
+text_overrun_behavior = 4
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="RootVBox/Header/MarginContainer/HBoxContainer" unique_id=1940205470]
+layout_mode = 2
+size_flags_horizontal = 3
+stretch_mode = 1
+alignment_horizontal = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="RootVBox/Header/MarginContainer/HBoxContainer/AspectRatioContainer" unique_id=1564713283]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="TextureRect" type="TextureRect" parent="RootVBox/Header/MarginContainer/HBoxContainer/AspectRatioContainer/MarginContainer" unique_id=1868534911]
+layout_mode = 2
+texture = ExtResource("3_rooy4")
+expand_mode = 1
+
+[node name="ContentClip" type="Control" parent="RootVBox" unique_id=1960546876]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="RootVBox/ContentClip" unique_id=498100402]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 10
+
+[node name="ScrollContainer" type="ScrollContainer" parent="RootVBox/ContentClip/MarginContainer" unique_id=1023657382]
+layout_mode = 2
+
+[node name="ContentBody" type="MarginContainer" parent="RootVBox/ContentClip/MarginContainer/ScrollContainer" unique_id=1671733621]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_right = 6
