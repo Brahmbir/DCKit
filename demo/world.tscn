@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://qv7uw2xl7r64"]
+
+[ext_resource type="Shader" uid="uid://2qrvegyxlca5" path="res://grid.gdshader" id="1_f3sb7"]
+[ext_resource type="Script" uid="uid://by3lqskkcmq47" path="res://world.gd" id="1_fj7yv"]
+[ext_resource type="Script" uid="uid://cu5ky1vwuqgld" path="res://character_body_3d.gd" id="3_tlwt5"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_f3sb7"]
+sky_top_color = Color(0, 0.30640513, 0.6652226, 1)
+sky_horizon_color = Color(0.3068048, 0.3834061, 0.47311047, 1)
+ground_bottom_color = Color(0.07771559, 0.07771559, 0.07771559, 1)
+ground_horizon_color = Color(0.3068048, 0.3834061, 0.47311047, 1)
+
+[sub_resource type="Sky" id="Sky_fj7yv"]
+sky_material = SubResource("ProceduralSkyMaterial_f3sb7")
+
+[sub_resource type="Environment" id="Environment_tlwt5"]
+background_mode = 2
+sky = SubResource("Sky_fj7yv")
+tonemap_mode = 2
+glow_enabled = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
+volumetric_fog_anisotropy = -0.15
+volumetric_fog_sky_affect = 0.386
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fj7yv"]
+render_priority = 0
+shader = ExtResource("1_f3sb7")
+shader_parameter/bg_color = Color(0.15, 0.15, 0.18, 1)
+shader_parameter/line_color = Color(0.4, 0.4, 0.45, 1)
+shader_parameter/grid_scale = 1.0
+shader_parameter/line_thickness = 0.02
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_aqk2v"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_036b0"]
+
+[node name="World" type="Node3D" unique_id=328519527]
+script = ExtResource("1_fj7yv")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2113784898]
+environment = SubResource("Environment_tlwt5")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1632434898]
+transform = Transform3D(-0.9931706, -0.03585953, 0.11102323, 0, 0.9515944, 0.30735663, -0.11667075, 0.30525756, -0.9450956, 0, 0, 0)
+light_energy = 2.4
+shadow_enabled = true
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=226450442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.057, -1, 0)
+use_collision = true
+size = Vector3(100, 10, 100)
+material = SubResource("ShaderMaterial_fj7yv")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGBox3D" unique_id=1327078642]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+operation = 2
+size = Vector3(99, 10, 99)
+
+[node name="Pause" type="Node3D" parent="." unique_id=986160782]
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="Pause" unique_id=888643814]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.057, -1, 0)
+script = ExtResource("3_tlwt5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pause/CharacterBody3D" unique_id=1819330354]
+shape = SubResource("CapsuleShape3D_aqk2v")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pause/CharacterBody3D" unique_id=389430753]
+mesh = SubResource("CapsuleMesh_036b0")
+
+[node name="Camera3D" type="Camera3D" parent="Pause/CharacterBody3D" unique_id=1874417297]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3)
