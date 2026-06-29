@@ -1,0 +1,193 @@
+# ======================================================
+# Developer Console Test Script
+# ======================================================
+
+echo "====================================="
+echo Starting Developer Console Test
+echo "====================================="
+
+# Variables
+
+echo
+echo "----- Variable Tests -----"
+
+var.set player Brahmbir
+echo "Player:" $player
+
+var.get player Unknown
+var.exists player
+var.list
+
+var.set score 100
+echo "Score:" $score
+
+var.delete score
+var.exists score
+
+var.try_delete score
+
+# Comparisons
+
+echo
+echo "----- Comparison Tests -----"
+
+cmp.eq hello hello
+cmp.eq hello world
+
+cmp.neq hello world
+cmp.neq hello hello
+
+cmp.gt 10 5
+cmp.gt 5 10
+
+cmp.lt 5 10
+cmp.lt 10 5
+
+cmp.gte 5 5
+cmp.gte 6 5
+
+cmp.lte 5 5
+cmp.lte 7 5
+
+# Boolean Logic
+
+echo
+echo "----- Boolean Tests -----"
+
+not true
+not false
+
+and true true true
+and true false true
+
+or false false true
+or false false false
+
+# IF
+
+echo
+echo "----- IF Tests -----"
+
+if true (echo IF TRUE branch)
+if false (echo SHOULD_NOT_PRINT) (echo ELSE branch)
+
+if (cmp.gt 20 10) (echo 20 is greater than 10)
+if (cmp.lt 20 10) (echo impossible) (echo Correct)
+
+# TRY
+
+echo
+echo "----- TRY Tests -----"
+
+try (cmp.gt abc 5)
+try (cmp.gt abc 5) (echo Comparison failed successfully)
+
+# Repeat
+
+echo
+echo "----- Repeat Tests -----"
+
+repeat 3 (echo "Hello!")
+
+repeat 5 (echo "Repeating...")
+
+# While
+
+echo
+echo "----- While Tests -----"
+
+#var.set counter 0
+
+# while (cmp.lt $counter 5) (echo "Counter:" $counter) (var.set counter (math.add $counter 1))
+
+# (Skip this section if math.add doesn't exist)
+
+# Wait
+
+echo
+echo "----- Wait Tests -----"
+
+wait 500ms
+echo Waited 500ms
+
+wait 1s
+echo Waited 1 second
+
+# Timing
+
+echo
+echo "----- Time Tests -----"
+
+time (wait 250ms)
+
+time (repeat 5 ( echo "Measuring..." ))
+
+# Nested Commands
+
+echo
+echo "----- Nested Commands -----"
+
+echo "Result:" (cmp.eq apple apple)
+
+if (cmp.eq hello hello) (echo Nested success ) (echo Nested fail)
+
+# Abort Test
+
+# Uncomment to test abort.
+# Everything after this line should stop.
+
+# abort Manual Abort Test
+
+echo "Abort did NOT execute."
+
+# Failure Tests
+
+# Uncomment individually.
+
+# cmp.gt abc xyz
+# repeat 500000 (echo Overflow)
+# wait banana
+# var.delete does_not_exist
+# cmp.eq
+# not
+# and
+# or
+
+# End
+
+
+echo "====================================="
+echo Constructor Tests
+echo "====================================="
+
+# Constructor Tests
+
+bat "./ctor_test.i/vector2.txt"
+bat "./ctor_test.i/vector2i.txt"
+
+bat "./ctor_test.i/vector3.txt"
+bat "./ctor_test.i/vector3i.txt"
+
+bat "./ctor_test.i/vector4.txt"
+bat "./ctor_test.i/vector4i.txt"
+
+bat "./ctor_test.i/transform2D.txt"
+bat "./ctor_test.i/transform3D.txt"
+
+bat "./ctor_test.i/rect2.txt"
+bat "./ctor_test.i/rect2i.txt"
+
+bat "./ctor_test.i/string.txt"
+bat "./ctor_test.i/color.txt"
+
+bat "./ctor_test.i/quaternion.txt"
+bat "./ctor_test.i/projection.txt"
+
+bat "./ctor_test.i/plane.txt"
+bat "./ctor_test.i/int.txt"
+
+bat "./ctor_test.i/float.txt"
+bat "./ctor_test.i/bool.txt"
+
+bat "./ctor_test.i/basis.txt"
+bat "./ctor_test.i/aabb.txt"

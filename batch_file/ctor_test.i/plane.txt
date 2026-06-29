@@ -1,0 +1,75 @@
+echo "===== Plane ====="
+
+# Default constructor
+
+echo Plane()
+
+# Named constants
+
+echo "Constants:"
+
+echo Plane( PLANE_XY)
+echo Plane( PLANE_XZ)
+echo Plane( PLANE_YZ)
+
+# Case-insensitive
+
+echo Plane( plane_xy)
+echo Plane( Plane_Xz)
+echo Plane( pLaNe_Yz)
+
+# Existing Plane
+
+echo "Existing:"
+
+var.set ground Plane(PLANE_XZ)
+
+echo $ground
+echo Plane($ground)
+
+# Normal + distance
+
+echo "Normal + Distance:"
+
+echo Plane( Vector3(0, 1, 0), 0)
+echo Plane( Vector3(0, 1, 0), 5)
+echo Plane( Vector3(1, 0, 0), -10)
+
+# Normal + point
+
+echo "Normal + Point:"
+
+echo Plane( Vector3(0, 1, 0), Vector3(0, 5, 0))
+
+echo Plane(Vector3(1, 0, 0), Vector3(10, 0, 0))
+
+# Three points
+
+echo "Three Points:"
+
+echo Plane( Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 0, 1))
+
+echo Plane( Vector3(0, 5, 0), Vector3(10, 5, 0), Vector3(0, 5, 10))
+
+# Components
+
+echo "Components:"
+
+echo Plane(0, 1, 0, 0)
+echo Plane(1, 0, 0, 10)
+echo Plane(0.5, 1.5, -2, 8)
+
+# Nested constructors
+
+echo Plane( Plane(PLANE_XY))
+
+echo Plane( Plane(Vector3(0, 1, 0), 2))
+
+# Type checks
+
+echo "Type of:"
+
+type_of Plane()
+type_of $ground
+
+echo "===== Done ====="

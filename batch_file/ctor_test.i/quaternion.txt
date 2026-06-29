@@ -1,0 +1,64 @@
+echo "===== Quaternion ====="
+
+# Default constructor
+
+echo Quaternion()
+
+# Named constants
+
+echo "Constants:"
+
+echo Quaternion( IDENTITY)
+
+# Case-insensitive
+
+echo Quaternion( identity)
+
+# Existing Quaternion
+
+echo "Existing:"
+
+var.set q Quaternion(Vector3(UP), 1)
+
+echo $q
+echo Quaternion($q)
+
+# From Basis
+
+echo "Basis:"
+
+echo Quaternion(Basis())
+echo Quaternion(Basis(Vector3(UP), 1))
+
+# Axis + angle
+
+echo "Axis + Angle:"
+
+echo Quaternion( Vector3(UP),0.33)
+
+echo Quaternion(Vector3(RIGHT),1)
+
+echo Quaternion(Vector3(FORWARD),1)
+
+# Raw components
+
+echo "Components:"
+
+echo Quaternion(0, 0, 0, 1)
+echo Quaternion(0.7071068, 0, 0, 0.7071068)
+echo Quaternion(0.5, 0.5, 0.5, 0.5)
+
+# Nested constructor
+
+echo Quaternion( Quaternion( Vector3(UP), 0.7))
+
+echo Quaternion( Basis( Vector3(FORWARD), 0.5))
+
+# Type checks
+
+echo "Type of:"
+
+type_of Quaternion()
+type_of $q
+
+echo "===== Done ====="

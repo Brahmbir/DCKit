@@ -1,0 +1,55 @@
+echo "===== Rect2 ====="
+
+# Default constructor
+
+echo Rect2()
+
+# From Rect2i widening
+
+echo "From Rect2i:"
+
+echo Rect2( Rect2i(0, 0, 10, 20) )
+echo Rect2( Rect2i(5, 5, 15, 25) )
+echo Rect2( Rect2i(-10, 20, 30, 40) )
+
+# Position + size (Vector2)
+
+echo "Vector2 form:"
+
+echo Rect2( Vector2(0, 0), Vector2(10, 20))
+
+echo Rect2( Vector2(-5, 10), Vector2(30, 40))
+
+# Flat float form
+
+echo "Flat floats:"
+
+echo Rect2( 0, 0, 10, 20 )
+echo Rect2( -5, 15, 30, 40 )
+echo Rect2( 100.5, 200.25, 50.75, 60.125 )
+
+# Variable usage
+
+echo "Variables:"
+
+var.set pos Vector2(10, 20)
+var.set size Vector2(30, 40)
+
+echo Rect2($pos, $size)
+
+# Nested constructor
+
+echo Rect2( Rect2( Vector2(0, 0), Vector2(10, 10) ))
+
+echo Rect2( Rect2i(0, 0, 10, 10))
+
+echo Rect2( Rect2($pos, $size))
+
+# Type checks
+
+echo "Type of:"
+
+type_of Rect2()
+type_of Rect2(0, 0, 10, 20)
+
+echo "===== Done ====="

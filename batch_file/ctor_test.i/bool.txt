@@ -1,0 +1,76 @@
+echo "===== Bool ====="
+
+# Default constructor
+echo Bool()
+
+echo "===== Literal Strings ====="
+
+echo Bool(true)
+echo Bool(false)
+echo Bool(TRUE)
+echo Bool(FALSE)
+echo Bool(True)
+echo Bool(False)
+
+echo Bool(yes)
+echo Bool(no)
+echo Bool(YES)
+echo Bool(NO)
+
+echo Bool(1)
+echo Bool(0)
+
+echo "===== Integer Conversion ====="
+
+try echo Bool(5)
+try echo Bool(-1)
+try echo Bool(42)
+try echo Bool(-999)
+
+echo Bool(0)
+
+echo "===== Variables ====="
+
+var.set b_true true
+var.set b_false false
+var.set i_zero 0
+var.set i_one 1
+var.set i_neg -25
+var.set s_true "true"
+var.set s_false "false"
+var.set s_yes "yes"
+var.set s_no "no"
+
+echo Bool($b_true)
+echo Bool($b_false)
+
+echo Bool($i_zero)
+echo Bool($i_one)
+echo (try Bool($i_neg))
+
+echo Bool($s_true)
+echo Bool($s_false)
+echo Bool($s_yes)
+echo Bool($s_no)
+
+echo "===== Nested ====="
+
+echo Bool(Bool())
+echo Bool(Bool(true))
+echo Bool(Bool(false))
+echo Bool(Bool(1))
+echo Bool(Bool(0))
+
+echo "===== Type Of ====="
+
+type_of Bool()
+type_of Bool(true)
+type_of Bool(1)
+echo Bool(on)
+echo Bool(off)
+
+echo "===== Invalid ====="
+
+try echo Bool(maybe)
+
+echo "===== Done ====="

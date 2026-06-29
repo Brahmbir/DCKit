@@ -1,0 +1,66 @@
+echo "===== String ====="
+
+# Zero-arg
+
+echo Str()
+
+# Single literal strings
+
+echo Str( hello )
+echo Str( "hello world" )
+
+# Numeric coercion
+
+echo "Numeric:"
+
+echo Str( 42 )
+echo Str( -15 )
+echo Str( 3.1415 )
+
+# Boolean coercion
+
+echo "Boolean:"
+
+echo Str( true )
+echo Str( false )
+
+# Vector coercion
+
+echo "Vectors:"
+
+echo Str( Vector2(1, 2) )
+echo Str( Vector3(10, 20, 30) )
+
+# Mixed multi-arg join behavior
+
+echo "Join behavior:"
+
+echo Str( hello, world )
+echo Str( 10, apples )
+echo Str( Vector2(1,2), plus, Vector3(3,4,5) )
+
+# Variable conversion
+
+echo "Variables:"
+
+var.set name John
+var.set score 99
+
+echo Str($name)
+echo Str($score)
+
+# Edge cases
+
+echo "Edge cases:"
+
+echo Str( null )
+echo Str()
+
+# Type check
+
+echo "Type of:"
+
+type_of Str(hello)
+type_of Str(123)
+
+echo "===== Done ====="

@@ -1,0 +1,60 @@
+echo "===== Transform3D ====="
+
+# Default constructor
+
+echo Transform3D()
+
+# Named constants
+
+echo "Constants:"
+
+echo Transform3D( IDENTITY)
+echo Transform3D( FLIP_X)
+echo Transform3D( FLIP_Y)
+echo Transform3D( FLIP_Z)
+
+# Case-insensitive constants
+
+echo Transform3D( identity)
+echo Transform3D( fLiP_x)
+echo Transform3D( flip_z)
+
+# Existing Transform3D passthrough
+
+echo "Existing:"
+
+var.set t Transform3D()
+
+echo $t
+echo Transform3D($t)
+
+# Basis + origin
+
+echo "Basis + Origin:"
+
+echo Transform3D( Basis(), Vector3(10, 20, 30))
+
+echo Transform3D( Basis(Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1)), Vector3(-5, 15, 25))
+
+# Column vectors
+
+echo "Columns:"
+
+echo Transform3D( Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1), Vector3(10, 20, 30))
+
+echo Transform3D( Vector3(2, 0, 0), Vector3(0, 2, 0), Vector3(0, 0, 2), Vector3(-10, -20, -30))
+
+# From Projection
+
+echo "Projection:"
+
+echo Transform3D(Projection())
+
+# Type checks
+
+echo "Type of:"
+
+type_of Transform3D()
+type_of $t
+
+echo "===== Done ====="

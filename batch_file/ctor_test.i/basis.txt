@@ -1,0 +1,81 @@
+echo "===== Basis ====="
+
+# Default constructor
+
+echo Basis()
+
+# Named constants
+
+echo "Constants:"
+
+echo Basis(IDENTITY)
+echo Basis(FLIP_X)
+echo Basis(FLIP_Y)
+echo Basis(FLIP_Z)
+
+# Case-insensitive
+
+echo Basis(identity)
+echo Basis(flip_x)
+echo Basis(FlIp_Y)
+
+# Axis + angle
+
+echo "Axis + Angle:"
+
+echo Basis(Vector3(UP), 0)
+echo Basis(Vector3(UP), 1.57079632679)
+echo Basis(Vector3(RIGHT), 3.14159265359)
+echo Basis(Vector3(BACK), 0.78539816339)
+
+# Three column vectors
+
+echo "Columns:"
+
+echo Basis( Vector3(RIGHT), Vector3(UP), Vector3(BACK))
+
+echo Basis( Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1))
+
+echo Basis( Vector3(2, 0, 0), Vector3(0, 2, 0), Vector3(0, 0, 2))
+
+# Variables
+
+echo "Variables:"
+
+var.set b Basis()
+
+var.set axis Vector3(UP)
+var.set angle 1.57079632679
+
+echo $b
+echo Basis($b)
+
+echo Basis($axis, $angle)
+
+# Quaternion conversion
+
+echo "Quaternion:"
+
+var.set q Quaternion(Vector3(UP), 1.57079632679)
+
+echo $q
+echo Basis($q)
+echo Basis(Quaternion(Vector3(RIGHT), 3.14159265359))
+
+# Nested constructors
+
+echo "Nested:"
+
+echo Basis(Basis())
+echo Basis(Basis(FLIP_X))
+echo Basis( Vector3(Vector3(RIGHT)), Vector3(Vector3(UP)), Vector3(Vector3(BACK)))
+
+# Type checks
+
+echo "Type Of:"
+
+type_of Basis()
+type_of Basis(IDENTITY)
+type_of $b
+
+echo "===== Done ====="

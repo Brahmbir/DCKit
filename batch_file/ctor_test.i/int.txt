@@ -1,0 +1,62 @@
+echo "===== Int ====="
+
+# Default constructor
+
+echo Int()
+
+# Integer literals
+
+echo "Integers:"
+
+echo Int(0)
+echo Int(1)
+echo Int(-5)
+echo Int(123456)
+
+# Float truncation
+
+echo "Floats:"
+
+echo Int(1.0)
+echo Int(3.9)
+echo Int(-2.7)
+echo Int(999.999)
+
+# String conversion
+
+echo "Strings:"
+
+echo Int("42")
+echo Int("-15")
+echo Int("3.0")
+echo Int("8.9")
+
+# Variables
+
+echo "Variables:"
+
+var.set i 42
+var.set f 12.75
+var.set s "99"
+
+echo $i
+echo $f
+echo $s
+
+echo Int($i)
+echo Int($f)
+echo Int($s)
+
+# Nested constructors
+
+echo Int(Int(5))
+echo Int(Float(8.75))
+echo Int(Str(123))
+
+echo "Type of:"
+
+type_of Int()
+type_of Int(5)
+type_of $i
+
+echo "===== Done ====="

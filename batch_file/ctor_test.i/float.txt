@@ -1,0 +1,62 @@
+echo "===== Float ====="
+
+# Default constructor
+
+echo Float()
+
+# Integer conversion
+
+echo "Integers:"
+
+echo Float(0)
+echo Float(1)
+echo Float(-5)
+echo Float(123456)
+
+# Float values
+
+echo "Floats:"
+
+echo Float(1.0)
+echo Float(3.14)
+echo Float(-2.75)
+echo Float(999.999)
+
+# String conversion
+
+echo "Strings:"
+
+echo Float("42")
+echo Float("-15")
+echo Float("3.14")
+echo Float("-8.75")
+
+# Variables
+
+echo "Variables:"
+
+var.set i 42
+var.set f 12.75
+var.set s "99.5"
+
+echo $i
+echo $f
+echo $s
+
+echo Float($i)
+echo Float($f)
+echo Float($s)
+
+# Nested constructors
+
+echo Float(Int(5))
+echo Float(Float(8.75))
+echo Float(Str(123.456))
+
+echo "Type of:"
+
+type_of Float()
+type_of Float(5)
+type_of $f
+
+echo "===== Done ====="

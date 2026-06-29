@@ -1,0 +1,65 @@
+echo "===== Vector3 ====="
+
+# Default constructor
+
+echo Vector3()
+
+# Named constants
+
+echo "Constants:"
+
+echo Vector3( ZERO)
+echo Vector3( ONE)
+echo Vector3( INF)
+echo Vector3( LEFT)
+echo Vector3( RIGHT)
+echo Vector3( UP)
+echo Vector3( DOWN)
+echo Vector3( FORWARD)
+echo Vector3( BACK)
+echo Vector3( MODEL_LEFT)
+echo Vector3( MODEL_RIGHT)
+echo Vector3( MODEL_TOP)
+echo Vector3( MODEL_BOTTOM)
+echo Vector3( MODEL_FRONT)
+echo Vector3( MODEL_REAR)
+
+# Case-insensitive
+
+echo Vector3( zero)
+echo Vector3( Up)
+echo Vector3( rIgHt)
+echo Vector3( forward)
+echo Vector3( model_front)
+
+# Numeric construction
+
+echo "Numeric:"
+
+echo Vector3( 0, 0, 0)
+echo Vector3( 1, 2, 3)
+echo Vector3( -5, 12, -8)
+echo Vector3( 1.5, 2.75, 3.125)
+echo Vector3( -3.25, 8, -4.5)
+
+# Variable conversion
+
+echo "Variables:"
+
+var.set pos3 Vector3(10, 20, 30)
+
+echo $pos3
+echo Vector3($pos3)
+
+# Nested constructor
+
+echo Vector3(Vector3(50, 60, 70))
+echo Vector3(Vector3i(50, 60, 70))
+echo Vector3(Vector3($pos3))
+
+echo "Type of:"
+
+type_of Vector3(0, 0, 0)
+type_of $pos3
+
+echo "===== Done ====="

@@ -1,0 +1,52 @@
+echo "===== Rect2i ====="
+
+# Default constructor
+
+echo Rect2i()
+
+# Single argument conversion
+
+echo "Single arg:"
+
+echo Rect2i( Rect2(0, 0, 10, 20) )
+echo Rect2i( Rect2(5.0, 5.0, 15.0, 25.0) )
+
+# Position + size (Vector2i)
+
+echo "Vector2i form:"
+
+echo Rect2i( Vector2i(0, 0), Vector2i(10, 20))
+
+echo Rect2i( Vector2i(-5, 10), Vector2i(30, 40))
+
+# Flat integer form
+
+echo "Flat integers:"
+
+echo Rect2i( 0, 0, 10, 20 )
+echo Rect2i( -5, 15, 30, 40 )
+echo Rect2i( 100, 200, 50, 60 )
+
+# Variable usage
+
+echo "Variables:"
+
+var.set pos Vector2i(10, 20)
+var.set size Vector2i(30, 40)
+
+echo Rect2i($pos, $size)
+
+# Nested constructor
+
+echo Rect2i( Rect2i(0, 0, 10, 10))
+
+echo Rect2i( Rect2i($pos, $size))
+
+# Type checks
+
+echo "Type of:"
+
+type_of Rect2i()
+type_of Rect2i(0, 0, 10, 10)
+
+echo "===== Done ====="

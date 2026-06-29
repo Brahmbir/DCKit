@@ -1,0 +1,53 @@
+echo "===== Vector2 ====="
+
+# Default constructor
+
+echo Vector2()
+
+# Named constants
+
+echo "Constants:"
+
+echo Vector2( ZERO)
+echo Vector2( ONE)
+echo Vector2( INF)
+echo Vector2( LEFT)
+echo Vector2( RIGHT)
+echo Vector2( UP)
+echo Vector2( DOWN)
+
+# Case-insensitive
+echo Vector2( zero)
+echo Vector2( Up)
+echo Vector2( rIgHt)
+
+# Numeric construction
+
+echo "Numeric:"
+
+echo Vector2( 0, 0)
+echo Vector2( 1, 2)
+echo Vector2( -5, 12)
+echo Vector2( 1.5, 2.75)
+echo Vector2( -3.25, 8)
+
+# Variable conversion
+
+echo "Variables:"
+
+var.set pos Vector2(10, 20)
+
+echo $pos
+echo Vector2($pos)
+
+# Nested constructor
+echo Vector2(Vector2(50, 60))
+echo Vector2(Vector2i(50, 60))
+echo Vector2(Vector2($pos))
+
+echo "Type of:"
+
+type_of Vector2(0, 0)
+type_of $pos
+
+echo "===== Done ====="

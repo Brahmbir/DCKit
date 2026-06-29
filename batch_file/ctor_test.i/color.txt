@@ -1,0 +1,113 @@
+echo "===== Color ====="
+
+# Default constructor
+
+echo Color()
+
+# Named colors
+
+echo "Named Colors:"
+
+echo Color(red)
+echo Color(green)
+echo Color(blue)
+echo Color(white)
+echo Color(black)
+echo Color(gray)
+echo Color(yellow)
+echo Color(cyan)
+echo Color(magenta)
+echo Color(orange)
+echo Color(purple)
+echo Color(pink)
+echo Color(lime)
+echo Color(teal)
+echo Color(brown)
+echo Color(olive)
+echo Color(navy)
+echo Color(maroon)
+echo Color(silver)
+echo Color(gold)
+echo Color(transparent)
+
+# Case-insensitive
+
+echo Color(RED)
+echo Color(Red)
+echo Color(rEd)
+
+# HTML colors
+
+echo "HTML:"
+
+echo Color("ff0000")
+echo Color("00ff00")
+echo Color("0000ff")
+echo Color("f00")
+echo Color("0f0")
+echo Color("00f")
+echo Color("ff8800cc")
+echo Color("f80c")
+
+# Float RGB
+
+echo "Float RGB:"
+
+echo Color(0, 0, 0)
+echo Color(1, 1, 1)
+echo Color(1, 0, 0)
+echo Color(0, 1, 0)
+echo Color(0, 0, 1)
+echo Color(0.25, 0.5, 0.75)
+
+# Float RGBA
+
+echo "Float RGBA:"
+
+echo Color(1, 0, 0, 0.5)
+echo Color(0.1, 0.2, 0.3, 0.4)
+echo Color(0, 0, 0, 0)
+
+# 8-bit RGB
+
+echo "8-bit RGB:"
+
+echo Color(255, 0, 0)
+echo Color(0, 255, 0)
+echo Color(0, 0, 255)
+echo Color(255, 255, 255)
+echo Color(128, 64, 32)
+
+# 8-bit RGBA
+
+echo "8-bit RGBA:"
+
+echo Color(255, 0, 0, 128)
+echo Color(0, 255, 0, 64)
+echo Color(0, 0, 255, 255)
+
+# Existing Color
+
+echo "Existing Color:"
+
+var.set c Color(red)
+
+echo $c
+echo Color($c)
+
+# Nested
+
+echo "Nested:"
+
+echo Color(Color(red))
+echo Color(Color("44aaee"))
+
+# Type checks
+
+echo "Type Of:"
+
+type_of Color()
+type_of Color(red)
+type_of $c
+
+echo "===== Done ====="

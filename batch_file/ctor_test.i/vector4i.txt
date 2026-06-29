@@ -1,0 +1,55 @@
+echo "===== Vector4i ====="
+
+# Default constructor
+
+echo Vector4i()
+
+# Named constants
+
+echo "Constants:"
+
+echo Vector4i( ZERO)
+echo Vector4i( ONE)
+
+# Case-insensitive constants
+
+echo Vector4i( zero)
+echo Vector4i( oNe)
+
+# Numeric construction
+
+echo "Numeric:"
+
+echo Vector4i( 0, 0, 0, 0)
+echo Vector4i( 1, 2, 3, 4)
+echo Vector4i( -5, 12, -8, 7)
+echo Vector4i( 10, -20, 30, -40)
+
+# Variable conversion
+
+echo "Variables:"
+
+var.set pos4i Vector4i(10, 20, 30, 40)
+
+echo $pos4i
+echo Vector4i($pos4i)
+
+# Conversion from Vector4
+
+echo "From Vector4:"
+
+echo Vector4i(Vector4(50, 60, 70, 80))
+echo Vector4i(Vector4(50.0, 60.0, 70.0, 80.0))
+echo Vector4i(Vector4(50.2, 60.8, 70.1, 80.9))
+
+# Nested constructor
+
+echo Vector4i(Vector4i(100, 200, 300, 400))
+echo Vector4i(Vector4i($pos4i))
+
+echo "Type of:"
+
+type_of Vector4i(0, 0, 0, 0)
+type_of $pos4i
+
+echo "===== Done ====="

@@ -1,0 +1,64 @@
+echo "===== AABB ====="
+
+# Default constructor
+
+echo AABB()
+
+# Position + Size
+
+echo "Position + Size:"
+
+echo AABB( Vector3(0, 0, 0), Vector3(1, 1, 1))
+
+echo AABB( Vector3(10, 20, 30), Vector3(5, 6, 7))
+
+echo AABB( Vector3(-5, -10, -15), Vector3(2, 4, 8))
+
+echo AABB( Vector3(1.5, 2.5, 3.5), Vector3(4.5, 5.5, 6.5))
+
+# Six-number constructor
+
+echo "Six Numbers:"
+
+echo AABB(0, 0, 0, 1, 1, 1)
+echo AABB(10, 20, 30, 5, 6, 7)
+echo AABB(-5, -10, -15, 2, 4, 8)
+echo AABB(1.5, 2.5, 3.5, 4.5, 5.5, 6.5)
+
+# Negative sizes
+
+echo "Negative Size:"
+
+echo AABB( Vector3(0, 0, 0), Vector3(-1, -2, -3))
+
+echo AABB(0, 0, 0, -1, -2, -3)
+
+# Variables
+
+echo "Variables:"
+
+var.set pos Vector3(2, 4, 6)
+var.set size Vector3(8, 10, 12)
+
+var.set box AABB($pos, $size)
+
+echo $box
+echo AABB($pos, $size)
+
+# Nested constructors
+
+echo "Nested:"
+
+echo AABB( Vector3(Vector3(1, 2, 3)), Vector3(Vector3(4, 5, 6)))
+
+echo AABB( Vector3(1, 2, 3), Vector3(Vector3(7, 8, 9)))
+
+# Type checks
+
+echo "Type Of:"
+
+type_of AABB()
+type_of AABB(Vector3(), Vector3())
+type_of $box
+
+echo "===== Done ====="

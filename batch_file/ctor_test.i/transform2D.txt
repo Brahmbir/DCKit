@@ -1,0 +1,59 @@
+echo "===== Transform2D ====="
+
+# Default constructor
+
+echo Transform2D()
+
+# Named constants
+
+echo "Constants:"
+
+echo Transform2D( IDENTITY)
+echo Transform2D( FLIP_X)
+echo Transform2D( FLIP_Y)
+
+# Case-insensitive constants
+
+echo Transform2D( identity)
+echo Transform2D( fLiP_x)
+echo Transform2D( flip_y)
+
+# Existing Transform2D passthrough
+
+echo "Existing:"
+
+var.set t Transform2D(1.0, Vector2(1, 2), 0.5, Vector2(10, 20))
+
+echo $t
+echo Transform2D($t)
+
+# Rotation + position
+
+echo "Rotation + Position:"
+
+echo Transform2D( 0, Vector2(0, 0))
+echo Transform2D( 1.5708, Vector2(10, 20))
+
+# Rotation + scale + skew + position
+
+echo "Full decomposition:"
+
+echo Transform2D( 0, Vector2(1, 1), 0, Vector2(0, 0))
+echo Transform2D( 0.3, Vector2(1.5, 0.5), 0.1, Vector2(-10, 5))
+
+# Column vector form
+
+echo "Column vectors:"
+
+echo Transform2D( Vector2(1, 0), Vector2(0, 1), Vector2(10, 20))
+
+echo Transform2D( Vector2(2, 0), Vector2(0, 2), Vector2(-5, -5))
+
+# Type checks
+
+echo "Type of:"
+
+type_of Transform2D()
+type_of $t
+
+echo "===== Done ====="
