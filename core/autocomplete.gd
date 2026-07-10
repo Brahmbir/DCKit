@@ -1,14 +1,8 @@
 extends RefCounted
 
-const Analyzer := preload("./analyzer/analyzer.gd")
-
-const ConstructorDef := preload("./registries/constructor_registry/constructor_def.gd")
-
-
 # Emitted by update() after storing fresh context — consumers (e.g. the
 # completion popup) re-call get_completions() to pull the new list.
 signal autocomplete_need_update
-
 
 class CompletionItem:
 	enum Kind { COMMAND, COMMAND_ALIAS, TYPE, VARIABLE, VALUE }
@@ -53,7 +47,7 @@ func get_completions() -> Dictionary:
 	if _result == null:
 		return { start = _cursor_pos, items = [] }
 
-	var scope: Analyzer.DCScope = _result.scope
+	var scope: _DCKitNamespace.Analyzer.DCScope = _result.scope
 	var prefix := _scan_prefix(_input, _cursor_pos)
 	var start  := _cursor_pos - prefix.length()
 
@@ -63,13 +57,13 @@ func get_completions() -> Dictionary:
 
 	var items : Array = []
 	match scope.kind:
-		Analyzer.DCScope.Kind.COMMAND:
+		_DCKitNamespace.Analyzer.DCScope.Kind.COMMAND:
 			if scope.arg_index == -1:
 				items = _command_items(prefix)
 			else:
 				items = _param_items(scope, prefix)
 				items.append_array(_type_items(prefix))
-		Analyzer.DCScope.Kind.CONSTRUCTOR:
+		_DCKitNamespace.Analyzer.DCScope.Kind.CONSTRUCTOR:
 			items = _part_items(scope, prefix)
 			items.append_array(_type_items(prefix))
 
@@ -141,10 +135,10 @@ func _part_items(scope, prefix: String) -> Array:
 	var seen : Dictionary = {}
 	var prev : Array      = _prev_arg_values(scope)
 
-	for sig : ConstructorDef.TypeSignature in def.signatures:
+	for sig : _DCKitNamespace.ConstructorDef.TypeSignature in def.signatures:
 		if scope.part_index >= sig.parts.size():
 			continue
-		var part : ConstructorDef.PartHint = sig.parts[scope.part_index]
+		var part : _DCKitNamespace.ConstructorDef.PartHint = sig.parts[scope.part_index]
 		if not part.suggestor.is_valid():
 			continue
 		#var suggestions = _call_suggestor(part.suggestor, prefix, prev)
@@ -161,17 +155,17 @@ func _part_items(scope, prefix: String) -> Array:
 
 # HELPERS
 
-func _prev_arg_values(scope: Analyzer.DCScope) -> Array:
+func _prev_arg_values(scope: _DCKitNamespace.Analyzer.DCScope) -> Array:
 	if _result == null or _result.ast.is_empty():
 		return []
 	match scope.kind:
-		Analyzer.DCScope.Kind.COMMAND:
+		_DCKitNamespace.Analyzer.DCScope.Kind.COMMAND:
 			for node in _result.ast:
 				if "args" in node and "name" in node and node.name == scope.name:
 					return _literal_values(node.args, scope.arg_index)
 		# INFO it crash , so dont uncomment (i dont want to to it) 
-		#Analyzer.DCScope.Kind.CONSTRUCTOR:
-			#var ctor :DCConstructorDef= _find_ctor(_result.ast, scope.type_name)
+		#_DCKitNamespace.Analyzer.DCScope.Kind.CONSTRUCTOR:
+			#var ctor :_DCKitNamespace.ConstructorDef= _find_ctor(_result.ast, scope.type_name)
 			#if ctor != null:
 				#return _literal_values(ctor.parts, scope.part_index)
 	return []

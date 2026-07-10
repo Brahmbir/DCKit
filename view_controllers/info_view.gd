@@ -2,7 +2,6 @@ extends RefCounted
 
 signal update_posted(data)
 
-const ConstructorDef := preload("../core/registries/constructor_registry/constructor_def.gd")
 
 var current_data: Dictionary = {}
 
@@ -51,12 +50,12 @@ func _build_command_data(def: DCDefinition, arg_index: int) -> Dictionary:
 	}
 
 
-func _build_constructor_data(def: ConstructorDef, part_index: int) -> Dictionary:
+func _build_constructor_data(def: _DCKitNamespace.ConstructorDef, part_index: int) -> Dictionary:
 	var signatures := []
-	for sig: ConstructorDef.TypeSignature in def.signatures:
+	for sig: _DCKitNamespace.ConstructorDef.TypeSignature in def.signatures:
 		var parts := []
 		for i in sig.parts.size():
-			var p: ConstructorDef.PartHint = sig.parts[i]
+			var p: _DCKitNamespace.ConstructorDef.PartHint = sig.parts[i]
 			parts.append({
 				"name":           p.name,
 				"type_hint":      p.type_hint,

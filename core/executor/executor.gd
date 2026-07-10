@@ -46,11 +46,7 @@ extends RefCounted
 signal command_executed(raw: String, result: DCResult)
 signal command_aborted
 
-const Analyzer := preload("../analyzer/analyzer.gd")
-const Parser   := preload("../analyzer/parser.gd")
-const _Logger  := preload("./logger/logger.gd")
 const _Profiler  := preload("./profiler.gd")
-
 
 const _ORIGIN_USER := "user"
 
@@ -66,7 +62,7 @@ var _analyzer
 var _active_ctx : DCContext = null
 var _running    : bool      = false
 
-var logger : _Logger = null
+var logger : _DCKitNamespace.Tracer = null
 var profiler : _Profiler = null
 
 
@@ -78,7 +74,7 @@ func _init(cmd_reg, ctor_reg, vars_store, analyzer) -> void:
 
 	profiler = _Profiler.new()
 	
-	logger = _Logger.new()
+	logger = _DCKitNamespace.Tracer.new()
 	logger.open_session()
 
 
@@ -154,7 +150,7 @@ func reset() -> void:
 # PIPELINE
 # Shared by run() and ctx.run_raw(). Does NOT touch _running.
 func _run_execution(exec: _Execution) -> DCResult:
-	var analysis : Analyzer.DCAnalysisResult = _analyzer.analyze(exec.raw)
+	var analysis : _DCKitNamespace.Analyzer.DCAnalysisResult = _analyzer.analyze(exec.raw)
 	if not analysis.ok():
 		var f := DCResult.fail(_format_errors(analysis.diagnostics))
 		_log_result(f, exec.origin, exec.call_stack.snapshot())
@@ -170,7 +166,7 @@ func _run_execution(exec: _Execution) -> DCResult:
 	var total    := exec.commands.size()
 
 	for i in total:
-		var cmd : Parser.CommandNode = exec.commands[i]
+		var cmd : _DCKitNamespace.Parser.CommandNode = exec.commands[i]
 
 		if is_chain:
 			var segment := _slice(exec.raw, cmd) if not exec.raw.is_empty() else cmd.name
@@ -193,7 +189,7 @@ func _run_execution(exec: _Execution) -> DCResult:
 # kind — _CallStack.FrameKind.EXECUTION for chain items (root run() and
 #        anything ctx.run_raw() triggers), or .ARGUMENT for commands
 #        resolved as arguments / constructor parts / variable fallbacks.
-func _execute(node: Parser.CommandNode, exec: _Execution, kind: int) -> DCResult:
+func _execute(node: _DCKitNamespace.Parser.CommandNode, exec: _Execution, kind: int) -> DCResult:
 	var definition : DCDefinition = _cmd_reg.get_definition(node.name)
 	if definition == null:
 		return DCResult.fail("Unknown command '%s'." % node.name)
@@ -279,13 +275,13 @@ func _execute(node: Parser.CommandNode, exec: _Execution, kind: int) -> DCResult
 # used as abort parent for anything resolved under it.
 
 func _resolve_node(node, exec: _Execution, root_ctx: DCContext) -> DCResult:
-	if node is Parser.StringNode:
+	if node is _DCKitNamespace.Parser.StringNode:
 		return DCResult.ok(DCResult.Value.literal(node.value))
-	if node is Parser.VariableNode:
+	if node is _DCKitNamespace.Parser.VariableNode:
 		return await _resolve_variable(node, exec, root_ctx)
-	if node is Parser.ConstructorNode:
+	if node is _DCKitNamespace.Parser.ConstructorNode:
 		return await _resolve_ctor(node, exec, root_ctx)
-	if node is Parser.CommandNode:
+	if node is _DCKitNamespace.Parser.CommandNode:
 		# Nested arg command: runs under the same exec (same stack, same origin).
 		# abort_root is temporarily set to the calling command's context.
 		var scoped := _Execution.new("", exec.origin, root_ctx, exec.call_stack)
@@ -300,7 +296,7 @@ func _resolve_node(node, exec: _Execution, root_ctx: DCContext) -> DCResult:
 # $name        → missing = FAIL
 # $?name       → missing = ""
 # $?name:node  → missing = resolve fallback node recursively
-func _resolve_variable(node: Parser.VariableNode, exec: _Execution, root_ctx: DCContext) -> DCResult:
+func _resolve_variable(node: _DCKitNamespace.Parser.VariableNode, exec: _Execution, root_ctx: DCContext) -> DCResult:
 	var value = _vars.get_value_raw(node.name)
 	if value != null:
 		if value is String:
@@ -314,7 +310,7 @@ func _resolve_variable(node: Parser.VariableNode, exec: _Execution, root_ctx: DC
 	return DCResult.fail("Variable '$%s' is not defined." % node.name)
 
 # Parts resolved eagerly depth-first; first failure short-circuits.
-func _resolve_ctor(node: Parser.ConstructorNode, exec: _Execution, root_ctx: DCContext) -> DCResult:
+func _resolve_ctor(node: _DCKitNamespace.Parser.ConstructorNode, exec: _Execution, root_ctx: DCContext) -> DCResult:
 	var parts : Array = []
 	for part in node.parts:
 		var r : DCResult = await _resolve_node(part, exec, root_ctx)
@@ -359,11 +355,11 @@ func _normalise(raw) -> DCResult:
 func _format_errors(diagnostics: Array) -> String:
 	var msgs : Array = []
 	for d in diagnostics:
-		if d.severity == Analyzer.DCDiagnostic.Severity.ERROR:
+		if d.severity == _DCKitNamespace.Analyzer.DCDiagnostic.Severity.ERROR:
 			msgs.append(d.message)
 	return "\n".join(msgs) if not msgs.is_empty() else "Analysis failed."
 
-func _slice(raw: String, node: Parser.CommandNode) -> String:
+func _slice(raw: String, node: _DCKitNamespace.Parser.CommandNode) -> String:
 	var a := clampi(node.start_pos, 0, raw.length())
 	var b := clampi(node.end_pos,   a, raw.length())
 	return raw.substr(a, b - a)
@@ -437,7 +433,7 @@ class _Execution:
 	var raw        : String
 	var origin     : String
 	var abort_root : DCContext   # null = this is the outermost run
-	var commands   : Array       # Array[Parser.CommandNode]
+	var commands   : Array       # Array[_DCKitNamespace.Parser.CommandNode]
 	var results    : Array       # Array[DCResult]
 	var call_stack : _CallStack
 

@@ -7,19 +7,18 @@ enum LOGGER_PRINT_THRESHOLD{
 	WARN = 3,
 	ERROR = 4,
 }
-
-
+s
 const SETTING_PATH = "addons/DCKit/"
 
-const _SETTING_ENABLED_IN_RELEASE = "export/enable_in_release"
-const _SETTING_EXPORT_BATCH_DIR = "export/batch_directory"
-#const _SETTING_ = "logging/max_session_files"
-#const _SETTING_   = "logging/print_threshold"
+const SETTING_ENABLED_IN_RELEASE = "export/enable_in_release"
+const SETTING_EXPORT_BATCH_DIR = "export/batch_directory"
+#const SETTING_ = "logging/max_session_files"
+#const SETTING_   = "logging/print_threshold"
 
-const _SETTING_LOGGING_ENABLED = "logging/enabled"
-const _SETTING_LOGGING_DIRECTORY = "logging/directory"
-const _SETTING_LOGGING_MAX_SESSION_FILES = "logging/max_session_files"
-const _SETTING_LOGGING_PRINT_THRESHOLD = "logging/print_threshold"
+const SETTING_LOGGING_ENABLED = "logging/enabled"
+const SETTING_LOGGING_DIRECTORY = "logging/directory"
+const SETTING_LOGGING_MAX_SESSION_FILES = "logging/max_session_files"
+const SETTING_LOGGING_PRINT_THRESHOLD = "logging/print_threshold"
 
 
 static func get_setting(key: String, default_value: Variant) -> Variant:
@@ -27,33 +26,33 @@ static func get_setting(key: String, default_value: Variant) -> Variant:
 
 
 static func _register_project_settings(prefix:String = SETTING_PATH) -> void:
-	_declare_setting(prefix + _SETTING_ENABLED_IN_RELEASE, false, TYPE_BOOL)
+	_declare_setting(prefix + SETTING_ENABLED_IN_RELEASE, false, TYPE_BOOL)
 		
 	_declare_setting(
-		prefix + _SETTING_EXPORT_BATCH_DIR,
+		prefix + SETTING_EXPORT_BATCH_DIR,
 		"res://batch_file/", 
 		TYPE_STRING, 
 		{"hint": PROPERTY_HINT_GLOBAL_DIR})
 	
-	_declare_setting(prefix + _SETTING_LOGGING_ENABLED, true, TYPE_BOOL)
+	_declare_setting(prefix + SETTING_LOGGING_ENABLED, true, TYPE_BOOL)
 	_declare_setting(
-		prefix + _SETTING_LOGGING_DIRECTORY, 
+		prefix + SETTING_LOGGING_DIRECTORY, 
 		"user://DCKit/logs/", 
 		TYPE_STRING, 
 		{"hint": PROPERTY_HINT_GLOBAL_DIR})
-	_declare_setting(prefix + _SETTING_LOGGING_MAX_SESSION_FILES, 5, TYPE_INT)
-	_declare_setting(prefix + _SETTING_LOGGING_PRINT_THRESHOLD,
+	_declare_setting(prefix + SETTING_LOGGING_MAX_SESSION_FILES, 5, TYPE_INT)
+	_declare_setting(prefix + SETTING_LOGGING_PRINT_THRESHOLD,
 		LOGGER_PRINT_THRESHOLD.WARN,
 		TYPE_INT,
 		{"hint": PROPERTY_HINT_ENUM,"hint_string": ",".join(LOGGER_PRINT_THRESHOLD.keys()) })
 
 static func _unregister_project_settings(prefix:String = SETTING_PATH) -> void:
-	_undeclare_setting(prefix + _SETTING_ENABLED_IN_RELEASE)
-	_undeclare_setting(prefix + _SETTING_EXPORT_BATCH_DIR)
-	_undeclare_setting(prefix + _SETTING_LOGGING_ENABLED)
-	_undeclare_setting(prefix + _SETTING_LOGGING_DIRECTORY)
-	_undeclare_setting(prefix + _SETTING_LOGGING_MAX_SESSION_FILES)
-	_undeclare_setting(prefix + _SETTING_LOGGING_PRINT_THRESHOLD)
+	_undeclare_setting(prefix + SETTING_ENABLED_IN_RELEASE)
+	_undeclare_setting(prefix + SETTING_EXPORT_BATCH_DIR)
+	_undeclare_setting(prefix + SETTING_LOGGING_ENABLED)
+	_undeclare_setting(prefix + SETTING_LOGGING_DIRECTORY)
+	_undeclare_setting(prefix + SETTING_LOGGING_MAX_SESSION_FILES)
+	_undeclare_setting(prefix + SETTING_LOGGING_PRINT_THRESHOLD)
 
 static func _declare_setting(key: String, default_value: Variant, type: int, hint: Dictionary = {} ) -> void:
 	if not ProjectSettings.has_setting(key):

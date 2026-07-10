@@ -36,7 +36,7 @@ func _ready() -> void:
 	add_child(_label)
 	_on_cleared()
 
-func _append_entry(entry: _InternalLogger.LogEntry) -> void:
+func _append_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 	_render_entry(entry)
 	_label.add_text("\n")
 
@@ -48,7 +48,7 @@ func _on_cleared() -> void:
 
 # Rendering
 
-func _render_entry(entry: _InternalLogger.LogEntry) -> void:
+func _render_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 	_render_badge(_badge_level(entry))
 	_label.add_text("  ")
 
@@ -101,10 +101,10 @@ func _render_badge(level: String) -> void:
 	_label.pop()
 
 
-func _badge_level(entry: _InternalLogger.LogEntry) -> String:
+func _badge_level(entry: _DCKitNamespace.Tracer.LogEntry) -> String:
 	match entry.kind:
-		"COMMAND":       return "CMD"
-		"SYSTEM":        return "SYS"
+		"COMMAND": return "CMD"
+		"SYSTEM": return "SYS"
 		"RESULT", "LOG":
 			if entry.level == "HELP": return "HELP"
 			return entry.level

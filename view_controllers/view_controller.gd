@@ -5,7 +5,6 @@ signal scope_updated(scope)      # DCScope
 
 const _ErrorView    = preload("./error_view.gd")
 const _InfoView     = preload("./info_view.gd")
-const _AutoComplete = preload("../core/autocomplete.gd")
 
 var last_result = null  # DCAnalysisResult — read by executor on submit
 var error_view_ctl : _ErrorView
@@ -20,9 +19,9 @@ func _init(analyzer) -> void:
 	error_view_ctl = _ErrorView.new()
 	info_view_ctl  = _InfoView.new()
 
-var autocomplete : _AutoComplete = null
+var autocomplete : _DCKitNamespace.AutoComplete = null
 
-func set_autocomplete(_autocomplete: _AutoComplete) -> void:
+func set_autocomplete(_autocomplete: _DCKitNamespace.AutoComplete) -> void:
 	autocomplete = _autocomplete
 
 func on_text_changed(text: String, cursor_pos: int) -> void:

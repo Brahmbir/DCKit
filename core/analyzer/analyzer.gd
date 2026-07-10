@@ -1,8 +1,6 @@
 extends RefCounted
 
-const Lexer  := preload("./lexer.gd")
-const Parser := preload("./parser.gd")
-const TT     := Lexer.TokenType
+const TT     := _DCKitNamespace.Lexer.TokenType
 
 const ConstructorDef := preload("../registries/constructor_registry/constructor_def.gd")
 
@@ -26,7 +24,7 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 	var result := DCAnalysisResult.new()
 	if cursor_pos < 0: cursor_pos = input.length()
 
-	var lex_r := Lexer.new().lex(input)
+	var lex_r := _DCKitNamespace.Lexer.new().lex(input)
 	if not lex_r.ok:
 		result.diagnostics.append(_diag(lex_r.error.message, lex_r.error.position,
 				1, DCDiagnostic.Severity.ERROR, DCDiagnostic.Source.LEXER))
@@ -35,7 +33,7 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 		return result
 	result.tokens = lex_r.tokens
 
-	var parse_r := Parser.new().parse_chain(result.tokens)
+	var parse_r := _DCKitNamespace.Parser.new().parse_chain(result.tokens)
 	if not parse_r.ok:
 		result.diagnostics.append(_diag(parse_r.error.message, parse_r.error.position,
 				1, DCDiagnostic.Severity.ERROR, DCDiagnostic.Source.PARSER))
@@ -117,7 +115,7 @@ func compute_scope(tokens: Array, cursor_pos: int) -> DCScope:
 func _check_node(node, out: Array) -> void:
 	if node == null: return
 
-	if node is Parser.VariableNode:
+	if node is _DCKitNamespace.Parser.VariableNode:
 		if not node.is_silent and _var_store != null \
 				and not _var_store.has(node.name):
 			out.append(_diag("'$%s' is not defined." % node.name,
@@ -125,7 +123,7 @@ func _check_node(node, out: Array) -> void:
 					DCDiagnostic.Severity.WARNING, DCDiagnostic.Source.SEMANTIC))
 		_check_node(node.fallback, out)
 
-	elif node is Parser.CommandNode:
+	elif node is _DCKitNamespace.Parser.CommandNode:
 		if _cmd_reg != null:
 			if not _cmd_reg.has(node.name):
 				out.append(_diag("Unknown command '%s'." % node.name,
@@ -151,7 +149,7 @@ func _check_node(node, out: Array) -> void:
 		# Argument count is intentionally not validated — handlers are variadic by design.
 		for child in node.args: _check_node(child, out)
 
-	elif node is Parser.ConstructorNode:
+	elif node is _DCKitNamespace.Parser.ConstructorNode:
 		if _ctor_reg != null:
 			if not _ctor_reg.knows(node.type_name):
 				out.append(_diag("Unknown constructor type '%s'." % node.type_name,
@@ -238,14 +236,14 @@ func _check_argument_stack(node, depth: int, out: Array) -> void:
 			DCDiagnostic.Source.SEMANTIC))
 		return
 
-	if node is Parser.VariableNode:
+	if node is _DCKitNamespace.Parser.VariableNode:
 		_check_argument_stack(node.fallback, depth + 1, out)
 
-	elif node is Parser.CommandNode:
+	elif node is _DCKitNamespace.Parser.CommandNode:
 		for child in node.args:
 			_check_argument_stack(child, depth + 1, out)
 
-	elif node is Parser.ConstructorNode:
+	elif node is _DCKitNamespace.Parser.ConstructorNode:
 		for child in node.parts:
 			_check_argument_stack(child, depth + 1, out)
 

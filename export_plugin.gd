@@ -1,16 +1,14 @@
 @tool
 extends EditorExportPlugin
 
-const SETTINGS := preload("./setting_utils.gd")
-
 func _get_name() -> String: return "DCKitBatFileExport"
 
 func _export_begin(features, is_debug, path, flags):
-	var source_dir := SETTINGS.get_setting(
-		SETTINGS._SETTING_EXPORT_BATCH_DIR,
+	var source_dir := _DCKitNamespace.Setting.get_setting(
+		_DCKitNamespace.Setting._SETTING_EXPORT_BATCH_DIR,
 	    ""
 	)
-	var _enabled = is_debug or SETTINGS.get_setting(SETTINGS._SETTING_ENABLED_IN_RELEASE, false)
+	var _enabled = is_debug or _DCKitNamespace.Setting.get_setting(_DCKitNamespace.Setting._SETTING_ENABLED_IN_RELEASE, false)
 
 	if not _enabled : return
 	if source_dir.is_empty() : return
