@@ -26,6 +26,7 @@ static func get_setting(key: String, default_value: Variant) -> Variant:
 
 
 static func _register_project_settings(prefix:String = SETTING_PATH) -> void:
+	#region All settings
 	_declare_setting(
 		prefix + SETTING_UI_SCALE, 1.0, TYPE_FLOAT,
 		{
@@ -69,27 +70,38 @@ static func _register_project_settings(prefix:String = SETTING_PATH) -> void:
 			"hint_string": ",".join(LOGGER_PRINT_THRESHOLD.keys()),
 			"doc":"Minimum log severity printed to the editor Output panel. Messages below this level are ignored by the console."
 			})
+	#endregion
+	
+	ProjectSettings.save()
+	
 
-static func _unregister_project_settings(prefix:String = SETTING_PATH) -> void:
-	_undeclare_setting(prefix + SETTING_ENABLED_IN_RELEASE)
-	_undeclare_setting(prefix + SETTING_UI_SCALE)
-	_undeclare_setting(prefix + SETTING_BATCH_DIR)
-	_undeclare_setting(prefix + SETTING_LOGGING_ENABLED)
-	_undeclare_setting(prefix + SETTING_LOGGING_DIRECTORY)
-	_undeclare_setting(prefix + SETTING_LOGGING_MAX_SESSION_FILES)
-	_undeclare_setting(prefix + SETTING_LOGGING_PRINT_THRESHOLD)
-
-static func _declare_setting(key: String, default_value: Variant, type: int, hint: Dictionary = {} ) -> void:
-	if not ProjectSettings.has_setting(key):
+static func _declare_setting(
+	key: String,
+	default_value: Variant,
+	type: int,
+	hint: Dictionary = {},
+	count: int = 0
+) -> void:
+	if !ProjectSettings.has_setting(key):
 		ProjectSettings.set_setting(key, default_value)
-		ProjectSettings.set_initial_value(key, default_value)
-		var info = { "name": key, "type": type }
-		info.merge(hint,true)
-		ProjectSettings.add_property_info(info)
-		ProjectSettings.save()
 
+	ProjectSettings.set_initial_value(key, default_value)
+	ProjectSettings.set_as_basic(key, true)
+	ProjectSettings.set_order(key, count)
 
-static func _undeclare_setting(key: String ) -> void:
-	if ProjectSettings.has_setting(key):
-		ProjectSettings.set_setting(key, null)
-		ProjectSettings.save()
+	var info := {
+		"name": key,
+		"type": type,
+	}
+	info.merge(hint, true)
+
+	ProjectSettings.add_property_info(info)
+
+static func set_settings_internal(internal: bool, prefix := SETTING_PATH) -> void:
+	for property in ProjectSettings.get_property_list():
+		var name: String = property.name
+
+		if name.begins_with(prefix):
+			ProjectSettings.set_as_internal(name, internal)
+
+	ProjectSettings.save()

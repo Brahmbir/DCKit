@@ -26,7 +26,7 @@ func _export_begin(features, is_debug, path, flags):
 
 	var relative :String= source_dir.trim_prefix(project_root).trim_prefix("/")
 	var export_dir :String= path.get_base_dir().path_join(relative)
-
+	
 	_copy_text_files(source_dir, export_dir)
 
 func _copy_text_files(source: String, destination: String) -> void:
