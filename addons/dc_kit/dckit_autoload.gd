@@ -9,40 +9,29 @@ const BatchRunner = preload("./basic_command/batch_runner.gd")
 const BasicCMD = preload("./basic_command/basic_commands.gd")
 const ControlFlowCMD = preload("./basic_command/control_flow_commands.gd")
 
-const _CmdReg := preload("./core/registries/command_registry/command_registry.gd")
-const _CtorReg := preload("./core/registries/constructor_registry/constructor_registry.gd")
-const _VarStore := preload("./core/variable_store.gd")
-
-const _Analyzer := preload("./core/analyzer/analyzer.gd")
-const AutoComplete = preload("./core/autocomplete.gd")
 const _ViewController := preload("./view_controllers/view_controller.gd")
-
-const _Executor := preload("./core/executor/executor.gd")
 
 const _UI_SCENE = preload("./ui/dev_console_ui.tscn")
 
 # INFO In a release export, the command and ui is never added.
 var _enabled := OS.is_debug_build()
 
-var _cmd_reg : _CmdReg = null  # CommandRegistry
-var _ctor_reg : _CtorReg = null  # ConstructorRegistry
-var _var_store : _VarStore = null  # VariableStore
+var _cmd_reg : _DCKitNamespace.CommandRegistry = null
+var _ctor_reg : _DCKitNamespace.ConstructorRegistry = null  
+var _var_store : _DCKitNamespace.VariableStore = null  
  
-var _analyzer : _Analyzer = null  # Analyzer
+var _analyzer : _DCKitNamespace.Analyzer = null  
+var _executor : _DCKitNamespace.Executor = null 
+
 var _view_controller = null  # ViewController
  
-var _executor : _Executor = null # Executor
- 
-
-const SETTING := preload("./setting_utils.gd")
-
 
 func _init() -> void:
 	_read_project_settings()
 
 func _read_project_settings() -> void:
-	var enabled_in_release: bool = SETTING.get_setting(
-		SETTING._SETTING_ENABLED_IN_RELEASE,
+	var enabled_in_release: bool = _DCKitNamespace.Setting.get_setting(
+		_DCKitNamespace.Setting.SETTING_ENABLED_IN_RELEASE,
 		false
 	)
 	_enabled = OS.is_debug_build() or enabled_in_release
@@ -56,22 +45,22 @@ func _ready() -> void:
 		_init_ui()
 
 func _init_systems() -> void:
-	_cmd_reg = _CmdReg.new()
-	_ctor_reg = _CtorReg.new()
-	_var_store = _VarStore.new()
+	_cmd_reg = _DCKitNamespace.CommandRegistry.new()
+	_ctor_reg = _DCKitNamespace.ConstructorRegistry.new()
+	_var_store = _DCKitNamespace.VariableStore.new()
 		
-	_analyzer = _Analyzer.new(_cmd_reg, _ctor_reg, _var_store)
+	_analyzer = _DCKitNamespace.Analyzer.new(_cmd_reg, _ctor_reg, _var_store)
 	
 	_view_controller = _ViewController.new(_analyzer)
-	_view_controller.set_autocomplete(AutoComplete.new(_cmd_reg, _ctor_reg, _var_store))
+	_view_controller.set_autocomplete(_DCKitNamespace.AutoComplete.new(_cmd_reg, _ctor_reg, _var_store))
 	
-	_executor = _Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
+	_executor = _DCKitNamespace.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
 	
 	_register_commands(_cmd_reg)
 	 
 #region Public API 
  
-func analyze(input: String, cursor_pos: int = -1) -> _Analyzer.DCAnalysisResult :
+func analyze(input: String, cursor_pos: int = -1) -> _DCKitNamespace.Analyzer.DCAnalysisResult :
 	_view_controller.on_text_changed(input, cursor_pos)
 	return _view_controller.last_result
  
@@ -158,7 +147,7 @@ func _register_defs(defs: Array[DCDefinition]) -> void:
 	for def in defs:
 		_cmd_reg.register(def)
 
-func _register_commands(command_reg : _CmdReg) -> void :
+func _register_commands(command_reg : _DCKitNamespace.CommandRegistry) -> void :
 	if not _enabled: return
 	
 	if BasicCMD: _register_defs(BasicCMD.get_command_def_array())

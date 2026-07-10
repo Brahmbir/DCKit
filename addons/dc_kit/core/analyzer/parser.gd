@@ -1,7 +1,6 @@
 extends RefCounted
 
-const DCLexer = preload("./lexer.gd")
-const TT := DCLexer.TokenType
+const TT := _DCKitNamespace.Lexer.TokenType
 
 #region TYPES
 
@@ -77,7 +76,7 @@ func parse(tokens: Array) -> Dictionary:
 	if _at_end(): return _fail("Empty input.", 0)
 	var r := _parse_command()
 	if r.ok:
-		var last : DCLexer.Token = _tokens[_pos - 1]
+		var last : _DCKitNamespace.Lexer.Token = _tokens[_pos - 1]
 		var val_len  := last.value.length() + (2 if last.type == TT.STRING else 0)
 		r.node.end_pos = last.position + val_len
 	return r
@@ -91,7 +90,7 @@ func parse_chain(tokens: Array) -> Dictionary:
 		if _peek().type == TT.SEMICOLON: _advance(); continue
 		var r := _parse_command()
 		if not r.ok: return r
-		var last : DCLexer.Token = _tokens[_pos - 1]
+		var last : _DCKitNamespace.Lexer.Token = _tokens[_pos - 1]
 		var val_len  := last.value.length() + (2 if last.type == TT.STRING else 0)
 		r.node.end_pos = last.position + val_len
 		commands.append(r.node)
@@ -247,8 +246,8 @@ func _token_to_node(token) -> Object:
 func _is_adjacent(a, b) -> bool:
 	return a.position + a.value.length() == b.position
 
-func _peek() -> DCLexer.Token :      return _tokens[_pos]
-func _peek_next() -> DCLexer.Token : return _tokens[_pos + 1] if _pos + 1 < _tokens.size() else _tokens.back()
+func _peek() -> _DCKitNamespace.Lexer.Token :      return _tokens[_pos]
+func _peek_next() -> _DCKitNamespace.Lexer.Token : return _tokens[_pos + 1] if _pos + 1 < _tokens.size() else _tokens.back()
 func _advance() -> void:
 	if _pos < _tokens.size() - 1: _pos += 1
 func _at_end() -> bool:  return _tokens[_pos].type == TT.END

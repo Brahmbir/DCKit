@@ -7,7 +7,7 @@ signal abort_requested
 signal input_text_changed(text: String, caret_pos: int)
 signal caret_changed(caret_pos: int)
 
-const TextCmdEdit       = preload("./text_edit_to_cmd_edit.gd")
+const TextCmdEdit = preload("./text_edit_to_cmd_edit.gd")
 const AutoCompletePopup = preload("./completion_popup.gd")
 
 

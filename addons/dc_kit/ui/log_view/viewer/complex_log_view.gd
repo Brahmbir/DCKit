@@ -124,7 +124,7 @@ func is_level_gutter_visible() -> bool: return _edit.is_gutter_drawn(_GUTTER_LEV
 
 # Base overrides
 
-func _append_entry(entry: _InternalLogger.LogEntry) -> void:
+func _append_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 	var tree  : Dictionary = _handler.styled_tree(entry.content)
 	var plain : String     = _plain_from_styled(tree)
 	var indent := " ".repeat(entry.stack.size() * _edit.indent_size)
@@ -180,7 +180,7 @@ func _draw_level_gutter(line: int, _gutter: int, area: Rect2) -> void:
 
 # Helpers
 
-func _badge(entry: _InternalLogger.LogEntry) -> String:
+func _badge(entry: _DCKitNamespace.Tracer.LogEntry) -> String:
 	return "CMD" if entry.kind == "COMMAND" else \
 		   "SYS" if entry.kind == "SYSTEM"  else \
 		   entry.level

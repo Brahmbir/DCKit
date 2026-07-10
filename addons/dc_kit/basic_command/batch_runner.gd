@@ -35,7 +35,7 @@ func _init() -> void:
 
 func _read_project_settings() -> void:
 	var path :String= SETTING_UTILS.get_setting(
-		SETTING_UTILS._SETTING_EXPORT_BATCH_DIR,
+		SETTING_UTILS.SETTING_EXPORT_BATCH_DIR,
 		_root_folder
 	)
 

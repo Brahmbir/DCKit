@@ -6,7 +6,6 @@
 #
 extends Control
 
-const _InternalLogger = preload("../../../core/executor/logger/logger.gd")
 const BBCodeHandler := preload("./utils/bb_code_handler.gd")
 
 # STATE
@@ -28,7 +27,7 @@ func _exit_tree() -> void:
 # ABSTRACT OVERRIDES — subclasses implement these
 # Receive one log entry.  Called both during history replay and for live entries.
 # entry.body is pre-parsed; no further parsing is needed in subclasses.
-func _append_entry(_entry: _InternalLogger.LogEntry) -> void:
+func _append_entry(_entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 	pass
 
 # The logger was cleared.  Reset the display.
@@ -54,7 +53,7 @@ func _replay_all() -> void:
 	_on_cleared()
 	if _logger == null or not _logger.has_method("get_all"):
 		return
-	for entry: _InternalLogger.LogEntry in _logger.get_all():
+	for entry: _DCKitNamespace.Tracer.LogEntry in _logger.get_all():
 		_append_entry(entry)
 
 # Signal helpers

@@ -1,9 +1,8 @@
-# logger.gd
+# tracer.gd but refered as logger
 # Central log store for the developer console.
 # Accessed via preload; no class_name.
 extends RefCounted
 
-const SETTING_UTILS := preload("../../../setting_utils.gd")
 const LogFileWriter := preload("./log_file_writer.gd")
 
 signal entry_added(entry: LogEntry)
@@ -13,12 +12,12 @@ signal cleared
 # Level ordering — used by get_at_or_above() and _maybe_print().
 # Higher value = more severe.
 const _LEVEL_ORDER : Dictionary = {
-	"OK"    : SETTING_UTILS.LOGGER_PRINT_THRESHOLD.OK,
-	"INFO"  : SETTING_UTILS.LOGGER_PRINT_THRESHOLD.INFO,
-	"HELP"  : SETTING_UTILS.LOGGER_PRINT_THRESHOLD.INFO,
-	"WARN"  : SETTING_UTILS.LOGGER_PRINT_THRESHOLD.WARN,
-	"FAIL"  : SETTING_UTILS.LOGGER_PRINT_THRESHOLD.FAIL,
-	"ERROR" : SETTING_UTILS.LOGGER_PRINT_THRESHOLD.ERROR,
+	"OK"    : _DCKitNamespace.Setting.LOGGER_PRINT_THRESHOLD.OK,
+	"INFO"  : _DCKitNamespace.Setting.LOGGER_PRINT_THRESHOLD.INFO,
+	"HELP"  : _DCKitNamespace.Setting.LOGGER_PRINT_THRESHOLD.INFO,
+	"WARN"  : _DCKitNamespace.Setting.LOGGER_PRINT_THRESHOLD.WARN,
+	"FAIL"  : _DCKitNamespace.Setting.LOGGER_PRINT_THRESHOLD.FAIL,
+	"ERROR" : _DCKitNamespace.Setting.LOGGER_PRINT_THRESHOLD.ERROR,
 }
 
 const _MEMORY_LIMIT_DEFAULT : int = 200
@@ -38,22 +37,22 @@ func _read_project_settings() -> void:
 	var log_dir              : String = "user://DCKit/logs/"
 	var max_files            : int    = 5
 
-	file_logging_enabled = SETTING_UTILS.get_setting(
-		SETTING_UTILS._SETTING_LOGGING_ENABLED,
+	file_logging_enabled = _DCKitNamespace.Setting.get_setting(
+		_DCKitNamespace.Setting.SETTING_LOGGING_ENABLED,
 		file_logging_enabled
 	)
-	log_dir = SETTING_UTILS.get_setting(
-		SETTING_UTILS._SETTING_LOGGING_DIRECTORY,
+	log_dir = _DCKitNamespace.Setting.get_setting(
+		_DCKitNamespace.Setting.SETTING_LOGGING_DIRECTORY,
 		log_dir
 	)
-	max_files = SETTING_UTILS.get_setting(
-		SETTING_UTILS._SETTING_LOGGING_MAX_SESSION_FILES,
+	max_files = _DCKitNamespace.Setting.get_setting(
+		_DCKitNamespace.Setting.SETTING_LOGGING_MAX_SESSION_FILES,
 		max_files
 	)
-	print_threshold = SETTING_UTILS.LOGGER_PRINT_THRESHOLD.keys()[
-		SETTING_UTILS.get_setting(
-			SETTING_UTILS._SETTING_LOGGING_PRINT_THRESHOLD,
-			SETTING_UTILS.LOGGER_PRINT_THRESHOLD[print_threshold]
+	print_threshold = _DCKitNamespace.Setting.LOGGER_PRINT_THRESHOLD.keys()[
+		_DCKitNamespace.Setting.get_setting(
+			_DCKitNamespace.Setting.SETTING_LOGGING_PRINT_THRESHOLD,
+			_DCKitNamespace.Setting.LOGGER_PRINT_THRESHOLD[print_threshold]
 		)
 	]
 

@@ -17,7 +17,7 @@ const BbCodeUtils = preload("../bb_code_utils.gd")
 var name        : String         # exact case as registered — key in registry
 var description : String         # BBCode; shown in info panel — supports full formatting
 var handler     : Callable       # (ctx: DevConsoleCommandContext) -> DevConsoleResult
-var params      : Array[DCParam] # ordered, matches handler's expected args
+var params      : Array[Param]   # ordered, matches handler's expected args
 var locked      : bool           # true = unregister denied; changeable via registry
 
 
@@ -25,7 +25,7 @@ func _init(
 		p_name        : String,
 		p_handler     : Callable,
 		p_description : String         = "",
-		p_params      : Array[DCParam] = [],
+		p_params      : Array[Param] = [],
 		p_locked      : bool           = false) -> void:
 	name        = p_name
 	handler     = p_handler
@@ -68,3 +68,49 @@ func deprecate(message: String = "") -> DCDefinition:
 func as_utility() -> DCDefinition:
 	log_mode = LogMode.HIDDEN_SUCCESS
 	return self
+
+
+# One parameter slot on a command. Purely descriptive — validation is the handler's job.
+class Param extends RefCounted:
+
+	const BbCodeUtils = preload("../bb_code_utils.gd")
+
+	# Display label shown in the info panel param list.
+	var name : String
+
+	# Optional BBCode description shown in the info panel below the param name.
+	# Leave empty when the param is self-explanatory from the command description (BBcode).
+	var description : String
+
+	# () -> Array[String]  |  null = no suggestions but never Signal.
+	# Called live by HintProvider on every keystroke. Keep it fast.
+	var suggestor : Callable
+
+	## If true, this parameter consumes all remaining tokens.
+	var is_rest := false
+
+	func _init(p_name: String, p_suggestor := Callable()) -> void:
+		name      = p_name
+		suggestor = p_suggestor
+
+	func describe(text: String) -> Param:
+		description = BbCodeUtils.close_bbcode(text)
+		return self
+
+	func suggest(source: Variant) -> Param:
+		if source is Callable:
+			suggestor = source
+		elif source is Array:
+			var values : Array[String] = []
+			for v in source:
+				values.append(str(v))
+
+			suggestor = func() -> Array[String]:
+				return values.duplicate()
+		else:
+			push_error("suggest() expects either Array[String] or Callable.")
+		return self
+
+	func rest() -> Param:
+		is_rest = true
+		return self

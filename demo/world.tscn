@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://qv7uw2xl7r64"]
 
-[ext_resource type="Shader" uid="uid://2qrvegyxlca5" path="res://grid.gdshader" id="1_f3sb7"]
-[ext_resource type="Script" uid="uid://by3lqskkcmq47" path="res://world.gd" id="1_fj7yv"]
-[ext_resource type="Script" uid="uid://cu5ky1vwuqgld" path="res://character_body_3d.gd" id="3_tlwt5"]
+[ext_resource type="Shader" uid="uid://2qrvegyxlca5" path="res://demo/grid.gdshader" id="1_f3sb7"]
+[ext_resource type="Script" uid="uid://by3lqskkcmq47" path="res://demo/world.gd" id="1_fj7yv"]
+[ext_resource type="Script" uid="uid://cu5ky1vwuqgld" path="res://demo/character_body_3d.gd" id="3_tlwt5"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_f3sb7"]
 sky_top_color = Color(0, 0.30640513, 0.6652226, 1)
@@ -23,6 +23,14 @@ volumetric_fog_density = 0.01
 volumetric_fog_anisotropy = -0.15
 volumetric_fog_sky_affect = 0.386
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2ssnh"]
+render_priority = 0
+shader = ExtResource("1_f3sb7")
+shader_parameter/bg_color = Color(0.15, 0.15, 0.18, 1)
+shader_parameter/line_color = Color(0.4, 0.4, 0.45, 1)
+shader_parameter/grid_scale = 1.0
+shader_parameter/line_thickness = 0.02
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fj7yv"]
 render_priority = 0
 shader = ExtResource("1_f3sb7")
@@ -42,20 +50,25 @@ script = ExtResource("1_fj7yv")
 environment = SubResource("Environment_tlwt5")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1632434898]
-transform = Transform3D(-0.9931706, -0.03585953, 0.11102323, 0, 0.9515944, 0.30735663, -0.11667075, 0.30525756, -0.9450956, 0, 0, 0)
-light_energy = 2.4
+transform = Transform3D(-0.9931705, -0.04360895, 0.10821526, 0, 0.92751944, 0.37377486, -0.11667169, 0.3712222, -0.92118496, 0, 0, 0)
+light_color = Color(1, 0.98, 0.92, 1)
+light_energy = 0.74754983
 shadow_enabled = true
 
-[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=226450442]
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="." unique_id=534058634]
+material_override = SubResource("ShaderMaterial_2ssnh")
+use_collision = true
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGCombiner3D" unique_id=226450442]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.057, -1, 0)
 use_collision = true
 size = Vector3(100, 10, 100)
 material = SubResource("ShaderMaterial_fj7yv")
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="CSGBox3D" unique_id=1327078642]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1327078642]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.057, 2.2520866, -0.9838257)
 operation = 2
-size = Vector3(99, 10, 99)
+size = Vector3(97, 10, 97)
 
 [node name="Pause" type="Node3D" parent="." unique_id=986160782]
 

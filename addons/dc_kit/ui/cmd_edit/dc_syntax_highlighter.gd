@@ -1,7 +1,6 @@
 extends SyntaxHighlighter
 
-const _Lexer := preload("../../core/analyzer/lexer.gd")
-const TT    := _Lexer.TokenType
+const TT := _DCKitNamespace.Lexer.TokenType
 
 @export var color_command    := Color("BD93F9") # classic dracula purple
 @export var color_ctor_type  := Color("8BE9FD") # cyan
@@ -21,7 +20,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	
 	var spans: Dictionary = { 0: { "color": color_default } }
 
-	var lex_r := _Lexer.new().lex(text)
+	var lex_r := _DCKitNamespace.Lexer.new().lex(text)
 	var tokens: Array = lex_r.get("tokens", [])
 
 	var last_end := _add_token_spans(spans, text, tokens)

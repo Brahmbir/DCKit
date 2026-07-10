@@ -3,7 +3,6 @@ extends Control
 const _SimpleView = preload("./viewer/simple_log_view.gd")
 const _ComplexView = preload("./viewer/complex_log_view.gd")
 
-
 enum Mode { SIMPLE, COMPLEX }
 
 signal mode_changed(new_mode: int)
