@@ -1,8 +1,6 @@
 extends RefCounted
 
-const TT     := _DCKitNamespace.Lexer.TokenType
-
-const ConstructorDef := preload("../registries/constructor_registry/constructor_def.gd")
+const TT := _DCKitNamespace.Lexer.TokenType
 
 # Provided at init — all optional; omit to skip that category of semantic check.
 var _cmd_reg   = null  # CommandRegistry     — .has(name), .get_definition(name)
@@ -156,7 +154,7 @@ func _check_node(node, out: Array) -> void:
 						node.start_pos, node.type_name.length(),
 						DCDiagnostic.Severity.ERROR, DCDiagnostic.Source.SEMANTIC))
 			else:
-				var def : ConstructorDef = _ctor_reg.get_def(node.type_name)
+				var def :  _DCKitNamespace.ConstructorDef = _ctor_reg.get_def(node.type_name)
 				var count : int = node.parts.size()
 				if not def.signatures.is_empty():
 					var matched : bool = def.signatures.any(
@@ -288,7 +286,7 @@ class DCScope:
 	var arg_index  : int    = -1  # COMMAND: -1 = at name, 0+ = Nth arg slot
 	var type_name  : String = ""  # CONSTRUCTOR: the type being constructed
 	var part_index : int    = 0   # CONSTRUCTOR: 0-based part index
-	var _active_ref : WeakRef = WeakRef.new()  # → DCDefinition | DCConstructorDef | null
+	var _active_ref : WeakRef = WeakRef.new()  # → DCDefinition |  _DCKitNamespace.ConstructorDef | null
 
 	func get_active():
 		return _active_ref.get_ref()

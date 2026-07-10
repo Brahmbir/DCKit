@@ -4,8 +4,6 @@
 
 extends RefCounted
 
-const DCCommandRegistry = preload("./registries/command_registry/command_registry.gd")
-
 var _vars : Dictionary = {}
 
 

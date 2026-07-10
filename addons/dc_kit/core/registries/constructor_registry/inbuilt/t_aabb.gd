@@ -12,7 +12,7 @@ extends "./inbuilt_base.gd"
 const DCFloat = preload("./t_float.gd")
 const DCVector3 = preload("./t_vector3.gd")
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
 		# Zero-arg → empty AABB
 		if parts.is_empty():
@@ -58,26 +58,26 @@ static func create() -> ConstructorDef:
 			"AABB: expected 0, 2, or 6 parts — got %d." % parts.size())
 
 	# Part hints
-	var vec3_part := func(p_name: String, p_desc: String) -> ConstructorDef.PartHint:
-		return (ConstructorDef.PartHint
+	var vec3_part := func(p_name: String, p_desc: String) ->  _DCKitNamespace.ConstructorDef.PartHint:
+		return ( _DCKitNamespace.ConstructorDef.PartHint
 			.new(p_name, "<Vector3>", p_desc)
 			.accepts([TYPE_VECTOR3]))
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"AABB",
 		handler,
 		"An axis-aligned bounding box defined by a [b]position[/b] and [b]size[/b].\n" +
 		"[color=gray]Negative size is allowed. Use [b].abs()[/b] to normalize.[/color]",
 		[
 			sig_zero("Zero AABB — AABB(Vector3.ZERO, Vector3.ZERO)"),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Position + size (Vector3)",
 				[
 					DCVector3.part_hint_vector3("position", "Origin corner of the box."),
 					DCVector3.part_hint_vector3("size", "Extent of the box."),
 				]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Six floats — position (x,y,z) + size (w,h,d)",
 				[
 					DCFloat.part_hint("x", "Position X"),
@@ -98,7 +98,7 @@ static func extract_aabb(val: DCResult.Value) -> Variant:
 	return null
 
 
-static func part_hint_aabb(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_aabb(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<AABB>", p_desc)
 		.accepts([TYPE_AABB]))

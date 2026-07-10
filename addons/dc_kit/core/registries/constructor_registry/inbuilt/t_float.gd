@@ -58,20 +58,20 @@ static func extract(val: DCResult.Value) -> Variant:
 
 # Part hint factory
 
-# Returns a ConstructorDef.PartHint configured for a float slot.
+# Returns a  _DCKitNamespace.ConstructorDef.PartHint configured for a float slot.
 # Used by other type files when building their signatures.
 #
 #   var parts = [DCFloat.part_hint("x", "Horizontal axis")]
-static func part_hint(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<float>", p_desc)
-		.validate(ConstructorDef.PartHint.float_validator())
+		.validate( _DCKitNamespace.ConstructorDef.PartHint.float_validator())
 		.accepts([TYPE_FLOAT, TYPE_INT, TYPE_STRING]))
 
 
 # Constructor type definition
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
 
 		# Zero-arg → 0.0
@@ -89,19 +89,19 @@ static func create() -> ConstructorDef:
 		return DCResult.fail(
 			"Float: expected 0 or 1 part — got %d." % parts.size())
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Float",
 		handler,
 		"Converts a value to a [b]float[/b].\n"
 		+ "[color=gray]Float()  →  0.0[/color]",
 		[
-			ConstructorDef.TypeSignature.new("Zero value", []),
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new("Zero value", []),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Coerce to float",
-				[(ConstructorDef.PartHint
+				[( _DCKitNamespace.ConstructorDef.PartHint
 					.new("value", "<float>", "Any numeric or string value to convert.")
-					.validate(ConstructorDef.PartHint.float_validator())
+					.validate( _DCKitNamespace.ConstructorDef.PartHint.float_validator())
 					.accepts([TYPE_FLOAT, TYPE_INT, TYPE_STRING]))]
 			),
 		]

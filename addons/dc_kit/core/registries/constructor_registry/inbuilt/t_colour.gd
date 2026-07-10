@@ -18,7 +18,7 @@ extends "./inbuilt_base.gd"
 const DCFloat = preload("./t_float.gd")
 const DCInt = preload("./t_int.gd")
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	const NAMED_COLORS := {
 		"black": Color.BLACK,
 		"white": Color.WHITE,
@@ -125,16 +125,16 @@ static func create() -> ConstructorDef:
 
 	# ── Part Hints ─────────────────────────────────────────────────────
 	
-	var name_part := (ConstructorDef.PartHint
+	var name_part := ( _DCKitNamespace.ConstructorDef.PartHint
 		.new("name", "<string>",
 			"CSS color name (e.g. [b]red[/b]) or HTML hex (e.g. [b]#ff4400[/b], [b]#f40[/b])")
 		.accepts([TYPE_STRING, TYPE_COLOR]))
 
-	var channel_part := func(ch: String, label: String) -> ConstructorDef.PartHint:
-		return (ConstructorDef.PartHint
+	var channel_part := func(ch: String, label: String) ->  _DCKitNamespace.ConstructorDef.PartHint:
+		return ( _DCKitNamespace.ConstructorDef.PartHint
 			.new(ch, "<float>",
 				"%s channel — 0.0–1.0 (float) or 0–255 (integer). Auto-detected." % label)
-			.validate(ConstructorDef.PartHint.float_validator())
+			.validate( _DCKitNamespace.ConstructorDef.PartHint.float_validator())
 			.accepts([TYPE_FLOAT, TYPE_INT, TYPE_STRING]))
 
 	var rf := channel_part.call("r", "Red")
@@ -142,7 +142,7 @@ static func create() -> ConstructorDef:
 	var bf := channel_part.call("b", "Blue")
 	var af := channel_part.call("a", "Alpha")
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Color",
 		handler,
         "An RGBA color. Supports named colors, hex codes, float (0.0–1.0), "
@@ -150,11 +150,11 @@ static func create() -> ConstructorDef:
 		+ "[color=gray]Auto-detection: values > 1.0 → treated as 8-bit.[/color]",
 		[
 			sig_zero("Opaque black — Color(0, 0, 0, 1)"),
-			ConstructorDef.TypeSignature.new("Named color or HTML hex", [name_part]),
-			ConstructorDef.TypeSignature.new("RGB — float 0.0–1.0", [rf, gf, bf]),
-			ConstructorDef.TypeSignature.new("RGBA — float 0.0–1.0", [rf, gf, bf, af]),
-			ConstructorDef.TypeSignature.new("RGB — 8-bit 0–255", [rf, gf, bf]),
-			ConstructorDef.TypeSignature.new("RGBA — 8-bit 0–255", [rf, gf, bf, af]),
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new("Named color or HTML hex", [name_part]),
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new("RGB — float 0.0–1.0", [rf, gf, bf]),
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new("RGBA — float 0.0–1.0", [rf, gf, bf, af]),
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new("RGB — 8-bit 0–255", [rf, gf, bf]),
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new("RGBA — 8-bit 0–255", [rf, gf, bf, af]),
 		]
 	)
 
@@ -170,7 +170,7 @@ static func extract_color(val: DCResult.Value) -> Variant:
 	return null
 
 
-static func part_hint_color(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_color(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<Color>", p_desc)
 		.accepts([TYPE_COLOR, TYPE_STRING]))

@@ -179,6 +179,7 @@ func _run_execution(exec: _Execution) -> DCResult:
 		var r : DCResult = await _execute(cmd, exec, _CallStack.FrameKind.EXECUTION)
 		exec.record(r)
 		if not r.success: break
+		await Engine.get_main_loop().process_frame # very important: yield to the engine so the UI can update between chain steps	
 
 	return exec.to_result()
 
@@ -240,12 +241,12 @@ func _execute(node: _DCKitNamespace.Parser.CommandNode, exec: _Execution, kind: 
 	if profiler != null and profiler.enabled:
 		profiler.begin(node.name)
 	
-	if definition.deprecated:
+	if definition._deprecated:
 		var msg := ("[warn]'%s' is deprecated.[warn/]" % definition.name ) if definition.name == node.name \
 					else ("[warn]Command '%s' (invoked as '%s') is deprecated.[warn/]"
 						% [definition.name, node.name])
-		if not definition.deprecated_message.is_empty():
-			msg += " " + definition.deprecated_message
+		if not definition._deprecated_message.is_empty():
+			msg += " " + definition._deprecated_message
 		_log_system(msg, exec.origin, exec.call_stack.snapshot())
 		pass
 

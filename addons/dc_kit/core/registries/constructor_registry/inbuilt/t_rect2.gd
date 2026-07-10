@@ -29,7 +29,7 @@ const DCFloat = preload("./t_float.gd")
 const DCVector2 = preload("./t_vector2.gd")
 
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 
 	var handler := func(parts: Array) -> Variant:
 
@@ -86,17 +86,17 @@ static func create() -> ConstructorDef:
 
 	# Part hints
 
-	var vec2_part := func(p_name: String, p_desc: String) -> ConstructorDef.PartHint:
-		return (ConstructorDef.PartHint
+	var vec2_part := func(p_name: String, p_desc: String) ->  _DCKitNamespace.ConstructorDef.PartHint:
+		return ( _DCKitNamespace.ConstructorDef.PartHint
 			.new(p_name, "<Vector2>", p_desc)
 			.accepts([TYPE_VECTOR2]))
 
-	var rect2i_part := (ConstructorDef.PartHint
+	var rect2i_part := ( _DCKitNamespace.ConstructorDef.PartHint
 		.new("from", "<Rect2i>",
 			"A Rect2i to widen into a Rect2 — integer components become floats.")
 		.accepts([TYPE_RECT2I, TYPE_RECT2]))
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Rect2",
 		handler,
 		"A 2D axis-aligned rectangle defined by a [b]position[/b] and [b]size[/b] Vector2.\n"
@@ -104,14 +104,14 @@ static func create() -> ConstructorDef:
 		[
 			sig_zero("Zero rectangle — Rect2(Vector2.ZERO, Vector2.ZERO)"),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"From Rect2i",
 				[part_hint_rect2(
 						"from",
 						"A Rect2 or Rect2i to use directly.")]
 			),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Position + size as Vector2",
 				[
 					vec2_part.call("position", "Top-left corner of the rectangle."),
@@ -119,7 +119,7 @@ static func create() -> ConstructorDef:
 				]
 			),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Flat floats — position (x, y) + size (w, h)",
 				[
 					DCFloat.part_hint("x", "Position X — left edge."),
@@ -139,7 +139,7 @@ static func extract_rect2(val: DCResult.Value) -> Variant:
 	return null
 
 
-static func part_hint_rect2(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_rect2(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<Rect2>", p_desc)
 		.accepts([TYPE_RECT2, TYPE_RECT2I]))

@@ -18,7 +18,7 @@ const DCVector3 = preload("./t_vector3.gd")
 const DCBasis = preload("./t_basis.gd")
 const DCProjection = preload("./t_projection.gd")
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	const CONSTS := {
 		"IDENTITY": Transform3D.IDENTITY,
 		"FLIP_X": Transform3D.FLIP_X,
@@ -94,29 +94,29 @@ static func create() -> ConstructorDef:
 		return DCResult.fail(
 			"Transform3D: expected 0, 1, 2, or 4 parts — got %d." % parts.size())
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Transform3D",
 		handler,
 		"A 3D transformation matrix with rotation, scale, and translation.\n" +
 		"[color=gray]Stores a [b]Basis[/b] (3×3) and a [b]Vector3 origin[/b].[/color]",
 		[
 			sig_zero("Identity — no transformation"),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Existing Transform3D or Projection",
-				[ConstructorDef.PartHint.new("value", "<Transform3D | Projection>", "Existing transform or projection")]
+				[ _DCKitNamespace.ConstructorDef.PartHint.new("value", "<Transform3D | Projection>", "Existing transform or projection")]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Basis + origin",
 				[
 					DCBasis.part_hint_basis("basis", "Rotation and scale matrix — e.g. from [b]Basis(axis, angle)[/b]."),
 					DCVector3.part_hint_vector3("origin", "Translation in world space."),
 				]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Three column vectors + origin",
 				[
 					DCVector3.part_hint_vector3("x", "X column — local right direction."),
@@ -125,7 +125,7 @@ static func create() -> ConstructorDef:
 					DCVector3.part_hint_vector3("origin", "Translation in world space."),
 				]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"From Projection",
 				[DCProjection.part_hint_projection("projection", "A Projection matrix to extract the affine 3D transform from.")]
 			),
@@ -140,7 +140,7 @@ static func extract_transform3d(val: DCResult.Value) -> Variant:
 	return null
 
 
-static func part_hint_transform3d(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_transform3d(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<Transform3D>", p_desc)
 		.accepts([TYPE_TRANSFORM3D, TYPE_PROJECTION]))

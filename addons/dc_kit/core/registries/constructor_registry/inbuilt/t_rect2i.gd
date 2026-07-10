@@ -18,7 +18,7 @@ const DCInt = preload("./t_int.gd")
 const DCVector2i = preload("./t_vector2i.gd")
 
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 
 	var handler := func(parts: Array) -> Variant:
 
@@ -74,7 +74,7 @@ static func create() -> ConstructorDef:
 		return DCResult.fail(
 			"Rect2i: expected 0, 1, 2, or 4 parts — got %d." % parts.size())
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Rect2i",
 		handler,
 		"A 2D axis-aligned rectangle defined by a [b]position[/b] and [b]size[/b] Vector2i.\n"
@@ -82,12 +82,12 @@ static func create() -> ConstructorDef:
 		[
 			sig_zero("Zero rectangle — Rect2i(Vector2i.ZERO, Vector2i.ZERO)"),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Convert Rect2/Rect2i",
 				[part_hint_rect2i("from","Existing Rect2i or integer-valued Rect2.")]
 			),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Position + size as Vector2i",
 				[
 					DCVector2i.part_hint_vector2i("position", "Top-left corner of the rectangle."),
@@ -95,7 +95,7 @@ static func create() -> ConstructorDef:
 				]
 			),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Flat integers — position (x, y) + size (w, h)",
 				[
 					DCInt.part_hint("x", "Position X — left edge."),
@@ -115,7 +115,7 @@ static func extract_rect2i(val: DCResult.Value) -> Variant:
 	return null
 
 
-static func part_hint_rect2i(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_rect2i(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<Rect2i>", p_desc)
 		.accepts([TYPE_RECT2, TYPE_RECT2I]))
