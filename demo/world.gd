@@ -9,11 +9,14 @@ extends Node3D
 var time := 0.0
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+
 	time += delta
 
 	# Rotate the sun
 	var angle := (time / day_length) * 360.0
-	directional_light.rotation_degrees.x = angle + 180
+	directional_light.rotation_degrees.x = angle + 180.0
 
 	_update_sun()
 
