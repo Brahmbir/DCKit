@@ -76,7 +76,7 @@ func register(
 		p_name      : String,
 		handler     : Callable,
 		description : String         = "",
-		params      : Array[DCParam] = []) -> bool:
+		params      : Array[DCDefinition.Param] = []) -> bool:
 	
 	if not _enabled:
 		return false

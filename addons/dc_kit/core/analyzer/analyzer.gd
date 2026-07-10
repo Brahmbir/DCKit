@@ -132,7 +132,7 @@ func _check_node(node, out: Array) -> void:
 			else:
 				# Deprecated — static analysis warning, fires before any execution.
 				var cmd_def : DCDefinition = _cmd_reg.get_definition(node.name)
-				if cmd_def != null and cmd_def.deprecated:
+				if cmd_def != null and cmd_def._deprecated:
 					
 					var msg := (
 						"'%s' is deprecated."
@@ -142,8 +142,8 @@ func _check_node(node, out: Array) -> void:
 						% [cmd_def.name, node.name]
 					)
 					
-					if not cmd_def.deprecated_message.is_empty():
-						msg += " " + cmd_def.deprecated_message
+					if not cmd_def._deprecated_message.is_empty():
+						msg += " " + cmd_def._deprecated_message
 					out.append(_diag(msg, node.start_pos, node.name.length(),
 							DCDiagnostic.Severity.WARNING, DCDiagnostic.Source.SEMANTIC))
 		# Argument count is intentionally not validated — handlers are variadic by design.

@@ -111,7 +111,7 @@ func get_command_def_array() -> Array[DCDefinition]:
 				output = "%s\n\n%s" % [result.value.as_string(), report]
 			return DCResult.ok(output),
 		"Profiles a nested command and all commands executed beneath it.",
-		[DCParam.new("command").describe("Command to profile.")],
+		[DCDefinition.Param.new("command").describe("Command to profile.")],
 		true
 	))
 

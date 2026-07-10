@@ -75,9 +75,9 @@ func get_content() -> PanelContent:
 	return _content
 
 func toggle()   -> void: 
-	print("triggered")
 	if _is_collapsed: _expand()
 	else: _collapse()
+	
 func collapse() -> void: _collapse()
 func expand()   -> void: _expand()
 

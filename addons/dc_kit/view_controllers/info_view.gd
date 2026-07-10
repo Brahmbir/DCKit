@@ -26,7 +26,7 @@ func update(scope) -> void:
 func _build_command_data(def: DCDefinition, arg_index: int) -> Dictionary:
 	var params := []
 	for i in def.params.size():
-		var p: DCParam = def.params[i]
+		var p: DCDefinition.Param = def.params[i]
 		params.append({
 			"index":           i,
 			"name":            p.name,
@@ -42,9 +42,9 @@ func _build_command_data(def: DCDefinition, arg_index: int) -> Dictionary:
 		"description":        def.description,
 		"active_index":       arg_index,
 		"params":             params,
-		"aliases":            Array(def.aliases),
-		"deprecated":         def.deprecated,
-		"deprecated_message": def.deprecated_message,
+		"aliases":            Array(def._aliases),
+		"deprecated":         def._deprecated,
+		"deprecated_message": def._deprecated_message,
 		"log_mode":           def.log_mode,
 		"log_mode_name":      DCDefinition.LogMode.keys()[def.log_mode],
 	}
