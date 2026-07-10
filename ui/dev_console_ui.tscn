@@ -111,6 +111,14 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 corner_detail = 20
 
+[sub_resource type="DPITexture" id="DPITexture_qlix7"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"><circle cx=\"4\" cy=\"4\" r=\"1.5\" fill=\"#b2b2b2\" fill-opacity=\".25\"/></svg>
+"
+
+[sub_resource type="DPITexture" id="DPITexture_3312h"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"><path fill=\"#b2b2b2\" fill-opacity=\".25\" d=\"M6 0v8h2V0zM1 0a1 1 0 0 0-.693 1.705L2.6 3.998.307 6.291A1 1 0 0 0 1.72 7.705l3-3a1 1 0 0 0 0-1.414l-3-3A1 1 0 0 0 1 0z\"/></svg>
+"
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qlix7"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3312h"]
@@ -172,12 +180,43 @@ corner_detail = 2
 
 [sub_resource type="Theme" id="Theme_o83vh"]
 default_font = ExtResource("2_es6bh")
-default_font_size = 24
+default_font_size = 16
+0_125em/base_type = &"MarginContainer"
+0_125em/constants/margin_bottom = 2
+0_125em/constants/margin_left = 2
+0_125em/constants/margin_right = 2
+0_125em/constants/margin_top = 2
+0_25em/constants/margin_bottom = 4
+0_25em/constants/margin_left = 4
+0_25em/constants/margin_right = 4
+0_25em/constants/margin_top = 4
+0_5em/base_type = &"MarginContainer"
+0_5em/constants/margin_bottom = 8
+0_5em/constants/margin_left = 8
+0_5em/constants/margin_right = 8
+0_5em/constants/margin_top = 8
+0_625em/constants/margin_bottom = 10
+0_625em/constants/margin_left = 10
+0_625em/constants/margin_right = 10
+0_625em/constants/margin_top = 10
+0_75em/base_type = &"MarginContainer"
+0_75em/constants/margin_bottom = 12
+0_75em/constants/margin_left = 12
+0_75em/constants/margin_right = 12
+0_75em/constants/margin_top = 12
+1_25em/constants/margin_bottom = 20
+1_25em/constants/margin_left = 20
+1_25em/constants/margin_right = 20
+1_25em/constants/margin_top = 20
+1em/base_type = &"MarginContainer"
+1em/constants/margin_bottom = 16
+1em/constants/margin_left = 16
+1em/constants/margin_right = 16
+1em/constants/margin_top = 16
 BasePanel/base_type = &"PanelContainer"
 BasePanel/styles/panel = SubResource("StyleBoxFlat_fcwua")
 Button/constants/h_separation = 12
 Button/constants/icon_max_width = 24
-Button/font_sizes/font_size = 24
 Button/fonts/font = ExtResource("1_dfjvn")
 Button/styles/focus = SubResource("StyleBoxFlat_crk3g")
 Button/styles/hover = SubResource("StyleBoxFlat_crk3g")
@@ -185,23 +224,45 @@ Button/styles/normal = SubResource("StyleBoxFlat_crk3g")
 Button/styles/pressed = SubResource("StyleBoxFlat_crk3g")
 Consts/colors/highlighted_colour = Color(0.23137255, 0.50980395, 0.9647059, 1)
 Consts/colors/normal_colour = Color(0.9411765, 0.972549, 1, 1)
+HScrollBar/constants/padding_top = 4
+HScrollBar/font_sizes/padding_top = 4
 HScrollBar/styles/grabber = SubResource("StyleBoxFlat_qlix7")
 HScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_3312h")
 HScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_cre8g")
 HScrollBar/styles/scroll = SubResource("StyleBoxFlat_fm6od")
+Label/font_sizes/font_size = 16
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_3euy8")
 PopupPanelContainer/base_type = &"PanelContainer"
 PopupPanelContainer/styles/panel = SubResource("StyleBoxFlat_de3ri")
 RichTextLabel/colors/selection_color = Color(0.21568628, 0.22745098, 0.2901961, 1)
 RichTextLabel/constants/paragraph_separation = 10
+RichTextLabel/font_sizes/bold_font_size = 16
+RichTextLabel/font_sizes/bold_italics_font_size = 16
+RichTextLabel/font_sizes/italics_font_size = 16
+RichTextLabel/font_sizes/mono_font_size = 16
+RichTextLabel/font_sizes/normal_font_size = 16
 RichTextLabel/fonts/bold_font = ExtResource("3_begow")
 RichTextLabel/fonts/bold_italics_font = ExtResource("4_secrp")
 RichTextLabel/fonts/italics_font = ExtResource("5_sntsg")
 RichTextLabel/fonts/mono_font = ExtResource("1_dfjvn")
 RichTextLabel/fonts/normal_font = ExtResource("2_es6bh")
+TextEdit/colors/background_color = Color(0, 0, 0, 0)
+TextEdit/colors/caret_background_color = Color(0, 0, 0, 1)
+TextEdit/colors/caret_color = Color(0.875, 0.875, 0.875, 1)
+TextEdit/colors/current_line_color = Color(0.25, 0.25, 0.26, 0.8)
+TextEdit/colors/font_color = Color(0.875, 0.875, 0.875, 1)
+TextEdit/colors/font_outline_color = Color(0, 0, 0, 1)
 TextEdit/colors/font_placeholder_color = Color(0.501406, 0.50140685, 0.5014061, 0.6)
+TextEdit/colors/font_readonly_color = Color(0.875, 0.875, 0.875, 0.5)
+TextEdit/colors/font_selected_color = Color(0, 0, 0, 0)
+TextEdit/colors/search_result_border_color = Color(0.3, 0.3, 0.3, 0.4)
+TextEdit/colors/search_result_color = Color(0.3, 0.3, 0.3, 1)
 TextEdit/colors/selection_color = Color(0.21721247, 0.22716843, 0.29022282, 1)
+TextEdit/colors/word_highlighted_color = Color(0.5, 0.5, 0.5, 0.25)
 TextEdit/constants/caret_width = 2
+TextEdit/font_sizes/font_size = 17
+TextEdit/icons/space = SubResource("DPITexture_qlix7")
+TextEdit/icons/tab = SubResource("DPITexture_3312h")
 TextEdit/styles/focus = SubResource("StyleBoxEmpty_qlix7")
 TextEdit/styles/normal = SubResource("StyleBoxEmpty_3312h")
 TextEdit/styles/read_only = SubResource("StyleBoxEmpty_cre8g")
@@ -211,6 +272,30 @@ VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_kkt4q")
 VScrollBar/styles/scroll = SubResource("StyleBoxFlat_7e8xj")
 VSeparator/constants/separation = 24
 VSeparator/styles/separator = SubResource("StyleBoxFlat_v1qa0")
+cmd_label/base_type = &"Label"
+cmd_label/font_sizes/font_size = 19
+error_cmd_area/base_type = &"MarginContainer"
+error_cmd_area/constants/margin_bottom = 20
+error_cmd_area/constants/margin_left = 20
+error_cmd_area/constants/margin_right = 20
+error_cmd_area/constants/margin_top = 8
+error_root_margin/base_type = &"MarginContainer"
+error_root_margin/constants/margin_bottom = 20
+error_root_margin/constants/margin_left = 12
+error_root_margin/constants/margin_right = 8
+error_root_margin/constants/margin_top = 16
+info_clip_margin/base_type = &"MarginContainer"
+info_clip_margin/constants/margin_bottom = 10
+info_clip_margin/constants/margin_left = 16
+info_clip_margin/constants/margin_right = 8
+info_clip_margin/constants/margin_top = 10
+log_info_Area/constants/margin_left = 20
+log_info_Area/constants/margin_right = 10
+log_info_area/base_type = &"MarginContainer"
+log_info_area/constants/margin_bottom = 0
+log_info_area/constants/margin_left = 20
+log_info_area/constants/margin_right = 10
+log_info_area/constants/margin_top = 0
 
 [sub_resource type="InputEventKey" id="InputEventKey_l7cum"]
 command_or_control_autoremap = true
@@ -469,10 +554,7 @@ theme_override_constants/separation = 0
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 20.0
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 0
+theme_type_variation = &"log_info_area"
 
 [node name="log_viewer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Log_Info_Area" unique_id=1654494674 instance=ExtResource("6_22agt")]
 unique_name_in_owner = true
@@ -483,6 +565,7 @@ layout_mode = 2
 mouse_filter = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Log_Info_Area/Control" unique_id=1407779581]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -512,8 +595,9 @@ layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 3.0
 mouse_filter = 2
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
+theme_type_variation = &"0_625em"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
 
 [node name="InfoLayoutArea" type="VBoxContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Log_Info_Area/Control/HBoxContainer/VBoxContainer/MarginContainer" unique_id=630061726]
 clip_contents = true
@@ -528,10 +612,7 @@ layout_mode = 2
 [node name="Error_Cmd_Area" type="MarginContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer" unique_id=662507096]
 layout_mode = 2
 size_flags_vertical = 8
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+theme_type_variation = &"error_cmd_area"
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area" unique_id=1765322943]
 layout_mode = 2
@@ -555,9 +636,6 @@ unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
-col_error = Color(1, 0.41960785, 0.41960785, 1)
-col_warn = Color(1, 0.81960785, 0.4, 1)
-col_hint = Color(0.3019608, 0.67058825, 0.96862745, 1)
 expanded = false
 
 [node name="CMDContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer/VBoxContainer" unique_id=1581047597]
@@ -569,10 +647,7 @@ debug_focus_effect = true
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer/VBoxContainer/CMDContainer" unique_id=68701197]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_type_variation = &"0_75em"
 
 [node name="CmdEdit" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer/VBoxContainer/CMDContainer/MarginContainer" unique_id=1590452007 instance=ExtResource("13_l7cum")]
 unique_name_in_owner = true

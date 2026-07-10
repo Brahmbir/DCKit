@@ -9,12 +9,6 @@
 [ext_resource type="Texture2D" uid="uid://b5lj7546kavby" path="res://addons/dc_kit/assets/images/octagon-minus.svg" id="4_r51ah"]
 [ext_resource type="Script" uid="uid://do0p117rpnomi" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur_rect.gd" id="5_os5r6"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kgxso"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3o6gb"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xgy80"]
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3jg7j"]
 shader = ExtResource("4_edw5b")
 shader_parameter/blur_radius = 80.0
@@ -65,13 +59,12 @@ script = ExtResource("1_6qxr3")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=80419476]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
+theme_type_variation = &"0_25em"
 theme_override_constants/margin_right = 0
-theme_override_constants/margin_bottom = 4
 
 [node name="Label" type="Label" parent="MarginContainer" unique_id=1605144196]
 layout_mode = 2
+theme_type_variation = &"cmd_label"
 text = "CMD"
 
 [node name="VSeparator" type="VSeparator" parent="." unique_id=372322894]
@@ -96,9 +89,6 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 20.0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_kgxso")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_3o6gb")
-theme_override_styles/read_only = SubResource("StyleBoxEmpty_xgy80")
 placeholder_text = "Write the Command ..."
 context_menu_enabled = false
 emoji_menu_enabled = false

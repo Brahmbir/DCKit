@@ -130,8 +130,9 @@ func _on_focus_exited() -> void:
 func _on_button_pressed() -> void:
 	if _state == State.BUSY:
 		abort_requested.emit()
-	else:
-		_on_submit(text_edit.text)
+	elif text_edit != null:
+		text_edit._on_submit()
+		#_on_submit(text_edit.text)
 
 func _on_text_changed() -> void:
 	var caret := text_edit.get_caret_column()

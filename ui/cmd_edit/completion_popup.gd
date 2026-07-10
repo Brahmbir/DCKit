@@ -1,7 +1,6 @@
 class_name CompletionPopup
 extends PanelContainer
 
-const AutoComplete := preload("../../core/autocomplete.gd")
 
 @export_group("icon","icon")
 @export var icon_command : Texture2D = preload("res://addons/dc_kit/assets/images/command.svg")
