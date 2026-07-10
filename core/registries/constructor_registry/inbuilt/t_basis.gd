@@ -17,7 +17,7 @@ const DCFloat = preload("./t_float.gd")
 const DCVector3 = preload("./t_vector3.gd")
 const DCQuaternion = preload("./t_quaternion.gd")
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	const CONSTS := {
 		"IDENTITY": Basis.IDENTITY,
 		"FLIP_X": Basis.FLIP_X,
@@ -98,29 +98,29 @@ static func create() -> ConstructorDef:
 		return DCResult.fail(
 			"Basis: expected 0, 1, 2, or 3 parts — got %d." % parts.size())
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Basis",
 		handler,
 		"A 3×3 rotation and scale matrix.\n" +
 		"[color=gray]Stores three column vectors: [b]x[/b] (right), [b]y[/b] (up), [b]z[/b] (back).[/color]",
 		[
 			sig_zero("Identity — no rotation or scale"),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Existing Basis or Quaternion",
-				[ConstructorDef.PartHint.new("value", "<Basis | Quaternion>", "Existing basis or quaternion")]
+				[ _DCKitNamespace.ConstructorDef.PartHint.new("value", "<Basis | Quaternion>", "Existing basis or quaternion")]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Axis + angle (radians)",
 				[
 					DCVector3.part_hint_vector3("axis", "Normalised rotation axis — e.g. [b]Vector3.UP[/b]."),
 					DCFloat.part_hint("angle", "Rotation angle in [b]radians[/b]. Use [b]deg_to_rad(degrees)[/b] to convert."),
 				]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Three column vectors",
 				[
 					DCVector3.part_hint_vector3("x", "X column — local right direction."),
@@ -128,7 +128,7 @@ static func create() -> ConstructorDef:
 					DCVector3.part_hint_vector3("z", "Z column — local back direction."),
 				]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"From Quaternion",
 				[DCQuaternion.part_hint_quaternion("quaternion", "A unit quaternion representing the desired rotation.")]
 			),
@@ -145,7 +145,7 @@ static func extract_basis(val: DCResult.Value) -> Variant:
 	return null
 
 
-static func part_hint_basis(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_basis(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<Basis>", p_desc)
 		.accepts([TYPE_BASIS]))

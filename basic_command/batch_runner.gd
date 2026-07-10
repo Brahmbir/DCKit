@@ -21,7 +21,7 @@
 
 extends RefCounted
 
-const SETTING_UTILS := preload("../setting_utils.gd")
+
 
 var _root_folder: String = "res://batch_file/"
 
@@ -34,8 +34,8 @@ func _init() -> void:
 	_read_project_settings()
 
 func _read_project_settings() -> void:
-	var path :String= SETTING_UTILS.get_setting(
-		SETTING_UTILS.SETTING_EXPORT_BATCH_DIR,
+	var path :String= _DCKitNamespace.Setting.get_setting(
+		_DCKitNamespace.Setting.SETTING_BATCH_DIR,
 		_root_folder
 	)
 

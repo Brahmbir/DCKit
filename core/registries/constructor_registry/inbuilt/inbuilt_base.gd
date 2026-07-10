@@ -1,8 +1,6 @@
 # inbuilt_base.gd
 extends RefCounted
 
-const ConstructorDef = preload("../constructor_def.gd")
-
 static func val_label(val: DCResult.Value) -> String:
 	if val.raw == null:
 		return "null"
@@ -21,16 +19,16 @@ static func val_label(val: DCResult.Value) -> String:
 # Signature helpers
 
 # Zero-argument signature shared by almost every built-in type.
-static func sig_zero(desc := "Zero / identity value") -> ConstructorDef.TypeSignature:
-	return ConstructorDef.TypeSignature.new(desc, [])
+static func sig_zero(desc := "Zero / identity value") ->  _DCKitNamespace.ConstructorDef.TypeSignature:
+	return  _DCKitNamespace.ConstructorDef.TypeSignature.new(desc, [])
 
 
 # Part hint helpers
 # Named-constant slot — suggestor returns const_names, validator rejects unknowns.
 # Case-insensitive. Skips variable references ($...).
-static func const_part(const_names: Array) -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func const_part(const_names: Array) ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new("name", "<const>", "One of: " + ", ".join(const_names))
-		.validate(ConstructorDef.PartHint.enum_validator(const_names))
+		.validate( _DCKitNamespace.ConstructorDef.PartHint.enum_validator(const_names))
 		.suggest(func(_prefix: String) -> Array: return const_names)
 		.accepts([TYPE_STRING]))

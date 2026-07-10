@@ -42,14 +42,14 @@ static func extract(val: DCResult.Value) -> String:
 
 # Part hint factory
 
-# Returns a ConstructorDef.PartHint configured for a string slot.
+# Returns a  _DCKitNamespace. _DCKitNamespace.ConstructorDef.PartHint configured for a string slot.
 # p_suggest — optional callable (prefix: String) -> Array[String] for suggestions.
 static func part_hint(
 		p_name    : String,
 		p_desc    : String   = "",
-		p_suggest : Callable = Callable()) -> ConstructorDef.PartHint:
+		p_suggest : Callable = Callable()) ->  _DCKitNamespace.ConstructorDef.PartHint:
 
-	var hint := (ConstructorDef.PartHint
+	var hint := ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<string>", p_desc)
 		.accepts([TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL]))
 
@@ -61,7 +61,7 @@ static func part_hint(
 
 # Constructor type definition
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
 
 		# Zero-arg → empty string
@@ -81,7 +81,7 @@ static func create() -> ConstructorDef:
 			joined += extract(parts[i])
 		return joined
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Str",
 		handler,
 		"Converts a value to a [b]string[/b], or joins multiple values with spaces.\n"
@@ -89,11 +89,11 @@ static func create() -> ConstructorDef:
 		+ "[color=gray]Str(hello)      →  \"hello\"[/color]\n"
 		+ "[color=gray]Str(hello world)  →  \"hello world\"[/color]",
 		[
-			ConstructorDef.TypeSignature.new("Empty string", []),
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new("Empty string", []),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Convert to string",
-				[(ConstructorDef.PartHint
+				[( _DCKitNamespace.ConstructorDef.PartHint
 					.new("value", "<any>",
 						"Any value — converted to its string representation.")
 					.accepts([TYPE_STRING, TYPE_INT, TYPE_FLOAT,

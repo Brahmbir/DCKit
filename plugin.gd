@@ -28,10 +28,9 @@ func _disable_plugin() -> void:
 	if _export_plugin: remove_export_plugin(_export_plugin)
 
 
-const SETTING_UTILS = preload("./setting_utils.gd")
 
 func _enter_tree() -> void:
 	_export_plugin = ExportPlugin.new()
-	SETTING_UTILS._register_project_settings()
+	_DCKitNamespace.Setting._register_project_settings()
 	
-func _exit_tree() -> void:SETTING_UTILS._unregister_project_settings()
+func _exit_tree() -> void: _DCKitNamespace.Setting._unregister_project_settings()

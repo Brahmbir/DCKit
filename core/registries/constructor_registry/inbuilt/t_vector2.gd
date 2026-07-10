@@ -12,7 +12,7 @@ extends "./inbuilt_base.gd"
 const DCFloat = preload("./t_float.gd")
 
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	const CONSTS := {
 		"ZERO":  Vector2.ZERO,
 		"ONE":   Vector2.ONE,
@@ -68,26 +68,26 @@ static func create() -> ConstructorDef:
 		return DCResult.fail(
 			"Vector2: expected 0, 1, or 2 parts — got %d." % parts.size())
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Vector2",
 		handler,
 		"A 2D vector with [b]x[/b] and [b]y[/b] float components.",
 		[
 			sig_zero("Zero vector — Vector2(0, 0)"),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)]
 			),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Convert Vector2/Vector2i",
 				[part_hint_vector2(
 						"value",
 						"Existing Vector2 or Vector2i")]
 			),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"XY components",
 				[
 					DCFloat.part_hint("x", "Horizontal axis — right (+), left (−)"),
@@ -103,8 +103,8 @@ static func extract_vector2(val: DCResult.Value) -> Variant:
 	if r is Vector2i: return Vector2(r)
 	return null
  
-static func part_hint_vector2(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_vector2(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<Vector2>", p_desc)
 		.accepts([TYPE_VECTOR2, TYPE_VECTOR2I]))
  

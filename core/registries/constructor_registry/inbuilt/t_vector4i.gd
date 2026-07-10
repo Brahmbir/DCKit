@@ -14,7 +14,7 @@ extends "./inbuilt_base.gd"
 const DCInt = preload("./t_int.gd")
 
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	const CONSTS := {
 		"ZERO": Vector4i.ZERO,
 		"ONE":  Vector4i.ONE,
@@ -60,26 +60,26 @@ static func create() -> ConstructorDef:
 		return DCResult.fail(
 			"Vector4i: expected 0, 1, or 4 parts — got %d." % parts.size())
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Vector4i",
 		handler,
 		"A 4D vector with [b]x[/b], [b]y[/b], [b]z[/b], and [b]w[/b] int components.",
 		[
 			sig_zero("Zero vector — Vector4i(0, 0, 0, 0)"),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)]
 			),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Convert Vector4/Vector4i",
 				[part_hint_vector4i(
 						"value",
 						"Existing Vector4i or integer-valued Vector4")]
 			),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"XYZW components",
 				[
 					DCInt.part_hint("x", "X component"),
@@ -97,7 +97,7 @@ static func extract_vector4i(val: DCResult.Value) -> Variant:
 	if r is Vector4: return Vector4i(r)
 	return null
  
-static func part_hint_vector4i(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_vector4i(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<Vector4i>", p_desc)
 		.accepts([TYPE_VECTOR4I, TYPE_VECTOR4]))

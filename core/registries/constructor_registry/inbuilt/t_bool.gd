@@ -50,9 +50,9 @@ static func extract(val: DCResult.Value) -> Variant:
 
 # Part hint factory
 
-# Returns a ConstructorDef.PartHint configured for a boolean slot.
-static func part_hint(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+# Returns a  _DCKitNamespace.ConstructorDef.PartHint configured for a boolean slot.
+static func part_hint(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<bool>", p_desc)
 		.validate(_bool_validator())
 		.suggest(func(_p): return ["true", "false"])
@@ -61,7 +61,7 @@ static func part_hint(p_name: String, p_desc: String = "") -> ConstructorDef.Par
 
 # Constructor type definition
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
 
 		# Zero-arg → false
@@ -80,18 +80,18 @@ static func create() -> ConstructorDef:
 		return DCResult.fail(
 			"Bool: expected 0 or 1 part — got %d." % parts.size())
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Bool",
 		handler,
 		"Converts a value to a [b]boolean[/b].\n"
 		+ "[color=gray]Bool()  →  false[/color]\n"
 		+ "Accepted: [b]true[/b] / [b]false[/b], [b]yes[/b] / [b]no[/b], [b]1[/b] / [b]0[/b]",
 		[
-			ConstructorDef.TypeSignature.new("Zero value — false", []),
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new("Zero value — false", []),
 
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Coerce to boolean",
-				[(ConstructorDef.PartHint
+				[( _DCKitNamespace.ConstructorDef.PartHint
 					.new("value", "<bool>",
 						"[b]true[/b] / [b]yes[/b] / [b]1[/b]  or  "
 						+ "[b]false[/b] / [b]no[/b] / [b]0[/b]")

@@ -5,10 +5,10 @@ func _get_name() -> String: return "DCKitBatFileExport"
 
 func _export_begin(features, is_debug, path, flags):
 	var source_dir := _DCKitNamespace.Setting.get_setting(
-		_DCKitNamespace.Setting._SETTING_EXPORT_BATCH_DIR,
+		_DCKitNamespace.Setting.SETTING_BATCH_DIR,
 	    ""
 	)
-	var _enabled = is_debug or _DCKitNamespace.Setting.get_setting(_DCKitNamespace.Setting._SETTING_ENABLED_IN_RELEASE, false)
+	var _enabled = is_debug or _DCKitNamespace.Setting.get_setting(_DCKitNamespace.Setting.SETTING_ENABLED_IN_RELEASE, false)
 
 	if not _enabled : return
 	if source_dir.is_empty() : return

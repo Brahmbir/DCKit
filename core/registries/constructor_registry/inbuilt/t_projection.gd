@@ -16,7 +16,7 @@ extends "./inbuilt_base.gd"
 const DCVector4 = preload("./t_vector4.gd")
 const DCTransform3D = preload("./t_transform3d.gd")
 
-static func create() -> ConstructorDef:
+static func create() ->  _DCKitNamespace.ConstructorDef:
 	const CONSTS := {
 		"IDENTITY": Projection.IDENTITY,
 		"ZERO": Projection.ZERO,
@@ -71,27 +71,27 @@ static func create() -> ConstructorDef:
 		return DCResult.fail(
 			"Projection: expected 0, 1, or 4 parts — got %d." % parts.size())
 
-	return ConstructorDef.new(
+	return  _DCKitNamespace.ConstructorDef.new(
 		"Projection",
 		handler,
 		"A 4×4 projection matrix — used for camera perspective and orthogonal projections.\n" +
 		"[color=gray]Stores four column vectors: [b]x[/b], [b]y[/b], [b]z[/b], [b]w[/b].[/color]",
 		[
 			sig_zero("Identity matrix"),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Existing Projection or Transform3D",
-				[ConstructorDef.PartHint.new("value", "<Projection | Transform3D>", "Existing projection or transform")]
+				[ _DCKitNamespace.ConstructorDef.PartHint.new("value", "<Projection | Transform3D>", "Existing projection or transform")]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"From Transform3D",
 				[DCTransform3D.part_hint_transform3d("transform",
 					"A Transform3D to convert into a Projection matrix.")]
 			),
-			ConstructorDef.TypeSignature.new(
+			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Four column vectors",
 				[
 					DCVector4.part_hint_vector4("x", "First column — maps X basis."),
@@ -111,7 +111,7 @@ static func extract_projection(val: DCResult.Value) -> Variant:
 	return null
 
 
-static func part_hint_projection(p_name: String, p_desc: String = "") -> ConstructorDef.PartHint:
-	return (ConstructorDef.PartHint
+static func part_hint_projection(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
+	return ( _DCKitNamespace.ConstructorDef.PartHint
 		.new(p_name, "<Projection>", p_desc)
 		.accepts([TYPE_PROJECTION, TYPE_TRANSFORM3D]))
