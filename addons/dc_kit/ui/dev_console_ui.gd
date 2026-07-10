@@ -71,7 +71,8 @@ func _rebuild_theme():
 		for side in SIDES: new_theme.set_constant("margin_" + side, margin_name, value)
 	
 	var margin_data := {
-		"log_info_Area": {
+		"MarginContainer":{},
+		"log_info_area": {
 			"left": 1.25,
 			"right": 0.625,
 		},
@@ -96,7 +97,7 @@ func _rebuild_theme():
 
 	for margin_name in margin_data:
 		var margins: Dictionary = margin_data[margin_name]
-		for side in margins: new_theme.set_constant("margin_" + side, margin_name, em.call(margins.get(side, 0)))
+		for side in SIDES: new_theme.set_constant("margin_" + side, margin_name, em.call(margins.get(side, 0)))
 	
 	new_theme.default_font_size = em.call(1)
 	new_theme.set_font_size("font_size","Label",em.call(1))
