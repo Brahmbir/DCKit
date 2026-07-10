@@ -29,7 +29,7 @@ func register(def: DCDefinition) -> bool:
 		return false
 	_commands[def.name] = def
 
-	for a in def.aliases:
+	for a in def._aliases:
 		var aerr := _validate_name(a)
 		if aerr != "":
 			push_warning("CommandRegistry: alias '%s' for '%s' — %s" % [a, def.name, aerr])

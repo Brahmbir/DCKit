@@ -34,9 +34,9 @@ static var if_cmd := DCDefinition.new(
 	+ "A result is [b]truthy[/b] when it succeeds and its value is not [code]\"\"[/code], "
 	+ "[code]\"false\"[/code], or [code]\"0\"[/code].",
 	[
-		DCParam.new("condition").describe("Command whose result determines the branch."),
-		DCParam.new("then").describe("Runs when the condition is truthy."),
-		DCParam.new("else").describe("Runs when the condition is falsy. Optional."),
+		DCDefinition.Param.new("condition").describe("Command whose result determines the branch."),
+		DCDefinition.Param.new("then").describe("Runs when the condition is truthy."),
+		DCDefinition.Param.new("else").describe("Runs when the condition is falsy. Optional."),
 	]
 ).as_utility()
 
@@ -48,7 +48,7 @@ static var not_cmd := DCDefinition.new(
 		var r := await ctx.arg(0)
 		return DCResult.ok("false" if _is_truthy(r) else "true"),
 	"Returns [b]true[/b] if its argument is falsy, [b]false[/b] if truthy.",
-	[DCParam.new("value").describe("Any command or literal value.")]
+	[DCDefinition.Param.new("value").describe("Any command or literal value.")]
 )
 
 static var and_cmd := DCDefinition.new(
@@ -64,7 +64,7 @@ static var and_cmd := DCDefinition.new(
 		return last,
 	"Evaluates arguments left-to-right; returns the last result if all are truthy, "
 	+ "or short-circuits on the first falsy / failed result.",
-	[DCParam.new("conditions").describe("Two or more commands or values.").rest()]
+	[DCDefinition.Param.new("conditions").describe("Two or more commands or values.").rest()]
 )
 
 static var or_cmd := DCDefinition.new(
@@ -80,7 +80,7 @@ static var or_cmd := DCDefinition.new(
 		return last,
 	"Evaluates arguments left-to-right; returns the first truthy result "
 	+ "or the last result if none are truthy.",
-	[DCParam.new("conditions").describe("Two or more commands or values.").rest()]
+	[DCDefinition.Param.new("conditions").describe("Two or more commands or values.").rest()]
 )
 #endregion 
 
@@ -101,8 +101,8 @@ static var try_cmd := DCDefinition.new(
 	+ "propagating the error. Returns empty string when the command fails "
 	+ "and no fallback is given.",
 	[
-		DCParam.new("command").describe("Command to attempt."),
-		DCParam.new("fallback").describe("Runs if the first command fails. Optional."),
+		DCDefinition.Param.new("command").describe("Command to attempt."),
+		DCDefinition.Param.new("fallback").describe("Runs if the first command fails. Optional."),
 	]
 ).as_utility()
 #endregion 
@@ -149,9 +149,9 @@ static var repeat_cmd := DCDefinition.new(
 	+ "Stops immediately if any command fails.\n"
 	+ "Maximum %d repetitions." % MAX_REPEAT_COUNT,
 	[
-		DCParam.new("count")
+		DCDefinition.Param.new("count")
 			.describe("Number of iterations. Truncated to an integer."),
-		DCParam.new("commands")
+		DCDefinition.Param.new("commands")
 			.describe("One or more commands to run each iteration.")
 			.rest(),
 	]
@@ -183,9 +183,9 @@ static var while_cmd := DCDefinition.new(
 	+ "Returns the last command result, or an empty string if the body never ran.\n"
 	+ "Hard limit: %d iterations." % MAX_WHILE_ITERS,
 	[
-		DCParam.new("condition")
+		DCDefinition.Param.new("condition")
 			.describe("Re-evaluated before each iteration."),
-		DCParam.new("commands")
+		DCDefinition.Param.new("commands")
 			.describe("One or more commands executed each iteration.")
 			.rest(),
 	]
@@ -207,7 +207,7 @@ static var cmp_eq_cmd := DCDefinition.new(
 		if not b.success: return b
 		return DCResult.ok("true" if a.value.as_string() == b.value.as_string() else "false"),
 	"Returns [b]true[/b] when both values are equal (string comparison).",
-	[DCParam.new("a"), DCParam.new("b")]
+	[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")]
 )
 
 static var cmp_neq_cmd := DCDefinition.new(
@@ -221,7 +221,7 @@ static var cmp_neq_cmd := DCDefinition.new(
 		if not b.success: return b
 		return DCResult.ok("true" if a.value.as_string() != b.value.as_string() else "false"),
 	"Returns [b]true[/b] when the two values differ (string comparison).",
-	[DCParam.new("a"), DCParam.new("b")]
+	[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")]
 )
 
 static var cmp_gt_cmd := DCDefinition.new(
@@ -233,7 +233,7 @@ static var cmp_gt_cmd := DCDefinition.new(
 		if not pair.success: return DCResult.fail(pair.message)
 		return DCResult.ok("true" if pair.a > pair.b else "false"),
 	"Returns [b]true[/b] when [i]a[/i] > [i]b[/i] (numeric comparison).",
-	[DCParam.new("a"), DCParam.new("b")]
+	[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")]
 )
 
 static var cmp_lt_cmd := DCDefinition.new(
@@ -245,7 +245,7 @@ static var cmp_lt_cmd := DCDefinition.new(
 		if not pair.success: return DCResult.fail(pair.message)
 		return DCResult.ok("true" if pair.a < pair.b else "false"),
 	"Returns [b]true[/b] when [i]a[/i] < [i]b[/i] (numeric comparison).",
-	[DCParam.new("a"), DCParam.new("b")]
+	[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")]
 )
 
 static var cmp_gte_cmd := DCDefinition.new(
@@ -257,7 +257,7 @@ static var cmp_gte_cmd := DCDefinition.new(
 		if not pair.success: return DCResult.fail(pair.message)
 		return DCResult.ok("true" if pair.a >= pair.b else "false"),
 	"Returns [b]true[/b] when [i]a[/i] ≥ [i]b[/i] (numeric comparison).",
-	[DCParam.new("a"), DCParam.new("b")]
+	[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")]
 )
 
 static var cmp_lte_cmd := DCDefinition.new(
@@ -269,7 +269,7 @@ static var cmp_lte_cmd := DCDefinition.new(
 		if not pair.success: return DCResult.fail(pair.message)
 		return DCResult.ok("true" if pair.a <= pair.b else "false"),
 	"Returns [b]true[/b] when [i]a[/i] ≤ [i]b[/i] (numeric comparison).",
-	[DCParam.new("a"), DCParam.new("b")]
+	[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")]
 )
 #endregion
 

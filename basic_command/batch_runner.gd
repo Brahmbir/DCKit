@@ -84,7 +84,7 @@ var bat_cmd := DCDefinition.new(
 		"Executes a [b]bat.txt[/b] script file line by line.\n\n"
 		+ "Lines beginning with [code]#[/code] are comments. "
 		+ "Nested [b]bat[/b] calls are fully supported.",
-		[ DCParam.new("path").describe(
+		[ DCDefinition.Param.new("path").describe(
 			"Path to the script file. Relative paths resolve from the configured root folder.")
 			.suggest(func() -> Array[String]:
 				var out : Array[String] = []

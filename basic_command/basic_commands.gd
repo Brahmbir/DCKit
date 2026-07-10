@@ -16,7 +16,7 @@ static var echo_cmd := DCDefinition.new(
 			parts.append(result.value.as_string())
 		return DCResult.ok(" ".join(parts)),
 		"Prints text to the console.",
-		[DCParam.new("text").describe("Text to display.").rest()],
+		[DCDefinition.Param.new("text").describe("Text to display.").rest()],
 		true
 	)
 
@@ -48,7 +48,7 @@ static var wait_cmd := DCDefinition.new(
 		return DCResult.ok("Waited %s." % duration_text),
 	"Pauses execution for a duration.",
 	[
-		DCParam.new("duration")
+		DCDefinition.Param.new("duration")
 			.describe("Examples: 500ms, 2s, 1m")
 	]
 ).as_utility()
@@ -68,7 +68,7 @@ static var abort_cmd := DCDefinition.new(
 		return DCResult.fail("Execution aborted.\n%s" % result.value.as_string()),
 	"Aborts the current command or script.",
 	[
-		DCParam.new("reason")
+		DCDefinition.Param.new("reason")
 			.describe("Optional reason.")
 	]
 )
@@ -97,7 +97,7 @@ static var time_cmd := DCDefinition.new(
 		),
 	"Measures how long a nested command takes.",
 	[
-		DCParam.new("command")
+		DCDefinition.Param.new("command")
 			.describe("Command to execute.")
 	],
 	true
@@ -181,7 +181,7 @@ static var type_of_cmd := DCDefinition.new(
 		return DCResult.ok(type_name),
 	"Returns the type of a value.",
 	[
-		DCParam.new("value")
+		DCDefinition.Param.new("value")
 			.describe("Value to inspect.")
 	],
 	true

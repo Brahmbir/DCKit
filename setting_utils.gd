@@ -7,7 +7,7 @@ enum LOGGER_PRINT_THRESHOLD{
 	WARN = 3,
 	ERROR = 4,
 }
-s
+
 const SETTING_PATH = "addons/DCKit/"
 
 const SETTING_ENABLED_IN_RELEASE = "export/enable_in_release"

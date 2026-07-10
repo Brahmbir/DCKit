@@ -99,9 +99,9 @@ func get_command_def_array() -> Array[DCDefinition]:
 			return DCResult.ok(str(r1.raw)),          # display string for the console log
 		"Writes a variable into the store.",
 		[
-			DCParam.new("name").describe(
+			DCDefinition.Param.new("name").describe(
 				"Variable name. Must start with a letter or underscore."),
-			DCParam.new("value").describe(
+			DCDefinition.Param.new("value").describe(
 				"Value to store. Always kept as a string."),
 		]
 	)
@@ -123,8 +123,8 @@ func get_command_def_array() -> Array[DCDefinition]:
 			return DCResult.ok(get_value(key, fallback)),
 		"Reads a variable. Returns the default value when the variable is absent.",
 		[ 
-			DCParam.new("name").suggest(func(): return get_keys() ),
-			DCParam.new("default").describe(
+			DCDefinition.Param.new("name").suggest(func(): return get_keys() ),
+			DCDefinition.Param.new("default").describe(
 				"Returned as-is when the variable does not exist."),
 		]
 	)
@@ -142,7 +142,7 @@ func get_command_def_array() -> Array[DCDefinition]:
 				return DCResult.fail("Invalid variable name '%s'." % key)
 			return DCResult.ok("true" if has(key) else "false"),
 		"Returns [b]true[/b] if the variable exists, [b]false[/b] otherwise.",
-		[ DCParam.new("name").suggest(func(): return get_keys() ) ]
+		[ DCDefinition.Param.new("name").suggest(func(): return get_keys() ) ]
 	)
 	var list_cmd := DCDefinition.new(
 		"var.list",
@@ -158,7 +158,7 @@ func get_command_def_array() -> Array[DCDefinition]:
 				return DCResult.ok("emp")
 			return DCResult.ok(", ".join(keys)),
 		"Lists variable names, space-separated. Optionally filters by prefix.",
-		[ DCParam.new("prefix").describe(
+		[ DCDefinition.Param.new("prefix").describe(
 			"Optional. Only names starting with this are returned.") ]
 	)
 
@@ -179,7 +179,7 @@ func get_command_def_array() -> Array[DCDefinition]:
 					"Variable '%s' does not exist." % key)
 			return DCResult.ok(),
 		"Deletes a variable. Fails if it does not exist.",
-		[ DCParam.new("name").suggest(func(): return get_keys() ) ]
+		[ DCDefinition.Param.new("name").suggest(func(): return get_keys() ) ]
 	)
 
 
@@ -197,7 +197,7 @@ func get_command_def_array() -> Array[DCDefinition]:
 			delete(key)
 			return DCResult.ok(),
 		"Deletes a variable if it exists. Succeeds silently when absent.",
-		[ DCParam.new("name").suggest(func(): return get_keys() ) ]
+		[ DCDefinition.Param.new("name").suggest(func(): return get_keys() ) ]
 	)
 	return [set_cmd, get_cmd, exist_cmd, list_cmd, delete_cmd, try_delete_cmd]
 	

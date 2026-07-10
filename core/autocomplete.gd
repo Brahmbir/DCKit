@@ -113,7 +113,7 @@ func _param_items(scope, prefix: String) -> Array:
 	var def = scope.get_active()
 	if def == null or scope.arg_index >= def.params.size():
 		return []
-	var param : DCParam = def.params[scope.arg_index]
+	var param : DCDefinition.Param = def.params[scope.arg_index]
 	if not param.suggestor.is_valid():
 		return []
 	var out : Array = []
