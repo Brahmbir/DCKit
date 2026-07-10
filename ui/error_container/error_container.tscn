@@ -17,6 +17,8 @@ grow_vertical = 0
 size_flags_vertical = 0
 script = ExtResource("1_6kobp")
 expanded = true
+update_debounce = null
+collapse_delay = null
 
 [node name="Control" type="Control" parent="." unique_id=1901914460]
 layout_mode = 2
