@@ -10,9 +10,9 @@ enum LOGGER_PRINT_THRESHOLD{
 
 const SETTING_PATH = "addons/DCKit/"
 
-const SETTING_ENABLED_IN_RELEASE = "export/enable_in_release"
 const SETTING_BATCH_DIR = "batch_directory"
-#const SETTING_ = "logging/max_session_files"
+const SETTING_UI_SCALE = "ui_scale"
+const SETTING_ENABLED_IN_RELEASE = "export/enable_in_release"
 #const SETTING_   = "logging/print_threshold"
 
 const SETTING_LOGGING_ENABLED = "logging/enabled"
@@ -26,6 +26,13 @@ static func get_setting(key: String, default_value: Variant) -> Variant:
 
 
 static func _register_project_settings(prefix:String = SETTING_PATH) -> void:
+	_declare_setting(
+		prefix + SETTING_UI_SCALE, 1.0, TYPE_FLOAT,
+		{
+			"hint": PROPERTY_HINT_RANGE,
+			"hint_string": "0.5,3.0,0.05,suffix:x",
+			"doc": "Scales the Dev Console user interface. A value of 1.0 uses the default size."
+		})
 	_declare_setting(
 		prefix + SETTING_BATCH_DIR,
 		"res://batch_file/", 
@@ -65,6 +72,7 @@ static func _register_project_settings(prefix:String = SETTING_PATH) -> void:
 
 static func _unregister_project_settings(prefix:String = SETTING_PATH) -> void:
 	_undeclare_setting(prefix + SETTING_ENABLED_IN_RELEASE)
+	_undeclare_setting(prefix + SETTING_UI_SCALE)
 	_undeclare_setting(prefix + SETTING_BATCH_DIR)
 	_undeclare_setting(prefix + SETTING_LOGGING_ENABLED)
 	_undeclare_setting(prefix + SETTING_LOGGING_DIRECTORY)

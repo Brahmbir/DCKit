@@ -72,10 +72,7 @@ expand_icon = true
 layout_mode = 2
 mouse_filter = 2
 mouse_behavior_recursive = 1
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_type_variation = &"0_5em"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="RootVBox/Header/MarginContainer" unique_id=2096185842]
 layout_mode = 2
@@ -86,7 +83,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 size_flags_stretch_ratio = 20.0
-theme_override_font_sizes/font_size = 28
 text = "Placeholder Test"
 clip_text = true
 text_overrun_behavior = 4
@@ -99,10 +95,7 @@ alignment_horizontal = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="RootVBox/Header/MarginContainer/HBoxContainer/AspectRatioContainer" unique_id=1564713283]
 layout_mode = 2
-theme_override_constants/margin_left = 2
-theme_override_constants/margin_top = 2
-theme_override_constants/margin_right = 2
-theme_override_constants/margin_bottom = 2
+theme_type_variation = &"0_125em"
 
 [node name="TextureRect" type="TextureRect" parent="RootVBox/Header/MarginContainer/HBoxContainer/AspectRatioContainer/MarginContainer" unique_id=1868534911]
 layout_mode = 2
@@ -113,6 +106,7 @@ expand_mode = 1
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="RootVBox/ContentClip" unique_id=498100402]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -120,9 +114,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 10
+theme_type_variation = &"info_clip_margin"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="RootVBox/ContentClip/MarginContainer" unique_id=1023657382]
 layout_mode = 2
@@ -132,4 +124,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/margin_right = 6
+theme_type_variation = &"MarginContainer_0_625em"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_bottom = 0

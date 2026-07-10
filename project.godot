@@ -19,6 +19,11 @@ config/icon="uid://b0tp6gb8sl00v"
 
 DCKit="*uid://duy3yg28rqxcy"
 
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+
 [dotnet]
 
 project/assembly_name="demo"
