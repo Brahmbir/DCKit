@@ -6,8 +6,6 @@
 #
 extends Control
 
-const BBCodeHandler := preload("./utils/bb_code_handler.gd")
-
 # STATE
 var _logger    : Object = null
 var _connected : bool   = false
