@@ -137,8 +137,8 @@ func _maybe_print(entry: LogEntry) -> void:
 	var line := entry.format_line()
 	match entry.level:
 		"ERROR": push_error(line)
-		"WARN":  push_warning(line)
-		_:       print(line)
+		"WARN": push_warning(line)
+		_: print(line)
 
 
 # LOG ENTRY
@@ -146,6 +146,7 @@ func _maybe_print(entry: LogEntry) -> void:
 class LogEntry extends RefCounted:
 
 	const _STACK_DISPLAY_LIMIT : int = 3
+	static var _stripper : RichTextLabel
 
 	var kind : String   # COMMAND | SYSTEM | RESULT | LOG
 	var level : String   # INFO | OK | FAIL | WARN | ERROR | HELP
@@ -158,13 +159,14 @@ class LogEntry extends RefCounted:
 		stack = p_stack
 		content  = p_content
 
-
 	func format_line() -> String:
 		var trimmed : Array = stack.slice(max(0, stack.size() - _STACK_DISPLAY_LIMIT))
 		var crumb : String = " > ".join(trimmed) if not trimmed.is_empty() else "·"
 		return "%-14s {%s} %s" % [kind + " / " + level, crumb, to_plain_text()]
 
 	func to_plain_text() -> String:
-		var regex := RegEx.new()
-		regex.compile("\\[/?[a-zA-Z0-9_=# ,.]+\\]")
-		return regex.sub(content, "", true)
+		if _stripper == null:
+			_stripper = RichTextLabel.new()
+			_stripper.bbcode_enabled = true
+		_stripper.text = content
+		return _stripper.get_parsed_text()
