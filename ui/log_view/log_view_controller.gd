@@ -1,9 +1,11 @@
 extends Control
 
 const _SimpleView = preload("./viewer/simple_log_view.gd")
-const _ComplexView = preload("./viewer/complex_log_view.gd")
 
-enum Mode { SIMPLE, COMPLEX }
+enum Mode { 
+	SIMPLE,
+	#COMPLEX
+ }
 
 signal mode_changed(new_mode: int)
 
@@ -33,12 +35,12 @@ func set_mode(mode: Mode) -> void:
 	_activate(_current)
 	mode_changed.emit(_current)
 
-func toggle_mode() -> void:
-	set_mode(Mode.SIMPLE if _current == Mode.COMPLEX else Mode.COMPLEX)
+#func toggle_mode() -> void:
+	#set_mode(Mode.SIMPLE if _current == Mode.COMPLEX else Mode.COMPLEX)
 
 func get_mode() -> Mode: return _current
 func is_simple() -> bool: return _current == Mode.SIMPLE
-func is_complex() -> bool: return _current == Mode.COMPLEX
+#func is_complex() -> bool: return _current == Mode.COMPLEX
 func is_set_up() -> bool: return _is_set_up
 
 func _activate(mode: Mode) -> void:
@@ -52,17 +54,17 @@ func _deactivate(mode: Mode) -> void:
 	match mode:
 		Mode.SIMPLE:
 			if _simple: _simple.queue_free(); _simple = null
-		Mode.COMPLEX:
-			if _complex: _complex.queue_free(); _complex = null
+		#Mode.COMPLEX:
+			#if _complex: _complex.queue_free(); _complex = null
 
 func _build_view(mode: Mode) -> Control:
 	match mode:
 		Mode.SIMPLE:
 			_simple = _SimpleView.new()
 			return _simple
-		Mode.COMPLEX:
-			_complex = _ComplexView.new()
-			return _complex
+		#Mode.COMPLEX:
+			#_complex = _ComplexView.new()
+			#return _complex
 			pass
 	return Control.new()
 
@@ -77,5 +79,5 @@ func _setup_active() -> void:
 	match _current:
 		Mode.SIMPLE:
 			if _simple: _simple.setup(logger)
-		Mode.COMPLEX:
-			if _complex: _complex.setup(logger)
+		#Mode.COMPLEX:
+			#if _complex: _complex.setup(logger)

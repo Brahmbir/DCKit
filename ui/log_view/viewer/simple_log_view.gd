@@ -1,6 +1,5 @@
 # simple_log_view.gd
 extends "./log_view_base.gd"
-
 const _C := {
 	"OK"    : "#4EC9B0",
 	"FAIL"  : "#F28B82",
@@ -13,19 +12,8 @@ const _C := {
 	"muted" : "#6C7086",
 	"plain" : "#CDD6F4",
 }
-
-var _label   : RichTextLabel
-var _handler : BBCodeHandler
-
+var _label : RichTextLabel
 func _ready() -> void:
-	_handler = BBCodeHandler.new() \
-		.allow(["b", "i", "u", "s", "color", "wave", "tornado", "rainbow", "shake", "url"]) \
-		.color("error", "#F28B82") \
-		.color("warn",  "#FFD166") \
-		.color("ok",    "#4EC9B0") \
-		.color("muted", "#6C7086") \
-		.color("cmd",   "#89DCEB") \
-		.color("dim",   "#6C7086")
 	_label = RichTextLabel.new()
 	_label.focus_mode = Control.FOCUS_NONE
 	_label.bbcode_enabled = true
@@ -35,23 +23,17 @@ func _ready() -> void:
 	_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_label)
 	_on_cleared()
-
 func _append_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 	_render_entry(entry)
 	_label.add_text("\n")
-
 func _on_cleared() -> void:
 	_label.clear()
 	_label.add_text("\n".repeat(3))
 	#_label.text = "\n".repeat(3)
-
-
 # Rendering
-
 func _render_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 	_render_badge(_badge_level(entry))
 	_label.add_text("  ")
-
 	match entry.kind:
 		"SYSTEM":
 			_label.push_color(Color.html(_C.muted))
@@ -68,39 +50,16 @@ func _render_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 				_render_body(entry.content)
 		_:
 			_render_body(entry.content)
-
-
 func _render_body(text: String) -> void:
-	_render_node(_handler.styled_tree(text))
-
-
-func _render_node(node: Dictionary) -> void:
-	if node.has("text"):
-		_label.add_text(node.text)
-		return
-
-	var s      : Dictionary = node.style
-	var pushed : bool       = false
-
-	if   s.has("color"):                  _label.push_color(s.color);       pushed = true
-	elif s.get("bold",          false):   _label.push_bold();                pushed = true
-	elif s.get("italic",        false):   _label.push_italics();             pushed = true
-	elif s.get("underline",     false):   _label.push_underline();           pushed = true
-	elif s.get("strikethrough", false):   _label.push_strikethrough();       pushed = true
-
-	for child : Dictionary in node.children:
-		_render_node(child)
-
-	if pushed:
-		_label.pop()
-
-
+	# Raw text is fed straight to the RichTextLabel's own bbcode parser.
+	# pop_all() guarantees that any tag left open by malformed/unbalanced
+	# markup in this entry cannot bleed into the next entry's styling.
+	_label.append_text(text)
+	_label.pop_all()
 func _render_badge(level: String) -> void:
 	_label.push_color(Color.html(_C.get(level, _C.muted)))
 	_label.add_text("[%s]" % level)
 	_label.pop()
-
-
 func _badge_level(entry: _DCKitNamespace.Tracer.LogEntry) -> String:
 	match entry.kind:
 		"COMMAND": return "CMD"
