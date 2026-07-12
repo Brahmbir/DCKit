@@ -118,7 +118,7 @@ func _param_items(scope, prefix: String) -> Array:
 		return []
 	var out : Array = []
 	
-	var suggestions = _call_suggestor(param.suggestor, prefix, _prev_arg_values(scope))
+	var suggestions = _call_suggestor(param.suggestor, _prev_arg_values(scope), prefix)
 	if suggestions is not Array:
 		return out
 	for s in suggestions:
@@ -141,7 +141,7 @@ func _part_items(scope, prefix: String) -> Array:
 		var part : _DCKitNamespace.ConstructorDef.PartHint = sig.parts[scope.part_index]
 		if not part.suggestor.is_valid():
 			continue
-		#var suggestions = _call_suggestor(part.suggestor, prefix, prev)
+		#var suggestions = _call_suggestor(part.suggestor, prev, prefix)
 		var suggestions = _call_suggestor(part.suggestor)
 		
 		if suggestions is not Array:
@@ -212,8 +212,8 @@ func _is_prefix_char(c: String) -> bool:
 	return (n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) \
 			or c in ["_", ".", "$", "?", "{"]
 
-func _call_suggestor(suggestor: Callable, prefix: String="", prev: Array=[]):
+func _call_suggestor(suggestor: Callable, prev: Array=[], prefix: String=""):
 	match suggestor.get_argument_count():
 		0: return suggestor.call()
-		1: return suggestor.call(prefix)
-		_: return suggestor.call(prefix, prev)  # 2, or -1 (variadic/unknown)
+		1: return suggestor.call(prev)
+		_: return suggestor.call(prev, prefix)

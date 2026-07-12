@@ -1,7 +1,6 @@
 extends Node
 
-const ADDON_PATH := "res://addons/dc_kit"
-const PLUGIN_CFG := "res://addons/dc_kit/plugin.cfg"
+const ADDON_PATH :String= "res://addons/dc_kit"
 
 func _ready() -> void:
 	var export_addon_cmd := DCDefinition.new(
@@ -46,7 +45,6 @@ func _ready() -> void:
 			)
 
 			if err != OK:
-				print(error_string(err))
 				return DCResult.fail("Failed to export addon (Error %d)." % err)
 
 			return DCResult.ok(
@@ -185,7 +183,7 @@ static func _zip_file(
 static func get_plugin_version() -> String:
 	var cfg := ConfigFile.new()
 
-	if cfg.load(PLUGIN_CFG) != OK:
+	if cfg.load(ADDON_PATH + "/plugin.cfg") != OK:
 		return "0.0.0"
 
 	return cfg.get_value("plugin", "version", "0.0.0")
@@ -194,19 +192,16 @@ static func get_plugin_version() -> String:
 static func set_plugin_version(version_str: String) -> Error:
 	var cfg := ConfigFile.new()
 
-	var err := cfg.load(PLUGIN_CFG)
+	var err := cfg.load(ADDON_PATH + "/plugin.cfg")
 	if err != OK:
 		return err
 
 	cfg.set_value("plugin", "version", version_str)
-	return cfg.save(PLUGIN_CFG)
+	return cfg.save(ADDON_PATH + "/plugin.cfg")
 
 static func compare_versions(a: String, b: String) -> int:
 	var pa := _parse_version(a)
 	var pb := _parse_version(b)
-	
-	print(pa)
-	print(pb)
 	
 	var count := maxi(pa.numbers.size(), pb.numbers.size())
 

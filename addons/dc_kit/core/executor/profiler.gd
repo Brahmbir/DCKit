@@ -36,8 +36,8 @@ func begin(command: String) -> void:
 
 
 func end() -> void:
-	var node    := _stack.pop_back()
-	node.end_us  = Time.get_ticks_usec()
+	var node :ProfilerNode= _stack.pop_back()
+	node.end_us = Time.get_ticks_usec()
 
 
 func reset() -> void:
