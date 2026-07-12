@@ -67,7 +67,7 @@ func _rebuild_theme():
 
 	const SIDES := ["top", "right", "bottom", "left"]
 	for margin_name in margin_presets:
-		var value := em.call(margin_presets[margin_name])
+		var value : int = em.call(margin_presets[margin_name])
 		for side in SIDES: new_theme.set_constant("margin_" + side, margin_name, value)
 	
 	var margin_data := {
