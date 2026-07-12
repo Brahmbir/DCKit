@@ -41,8 +41,6 @@ func _init() -> void:
 	font_scale = _DCKitNamespace.Setting.get_setting(_DCKitNamespace.Setting.SETTING_UI_SCALE,1.0)
 	_rebuild_theme()
 
-var base_theme: Theme = preload("./utills/dev_con_theme.theme")
-
 @onready var margin_container: MarginContainer = $MarginContainer
 
 func _rebuild_theme():
