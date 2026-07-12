@@ -40,14 +40,14 @@ func _render_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 		"SYSTEM":
 			_label.push_color(Color.html(_C.muted))
 			_render_body(entry.content)
-			_label.pop()
+			#_label.pop()
 		"RESULT", "LOG":
 			if entry.level == "HELP":
 				_label.push_color(Color.html(_C.muted))
 				_label.push_italics()
 				_render_body(entry.content)
-				_label.pop()  # italics
-				_label.pop()  # color
+				#_label.pop()  # italics 
+				#_label.pop()  # color
 			else:
 				_render_body(entry.content)
 		_:
