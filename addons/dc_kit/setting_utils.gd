@@ -87,7 +87,7 @@ static func _declare_setting(
 
 	ProjectSettings.set_initial_value(key, default_value)
 	ProjectSettings.set_as_basic(key, true)
-	ProjectSettings.set_order(key, count)
+	#ProjectSettings.set_order(key, count)
 
 	var info := {
 		"name": key,

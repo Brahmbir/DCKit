@@ -8,11 +8,6 @@
 
 config_version=5
 
-[addons]
-
-DCKit/export/enable_in_release=true
-DCKit/ui_scale=1.6
-
 [application]
 
 config/name="DCKit_demo"

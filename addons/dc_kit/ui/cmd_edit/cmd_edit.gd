@@ -11,12 +11,12 @@ const TextCmdEdit = preload("./text_edit_to_cmd_edit.gd")
 const AutoCompletePopup = preload("./completion_popup.gd")
 
 
-@onready var button: Button = $HBoxContainer/AspectRatioContainer/Button
-@onready var text_edit: TextCmdEdit = $HBoxContainer/Control/TextEdit
-@onready var masked_icon_panel: MaskedIconPanel = $HBoxContainer/AspectRatioContainer/Button/MaskedIconPanel
+@onready var button: Button = %Button
+@onready var masked_icon_panel: MaskedIconPanel = %MaskedIconPanel
+@onready var text_edit: TextCmdEdit = %TextEdit
 
-@onready var label: Label = $MarginContainer/Label
-@onready var autocomplete_popup: AutoCompletePopup = $HBoxContainer/Control/PopupPanel
+@onready var label: Label = %Label
+@onready var autocomplete_popup: AutoCompletePopup = %PopupPanel
 
 #  STATE
 enum State { IDLE, BUSY }
@@ -29,10 +29,16 @@ var _tween: Tween
 var _highlighted_colour := Color.BLACK
 var _normal_colour := Color.BLACK
 
+func set_btn_min_size():
+	button.get_parent().custom_minimum_size.x = size.y
+	pass
+	
 
 func _ready() -> void:
-	_highlighted_colour = get_theme_color("highlighted_colour","Consts")
-	_normal_colour = get_theme_color("normal_colour","Consts")
+	theme_changed.connect(set_colors)
+	resized.connect(set_btn_min_size)
+	
+	set_colors()
 
 	text_edit.text_changed.connect(_on_text_changed)
 	text_edit.caret_changed.connect(_on_caret_changed)
@@ -42,11 +48,18 @@ func _ready() -> void:
 	text_edit.focus_exited.connect(_on_focus_exited)
 
 	button.pressed.connect(_on_button_pressed)
-	masked_icon_panel.accent_color = get_theme_color("highlighted_colour","Consts")
+	masked_icon_panel.accent_color = _highlighted_colour
 	_set_state(State.IDLE)
 
 	autocomplete_popup.item_accepted.connect(_on_completion_accepted)
 
+
+func set_colors():
+	_highlighted_colour = get_theme_color("highlighted_colour","Consts")
+	_normal_colour = get_theme_color("normal_colour","Consts")
+	
+	masked_icon_panel.accent_color = _highlighted_colour
+	
 
 var _sct_toggle_popup : Shortcut = _make_shortcut(KEY_SPACE, true)
 

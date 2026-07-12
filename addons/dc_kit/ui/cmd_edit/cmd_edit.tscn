@@ -63,6 +63,7 @@ theme_type_variation = &"0_25em"
 theme_override_constants/margin_right = 0
 
 [node name="Label" type="Label" parent="MarginContainer" unique_id=1605144196]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"cmd_label"
 text = "CMD"
@@ -70,10 +71,9 @@ text = "CMD"
 [node name="VSeparator" type="VSeparator" parent="." unique_id=372322894]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1203293251]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1436129954]
 layout_mode = 2
 size_flags_horizontal = 3
-alignment = 2
 
 [node name="Control" type="Control" parent="HBoxContainer" unique_id=1429264838]
 layout_mode = 2
@@ -81,6 +81,7 @@ size_flags_horizontal = 3
 size_flags_stretch_ratio = 20.0
 
 [node name="TextEdit" type="TextEdit" parent="HBoxContainer/Control" unique_id=1291334252]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -98,6 +99,7 @@ caret_multiple = false
 script = ExtResource("2_yg3ig")
 
 [node name="PopupPanel" type="PanelContainer" parent="HBoxContainer/Control" unique_id=1914536021]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -124,12 +126,12 @@ auto_width = true
 fixed_icon_size = Vector2i(20, 20)
 
 [node name="AspectRatioContainer" type="AspectRatioContainer" parent="HBoxContainer" unique_id=32606962]
+custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.6
-stretch_mode = 1
+alignment_horizontal = 2
 
 [node name="Button" type="Button" parent="HBoxContainer/AspectRatioContainer" unique_id=394870231]
+unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_1y760")
@@ -141,6 +143,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_ieho6")
 toggle_mode = true
 
 [node name="MaskedIconPanel" type="PanelContainer" parent="HBoxContainer/AspectRatioContainer/Button" unique_id=855490656]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

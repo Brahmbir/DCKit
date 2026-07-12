@@ -15,14 +15,16 @@ const _C := {
 var _label : RichTextLabel
 func _ready() -> void:
 	_label = RichTextLabel.new()
-	_label.focus_mode = Control.FOCUS_NONE
+	_label.name = "simple_log_viewer"
 	_label.bbcode_enabled = true
 	_label.scroll_following = true
 	_label.selection_enabled = true
 	_label.fit_content = false
 	_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_label)
+	_label.focus_mode = Control.FOCUS_NONE
 	_on_cleared()
+	
 func _append_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 	_render_entry(entry)
 	_label.add_text("\n")
