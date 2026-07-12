@@ -200,6 +200,10 @@ func _find_ctor(nodes: Array, type_name: String):
 # Correct even when the cursor sits mid-word — only what's typed BEFORE
 # the cursor is ever completed.
 func _scan_prefix(input: String, cursor_pos: int) -> String:
+	# Defensive: cursor_pos can arrive stale/out-of-sync with input (e.g. a
+	# caller capturing caret column and text a tick apart), so clamp before
+	# indexing or input[start - 1] throws "Out of bounds".
+	cursor_pos = clampi(cursor_pos, 0, input.length())
 	var start := cursor_pos
 	while start > 0:
 		if _is_prefix_char(input[start - 1]): start -= 1
