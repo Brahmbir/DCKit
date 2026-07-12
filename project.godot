@@ -11,7 +11,7 @@ config_version=5
 [addons]
 
 DCKit/export/enable_in_release=true
-DCKit/ui_scale=1.4
+DCKit/ui_scale=1.6
 
 [application]
 
@@ -29,7 +29,6 @@ UtilScript="*uid://cg2t6sv2q7kvn"
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=2
 
 [dotnet]
 
