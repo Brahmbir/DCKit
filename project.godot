@@ -23,6 +23,7 @@ config/icon="uid://b0tp6gb8sl00v"
 [autoload]
 
 DCKit="*uid://duy3yg28rqxcy"
+UtilScript="*uid://cg2t6sv2q7kvn"
 
 [display]
 
