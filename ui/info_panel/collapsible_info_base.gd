@@ -36,25 +36,25 @@ func _ready() -> void:
 	_icon.pivot_offset = _icon.size * 0.5
 
 	_btn.pressed.connect(_on_header_pressed)
-	_apply_style()
+	
+	_panel_style = get_theme_stylebox("panel").duplicate()
+	add_theme_stylebox_override("panel", _panel_style)
+	_set_colors()
+	
 
-func _apply_style() -> void:
-	var highlight_color := get_theme_color("highlighted_colour","Consts")
+var highlight_color: Color
+var border_color: Color
+var _panel_style := StyleBoxFlat.new()
+
+func _set_colors():
+	highlight_color = get_theme_color("highlighted_colour", "Consts")
+	border_color = get_theme_color("normal_colour", "Consts")
+
+	_panel_style.border_color = border_color.darkened(0.5)
+	#_panel_style.bg_color = get_theme_color("panel_bg", "Consts")
+
 	_label.add_theme_color_override("font_color", highlight_color)
 	_icon.modulate = highlight_color
-	var border_color := get_theme_color("normal_colour","Consts")
-	var dark_border := border_color.darkened(0.5) # Darken by 50%
-	# Duplicate so we don't mutate shared theme
-	var style: StyleBoxFlat = (
-		get_theme_stylebox("panel")
-		.duplicate()
-	)
-
-	style.border_color = dark_border
-	add_theme_stylebox_override(
-		"panel",
-		style
-	)
 
 # CollapsibleInfo takes ownership of PanelContent.node — do not free it externally.
 func set_content(c: PanelContent) -> void:

@@ -9,8 +9,8 @@
 shader = ExtResource("2_gbx52")
 shader_parameter/blur_radius = 80.0
 shader_parameter/blur_strength = 1.0
-shader_parameter/glass_color = Color(0.039, 0.055, 0.078, 0.65)
-shader_parameter/darken = 0.75
+shader_parameter/glass_color = Color(0.039215688, 0.05490196, 0.078431375, 0.8784314)
+shader_parameter/darken = 1.0
 shader_parameter/frost_grain = 0.045
 shader_parameter/frost_scale = 8.0
 shader_parameter/chroma_shift = 0.8
@@ -46,7 +46,8 @@ show_behind_parent = true
 material = SubResource("ShaderMaterial_ch5o3")
 layout_mode = 2
 script = ExtResource("3_4bocb")
-darken = 0.75
+glass_color = Color(0.039215688, 0.05490196, 0.078431375, 0.8784314)
+darken = 1.0
 metadata/_custom_type_script = "uid://do0p117rpnomi"
 
 [node name="RootVBox" type="VBoxContainer" parent="." unique_id=378115158]

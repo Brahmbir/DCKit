@@ -1,5 +1,4 @@
 @tool extends PanelContainer
-		
 
 @export var animation_duration := 0.2
 
@@ -10,7 +9,9 @@
 		debug_focus_effect = new 
 		_on_focus_changed(new)
 
-@onready var command_submiter = %CmdEdit
+
+const CmdEdit = preload("./cmd_edit/cmd_edit.gd")
+@onready var command_submiter :CmdEdit= %CmdEdit
 
 var _style: StyleBoxFlat
 var _tween: Tween
@@ -19,8 +20,8 @@ var _normal_colour := Color.BLACK
 
 
 func _ready() -> void:
-	_highlighted_colour = get_theme_color("highlighted_colour","Consts")
-	_normal_colour = get_theme_color("normal_colour","Consts")
+	theme_changed.connect(set_colors)
+	set_colors()
 	
 	_style = get_theme_stylebox("panel").duplicate()
 	_style.set_expand_margin_all(1)
@@ -33,6 +34,9 @@ func _ready() -> void:
 	if debug_focus_effect:
 		_on_focus_changed(true)
 
+func set_colors():
+	_highlighted_colour = get_theme_color("highlighted_colour","Consts")
+	_normal_colour = get_theme_color("normal_colour","Consts")
 
 func _on_focus_changed(has_focus: bool) -> void:
 	if _style == null:
