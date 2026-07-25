@@ -378,9 +378,9 @@ func _make_rich_label() -> RichTextLabel:
 func _boxed(node: Control, l: int, t: int, r: int, b: int) -> MarginContainer:
 	var m := MarginContainer.new()
 	m.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	m.add_theme_constant_override("margin_left",   l)
-	m.add_theme_constant_override("margin_top",    t)
-	m.add_theme_constant_override("margin_right",  r)
+	m.add_theme_constant_override("margin_left", l)
+	m.add_theme_constant_override("margin_top", t)
+	m.add_theme_constant_override("margin_right", r)
 	m.add_theme_constant_override("margin_bottom", b)
 	m.add_child(node)
 	return m

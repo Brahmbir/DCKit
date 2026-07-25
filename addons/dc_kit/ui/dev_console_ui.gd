@@ -44,15 +44,11 @@ func _init() -> void:
 @onready var margin_container: MarginContainer = $MarginContainer
 
 func _rebuild_theme():
-	var pixels := int( font_scale * 22 )
+	var pixels := int( font_scale * 18 )
 	
 	var t_util := _DCKitNamespace.Theme_util.new()
-	
-	var cm_theme := t_util.get_const_n_margin_theme(pixels, normal_colour, highlighted_colour)
-	if cm_theme != null and margin_container != null:
-		margin_container.theme = cm_theme
-	
-	var font_theme := t_util.get_font_size_theme(pixels)
+		
+	var font_theme := t_util.get_dckit_theme(pixels, normal_colour, highlighted_colour)
 	if font_theme != null and is_node_ready():
 		theme = font_theme
 
@@ -67,8 +63,9 @@ func _ready() -> void:
 	_rebuild_theme()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
-	_input_comp.command_submitted.connect(_on_command_submitted)
-	_input_comp.abort_requested.connect(_on_abort_requested)
+	if _input_comp.has_signal("focus_changed") and _input_comp.has_signal("abort_requested"):
+		_input_comp.command_submitted.connect(_on_command_submitted)
+		_input_comp.abort_requested.connect(_on_abort_requested)
 	_error_container.item_pressed.connect(func(p:int,l:int):_input_comp.move_caret_to(p))
 	
 	_error_container.expanded = false

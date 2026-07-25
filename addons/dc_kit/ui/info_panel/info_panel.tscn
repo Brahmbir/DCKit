@@ -1,21 +1,9 @@
 [gd_scene format=3 uid="uid://kvucga56re18"]
 
-[ext_resource type="Shader" uid="uid://yrkr1fp74sdl" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur.gdshader" id="2_gbx52"]
+[ext_resource type="PackedScene" uid="uid://dr6g0iah47pcl" path="res://addons/dc_kit/ui/utills/frost_blur/panel_container.tscn" id="2_gbx52"]
 [ext_resource type="Script" uid="uid://djxy55kr6xgtr" path="res://addons/dc_kit/ui/info_panel/info_panel.gd" id="2_try4t"]
-[ext_resource type="Script" uid="uid://do0p117rpnomi" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur_rect.gd" id="3_4bocb"]
 [ext_resource type="Texture2D" uid="uid://34hh7ng6y1kh" path="res://addons/dc_kit/assets/images/arrow-up-left.svg" id="3_rooy4"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ch5o3"]
-shader = ExtResource("2_gbx52")
-shader_parameter/blur_radius = 80.0
-shader_parameter/blur_strength = 1.0
-shader_parameter/glass_color = Color(0.039215688, 0.05490196, 0.078431375, 0.8784314)
-shader_parameter/darken = 1.0
-shader_parameter/frost_grain = 0.045
-shader_parameter/frost_scale = 8.0
-shader_parameter/chroma_shift = 0.8
-shader_parameter/scanline_str = 0.0
-shader_parameter/edge_vignette = 0.22
+[ext_resource type="Script" uid="uid://cguts2hqdpac7" path="res://addons/dc_kit/ui/utills/rel_margin_container.gd" id="4_4bocb"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcaev"]
 
@@ -38,17 +26,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_type_variation = &"MutedBorderPanel"
 script = ExtResource("2_try4t")
 
-[node name="FrostBlurRect" type="ColorRect" parent="." unique_id=1986560961]
-show_behind_parent = true
-material = SubResource("ShaderMaterial_ch5o3")
+[node name="PanelContainer" parent="." unique_id=62350264 instance=ExtResource("2_gbx52")]
 layout_mode = 2
-script = ExtResource("3_4bocb")
-glass_color = Color(0.039215688, 0.05490196, 0.078431375, 0.8784314)
-darken = 1.0
-metadata/_custom_type_script = "uid://do0p117rpnomi"
 
 [node name="RootVBox" type="VBoxContainer" parent="." unique_id=378115158]
 layout_mode = 2
@@ -73,7 +54,15 @@ expand_icon = true
 layout_mode = 2
 mouse_filter = 2
 mouse_behavior_recursive = 1
-theme_type_variation = &"0_5em"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("4_4bocb")
+margin_scale_left = 50.0
+margin_scale_right = 50.0
+margin_scale_top = 50.0
+margin_scale_bottom = 50.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="RootVBox/Header/MarginContainer" unique_id=2096185842]
 layout_mode = 2
@@ -96,7 +85,15 @@ alignment_horizontal = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="RootVBox/Header/MarginContainer/HBoxContainer/AspectRatioContainer" unique_id=1564713283]
 layout_mode = 2
-theme_type_variation = &"0_125em"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("4_4bocb")
+margin_scale_left = 12.5
+margin_scale_right = 12.5
+margin_scale_top = 12.5
+margin_scale_bottom = 12.5
 
 [node name="TextureRect" type="TextureRect" parent="RootVBox/Header/MarginContainer/HBoxContainer/AspectRatioContainer/MarginContainer" unique_id=1868534911]
 layout_mode = 2
@@ -107,7 +104,6 @@ expand_mode = 1
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="RootVBox/ContentClip" unique_id=498100402]
-unique_name_in_owner = true
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -115,7 +111,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_type_variation = &"info_clip_margin"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("4_4bocb")
+margin_scale_left = 100.0
+margin_scale_right = 50.0
+margin_scale_top = 62.5
 
 [node name="ScrollContainer" type="ScrollContainer" parent="RootVBox/ContentClip/MarginContainer" unique_id=1023657382]
 layout_mode = 2
@@ -125,7 +128,9 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_type_variation = &"MarginContainer_0_625em"
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
+script = ExtResource("4_4bocb")
+margin_scale_right = 62.5

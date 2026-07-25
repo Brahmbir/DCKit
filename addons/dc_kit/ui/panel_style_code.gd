@@ -29,7 +29,7 @@ func _ready() -> void:
 	
 	add_theme_stylebox_override("panel",_style)
 	
-	if command_submiter:
+	if command_submiter and command_submiter.has_signal("focus_changed"):
 		command_submiter.focus_changed.connect(_on_focus_changed)
 	if debug_focus_effect:
 		_on_focus_changed(true)
