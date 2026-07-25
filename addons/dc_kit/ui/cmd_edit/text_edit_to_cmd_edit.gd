@@ -4,8 +4,19 @@ signal text_submitted(text: String)
 
 const CmdHighlighter = preload("./dc_syntax_highlighter.gd")
 
+@export var palette := CmdHighlighter.ColorScheme.Tokyo_Night:
+	set(new):
+		if palette == new:
+			return
+		palette = new
+		if syntax_highlighter != null:
+			syntax_highlighter.palette = palette
+			syntax_highlighter.update_cache()
+		
+
 func _init() -> void:
 	syntax_highlighter = CmdHighlighter.new()
+	syntax_highlighter.palette = palette
 
 func _gui_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed):

@@ -31,6 +31,7 @@ script = ExtResource("1_fdok2")
 style_override = SubResource("StyleBoxFlat_gbx52")
 
 [node name="FrostBlurRect" type="ColorRect" parent="." unique_id=1669545097]
+show_behind_parent = true
 material = SubResource("ShaderMaterial_ch5o3")
 layout_mode = 2
 script = ExtResource("3_xt8ov")

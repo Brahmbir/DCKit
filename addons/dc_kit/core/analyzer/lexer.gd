@@ -189,9 +189,13 @@ func _read_var_modifier(name: String, start: int, allow_whitespace := false) -> 
 	match _peek():
 		"!":
 			_eat()
+			if not allow_whitespace and not _at_end() and not _is_atom_delim(_peek()):
+				return _err("Expected space after '!'.", _pos)
 		"?":
 			_eat()
 			tok.is_silent = true
+			if not allow_whitespace and not _at_end() and not _is_atom_delim(_peek()):
+				return _err("Expected space after '?'.", _pos)
 		":":
 			_eat()
 			tok.is_silent = true
