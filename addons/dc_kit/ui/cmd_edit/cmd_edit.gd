@@ -107,6 +107,7 @@ func move_caret_to(col: int) -> void:
 	var line := text_edit.get_caret_line()
 	text_edit.set_caret_line(line)
 	text_edit.set_caret_column(col)
+	text_edit.grab_focus(true)
 
 func set_busy(is_busy: bool) -> void:
 	_set_state(State.BUSY if is_busy else State.IDLE)

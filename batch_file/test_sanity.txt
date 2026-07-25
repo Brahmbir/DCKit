@@ -156,6 +156,104 @@ echo "Abort did NOT execute."
 # End
 
 
+# ======================================================
+# Variable Syntax Sanity Test
+# Covers: $name (required), $name! (required, explicit),
+#         $name? (silent -> ""), $name:fallback (silent -> fallback)
+#         plus braced ${...} equivalents.
+# ======================================================
+echo "====================================="
+echo Variable Syntax Test
+echo "====================================="
+
+# Setup
+var.set player Brahmbir
+var.set score 100
+
+# -----------------------------------------------------
+echo
+echo "----- Required: bare $name -----"
+echo "Existing:" $player
+# Missing + required should FAIL. Uncomment to confirm error handling:
+# echo "Missing:" $does_not_exist
+
+echo
+echo "----- Required: $name! (explicit) -----"
+echo "Existing:" $player!
+# Missing + '!' should FAIL, same as bare form. Uncomment to confirm:
+# echo "Missing:" $does_not_exist!
+
+# -----------------------------------------------------
+echo
+echo "----- Silent: $name? -> empty on missing -----"
+echo "Existing:" $player?
+echo "Missing (expect empty):" $does_not_exist?
+
+# -----------------------------------------------------
+echo
+echo "----- Fallback: $name:value -----"
+echo "Existing (fallback unused):" $player:Fallback
+echo "Missing (uses literal fallback):" $does_not_exist:Fallback
+echo "Missing (uses quoted fallback):" $does_not_exist:"Default Name"
+
+echo
+echo "----- Fallback chains (recursive) -----"
+echo "Missing -> missing -> literal:" $does_not_exist:$also_missing:"Final Default"
+echo "Missing -> existing var:" $does_not_exist:$player
+
+echo
+echo "----- Fallback as nested command -----"
+echo "Missing -> nested cmd result:" $does_not_exist:(cmp.eq apple apple)
+echo "Missing -> nested var.get:" $does_not_exist:(var.get score 0)
+
+# -----------------------------------------------------
+echo
+echo "----- Braced form: ${name} -----"
+echo "Existing:" ${player}
+echo "Existing (spaced):" ${ player }
+
+echo
+echo "----- Braced: ${name!} -----"
+echo "Existing:" ${player!}
+
+echo
+echo "----- Braced: ${name?} -----"
+echo "Existing:" ${player?}
+echo "Missing (expect empty):" ${does_not_exist?}
+echo "Missing (spaced, expect empty):" ${ does_not_exist ? }
+
+echo
+echo "----- Braced: ${name:fallback} -----"
+echo "Existing (unused fallback):" ${player:Fallback}
+echo "Missing (literal fallback):" ${does_not_exist:Fallback}
+echo "Missing (spaced fallback):" ${ does_not_exist : "Default Name" }
+echo "Missing (nested cmd fallback):" ${does_not_exist:(cmp.eq apple apple)}
+
+# -----------------------------------------------------
+echo
+echo "----- try + missing required variable -----"
+try (echo $does_not_exist) (echo "Correctly caught missing required var")
+try (echo ${also_missing!}) (echo "Correctly caught missing required var (braced)")
+
+# -----------------------------------------------------
+echo
+echo "----- Malformed syntax (expect lex errors) -----"
+# Uncomment individually to check error messages:
+# echo $does_not_exist
+# echo $does_not_exist!
+# echo ${does_not_exist}
+# echo ${does_not_exist!}
+# echo ${name?!}
+# echo ${  ggg ? (var.get test "")}
+# echo ${name:fallback
+# echo $name?:fallback
+
+echo
+echo "====================================="
+echo Variable Syntax Test Complete
+echo "====================================="
+
+
 echo "====================================="
 echo Constructor Tests
 echo "====================================="

@@ -84,6 +84,10 @@ bg_color = Color(0, 0, 0, 0)
 border_width_left = 10
 border_color = Color(1, 1, 1, 0)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_juh5s"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qlix7"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3euy8"]
 content_margin_left = 0.0
 content_margin_top = 0.0
@@ -101,7 +105,7 @@ corner_radius_bottom_left = 8
 corner_detail = 20
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_de3ri"]
-bg_color = Color(0.09239706, 0.09239707, 0.092397, 1)
+bg_color = Color(0.09411765, 0.09411765, 0.09411765, 0)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -120,7 +124,7 @@ _source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"><c
 _source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"><path fill=\"#b2b2b2\" fill-opacity=\".25\" d=\"M6 0v8h2V0zM1 0a1 1 0 0 0-.693 1.705L2.6 3.998.307 6.291A1 1 0 0 0 1.72 7.705l3-3a1 1 0 0 0 0-1.414l-3-3A1 1 0 0 0 1 0z\"/></svg>
 "
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qlix7"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ja0ht"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3312h"]
 
@@ -199,6 +203,10 @@ HScrollBar/styles/grabber = SubResource("StyleBoxFlat_qlix7")
 HScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_3312h")
 HScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_cre8g")
 HScrollBar/styles/scroll = SubResource("StyleBoxFlat_fm6od")
+ItemList/constants/outline_size = 2
+ItemList/constants/v_separation = 8
+ItemList/styles/focus = SubResource("StyleBoxEmpty_juh5s")
+ItemList/styles/panel = SubResource("StyleBoxEmpty_qlix7")
 Label/font_sizes/font_size = 26
 MarginContainer/constants/margin_bottom = 16
 MarginContainer/constants/margin_left = 16
@@ -236,9 +244,10 @@ TextEdit/constants/caret_width = 2
 TextEdit/font_sizes/font_size = 30
 TextEdit/icons/space = SubResource("DPITexture_qlix7")
 TextEdit/icons/tab = SubResource("DPITexture_3312h")
-TextEdit/styles/focus = SubResource("StyleBoxEmpty_qlix7")
+TextEdit/styles/focus = SubResource("StyleBoxEmpty_ja0ht")
 TextEdit/styles/normal = SubResource("StyleBoxEmpty_3312h")
 TextEdit/styles/read_only = SubResource("StyleBoxEmpty_cre8g")
+VScrollBar/constants/padding_left = 4
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_ja0ht")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_juh5s")
 VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_kkt4q")
@@ -430,13 +439,8 @@ shader_parameter/edge_vignette = 0.22
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l7cum"]
 bg_color = Color(1, 1, 1, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.5058824)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0nc27"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hk3qb"]
 content_margin_left = 1.0
 content_margin_top = 1.0
 content_margin_right = 1.0
@@ -478,6 +482,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 0
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
@@ -504,6 +509,7 @@ metadata/_custom_type_script = "uid://do0p117rpnomi"
 [node name="Content" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=687423998]
 layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 0
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
@@ -512,6 +518,7 @@ script = ExtResource("7_l7cum")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/Content" unique_id=1515166436]
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/separation = 0
 
 [node name="Log_Info_Area" type="MarginContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer" unique_id=1136876718]
@@ -590,6 +597,7 @@ layout_mode = 2
 [node name="Error_Cmd_Area" type="MarginContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer" unique_id=662507096]
 layout_mode = 2
 size_flags_vertical = 8
+mouse_filter = 0
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 8
@@ -611,6 +619,7 @@ source_panel = NodePath("..")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer" unique_id=2093271139]
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/separation = 0
 
 [node name="ErrorContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer/VBoxContainer" unique_id=25897675 instance=ExtResource("10_es6bh")]
@@ -626,7 +635,7 @@ expanded = false
 
 [node name="CMDContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer/VBoxContainer" unique_id=1581047597]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_0nc27")
+theme_override_styles/panel = SubResource("StyleBoxFlat_hk3qb")
 script = ExtResource("12_es6bh")
 animation_duration = 0.1
 debug_focus_effect = true

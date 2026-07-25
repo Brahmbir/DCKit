@@ -4,7 +4,7 @@ signal pressed(pos: int, len: int)
 
 @onready var title: Label = %kind
 @onready var location: Label = %location
-@onready var message_lbl: Label = %message
+@onready var message_lbl: RichTextLabel = %message
 @onready var button: Button = $Button
 
 var _pos := -1
@@ -36,7 +36,7 @@ func _on_btn_pressed() -> void:
 	pressed.emit(_pos, _len)
 
 func _apply_data(data: Dictionary) -> void:
-	message_lbl.text = str(data.get("message", ""))
+	message_lbl.text = " " + str(data.get("message", ""))
 
 	_pos = int(data.get("position", -1))
 	_len = int(data.get("length", -1))
