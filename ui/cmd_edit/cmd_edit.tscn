@@ -92,6 +92,7 @@ tab_input_mode = false
 caret_blink = true
 caret_multiple = false
 script = ExtResource("2_yg3ig")
+palette = 1
 
 [node name="PopupPanel" type="PanelContainer" parent="HBoxContainer/Control" unique_id=1914536021]
 unique_name_in_owner = true

@@ -5,6 +5,9 @@
 [ext_resource type="Texture2D" uid="uid://34hh7ng6y1kh" path="res://addons/dc_kit/assets/images/arrow-up-left.svg" id="3_rooy4"]
 [ext_resource type="Script" uid="uid://cguts2hqdpac7" path="res://addons/dc_kit/ui/utills/rel_margin_container.gd" id="4_4bocb"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gbx52"]
+bg_color = Color(1, 1, 1, 1)
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcaev"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0t350"]
@@ -26,10 +29,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_type_variation = &"BasePanel"
 script = ExtResource("2_try4t")
 
-[node name="PanelContainer" parent="." unique_id=62350264 instance=ExtResource("2_gbx52")]
+[node name="PanelContainer" parent="." unique_id=62350264 node_paths=PackedStringArray("source_panel") instance=ExtResource("2_gbx52")]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gbx52")
+source_panel = NodePath("..")
 
 [node name="RootVBox" type="VBoxContainer" parent="." unique_id=378115158]
 layout_mode = 2
