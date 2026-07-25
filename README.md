@@ -133,10 +133,6 @@ DCKit.delete_var("difficulty")
 DCKit.get_var_keys()            # Array of all variable names
 ```
 
-### Disabled builds
-
-If DCKit is disabled (release build, `enabled_in_release` project setting off), `register()`, `register_def()`, and `run()` all become safe no-ops — `run()` returns a failed `DCResult` and `register()`/`register_def()` return `false`. No need to guard call sites with `OS.is_debug_build()` yourself.
-
 ## Syntax
 
 A command is a name followed by zero or more arguments:
@@ -147,21 +143,28 @@ echo "done" ;
 
 **Arguments** can be any of:
 
-| Form                   | Example                                                                                                    | Meaning                                                        |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Bare word / number     | `12`, `foo`                                                                                                | Unquoted literal                                               |
-| Quoted string          | `"hello world"`, `"it's fine"`, `` `raw` ``                                                                | Literal with escapes (`\n`, `\t`, `\"`, `\\`, ...)             |
-| Variable               | `$speed`                                                                                                   | Fails if `speed` is undefined                                  |
-| Silent variable        | `$?speed`                                                                                                  | Resolves to `""` if undefined                                  |
-| Variable with fallback | `$?speed:5`, `$?pos:(player.get_position)`                                                                 | Falls back to a literal, another variable, or a nested command |
-| Braced variable        | `${speed}`, `${?speed:5`, `${?speed:5}`, `${?name:$other}`, `${?pos: $? might_pos:(player.get_position)}`, | Same as above, but tolerant of surrounding whitespace          |
-| Constructor            | `Vector3(1, 2, 3)`, `Color(1, 0, 0, 1)`                                                                    | Built-in or custom typed value                                 |
-| Nested command         | `(var.get score 0)`                                                                                        | Runs a sub-command and uses its result as the argument         |
+| Form                   | Example                                                                                                  | Meaning                                                        |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Bare word / number     | `12`, `foo`                                                                                              | Unquoted literal                                               |
+| Quoted string          | `"hello world"`, `"it's fine"`, `` `raw` ``                                                              | Literal with escapes (`\n`, `\t`, `\"`, `\\`, ...)             |
+| Variable               | `$speed`                                                                                                 | Fails if `speed` is undefined                                  |
+| Variable (explicit)    | `$speed!`                                                                                                | Same as above — fails if `speed` is undefined                  |
+| Silent variable        | `$speed?`                                                                                                | Resolves to `""` if undefined                                  |
+| Variable with fallback | `$speed:5`, `$pos:(player.get_position)`                                                                 | Falls back to a literal, another variable, or a nested command |
+| Braced variable        | `${speed}`, `${speed!}`, `${speed?}`, `${speed:5}`, `${name:$other}`, `${ pos : (player.get_position) }` | Same as above, but tolerant of surrounding whitespace          |
+| Constructor            | `Vector3(1, 2, 3)`, `Color(1, 0, 0, 1)`                                                                  | Built-in or custom typed value                                 |
+| Nested command         | `(var.get score 0)`                                                                                      | Runs a sub-command and uses its result as the argument         |
+
+The modifier always trails the variable name — never precedes it — and only one may be used at a time:
+
+- **(none)** or **`!`** — required; the command fails if the variable is undefined.
+- **`?`** — silent; resolves to `""` if undefined, no error.
+- **`:fallback`** — resolves to `fallback` if undefined. `fallback` can itself be a literal, another variable (`$a:$b`), or a nested command (`$a:(cmd)`), and fallback chains resolve recursively (`$a:$b:"final"`).
 
 **Constructors** can nest arbitrarily and take variables or nested commands as parts:
 
 ```
-player.warp Vector3($x, 0, $?z:8)
+player.warp Vector3($x, 0, $z:8)
 ```
 
 **Comments** — everything after `#` on a line is ignored:
@@ -170,7 +173,7 @@ player.warp Vector3($x, 0, $?z:8)
 player.warp 0 0 0   # reset to origin
 ```
 
-**Note** : command chains (`;`) are **not** allowed inside a fallback's nested command — `$?pos:(cmd1; cmd2)` will raise a lex error.
+**Note**: command chains (`;`) are **not** allowed inside a fallback's nested command — `$pos:(cmd1; cmd2)` will raise a lex error.
 
 ## Additional Information
 
