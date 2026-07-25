@@ -56,7 +56,9 @@ func populate() -> void:
 			_DCKitNamespace.AutoComplete.CompletionItem.Kind.TYPE: item_list.set_item_icon(idx, icon_type)
 			_DCKitNamespace.AutoComplete.CompletionItem.Kind.VALUE, _: item_list.set_item_icon(idx, icon_text)
 		if not item.detail.is_empty():
-			item_list.set_item_tooltip(idx, item.detail)
+			var regex = RegEx.new()
+			regex.compile("\\[.+?\\]")
+			item_list.set_item_tooltip(idx, regex.sub(item.detail, "", true))
 
 	var h := expected_height()
 	custom_minimum_size.y = h
