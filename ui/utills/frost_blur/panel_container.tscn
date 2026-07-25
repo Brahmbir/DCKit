@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://dr6g0iah47pcl"]
+
+[ext_resource type="Script" uid="uid://dstv6nmg3lvow" path="res://addons/dc_kit/ui/info_panel/panel_container_updater.gd" id="1_fdok2"]
+[ext_resource type="Shader" uid="uid://yrkr1fp74sdl" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur.gdshader" id="2_0eby7"]
+[ext_resource type="Script" uid="uid://do0p117rpnomi" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur_rect.gd" id="3_xt8ov"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gbx52"]
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ch5o3"]
+shader = ExtResource("2_0eby7")
+shader_parameter/blur_radius = 80.0
+shader_parameter/blur_strength = 1.0
+shader_parameter/glass_color = Color(0.039215688, 0.05490196, 0.078431375, 0.8784314)
+shader_parameter/darken = 1.0
+shader_parameter/frost_grain = 0.045
+shader_parameter/frost_scale = 8.0
+shader_parameter/chroma_shift = 0.8
+shader_parameter/scanline_str = 0.0
+shader_parameter/edge_vignette = 0.22
+
+[node name="PanelContainer" type="PanelContainer" unique_id=62350264]
+show_behind_parent = true
+clip_children = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_fdok2")
+style_override = SubResource("StyleBoxFlat_gbx52")
+
+[node name="FrostBlurRect" type="ColorRect" parent="." unique_id=1669545097]
+material = SubResource("ShaderMaterial_ch5o3")
+layout_mode = 2
+script = ExtResource("3_xt8ov")
+glass_color = Color(0.039215688, 0.05490196, 0.078431375, 0.8784314)
+darken = 1.0
+metadata/_custom_type_script = "uid://do0p117rpnomi"

@@ -16,7 +16,7 @@ signal selection_changed(index: int)
 
 const MAX_VISIBLE := 8
 
-@onready var item_list: ItemList = $ItemList
+@onready var item_list: ItemList = %ItemList
 
 var _selected_index := 0
 var _start  : int   = 0

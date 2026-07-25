@@ -2,24 +2,15 @@
 
 [ext_resource type="Script" uid="uid://d3kv7uewwcajn" path="res://addons/dc_kit/ui/cmd_edit/cmd_edit.gd" id="1_6qxr3"]
 [ext_resource type="Script" uid="uid://bs453qxtiwag4" path="res://addons/dc_kit/ui/utills/masked_icon_panel/masked_icon_panel.gd" id="2_3grv6"]
+[ext_resource type="Script" uid="uid://cguts2hqdpac7" path="res://addons/dc_kit/ui/utills/rel_margin_container.gd" id="2_edw5b"]
 [ext_resource type="Script" uid="uid://fgjyb6jd1qa4" path="res://addons/dc_kit/ui/cmd_edit/text_edit_to_cmd_edit.gd" id="2_yg3ig"]
 [ext_resource type="Texture2D" uid="uid://6k2ri4r72f8i" path="res://addons/dc_kit/assets/images/play.svg" id="3_2ee44"]
 [ext_resource type="Script" uid="uid://ca1npnbx5o3eh" path="res://addons/dc_kit/ui/cmd_edit/completion_popup.gd" id="3_qvr61"]
-[ext_resource type="Shader" uid="uid://yrkr1fp74sdl" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur.gdshader" id="4_edw5b"]
 [ext_resource type="Texture2D" uid="uid://b5lj7546kavby" path="res://addons/dc_kit/assets/images/octagon-minus.svg" id="4_r51ah"]
-[ext_resource type="Script" uid="uid://do0p117rpnomi" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur_rect.gd" id="5_os5r6"]
+[ext_resource type="PackedScene" uid="uid://dr6g0iah47pcl" path="res://addons/dc_kit/ui/utills/frost_blur/panel_container.tscn" id="5_3jg7j"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_3jg7j"]
-shader = ExtResource("4_edw5b")
-shader_parameter/blur_radius = 80.0
-shader_parameter/blur_strength = 1.0
-shader_parameter/glass_color = Color(0.039, 0.055, 0.078, 0.65)
-shader_parameter/darken = 0.9
-shader_parameter/frost_grain = 0.045
-shader_parameter/frost_scale = 8.0
-shader_parameter/chroma_shift = 0.8
-shader_parameter/scanline_str = 0.0
-shader_parameter/edge_vignette = 0.22
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cbjtu"]
+bg_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1y760"]
 
@@ -33,7 +24,7 @@ shader_parameter/edge_vignette = 0.22
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ieho6"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cbjtu"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_edw5b"]
 content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
@@ -59,8 +50,12 @@ script = ExtResource("1_6qxr3")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=80419476]
 layout_mode = 2
-theme_type_variation = &"0_25em"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("2_edw5b")
+margin_scale_right = 25.0
 
 [node name="Label" type="Label" parent="MarginContainer" unique_id=1605144196]
 unique_name_in_owner = true
@@ -107,23 +102,36 @@ anchor_bottom = 1.0
 offset_top = -62.0
 offset_right = 203.0
 grow_vertical = 0
-theme_type_variation = &"BasePanel"
+theme_type_variation = &"PopupPanelContainer"
 script = ExtResource("3_qvr61")
 
-[node name="FrostBlurRect" type="ColorRect" parent="HBoxContainer/Control/PopupPanel" unique_id=773522223]
-show_behind_parent = true
-material = SubResource("ShaderMaterial_3jg7j")
+[node name="PanelContainer" parent="HBoxContainer/Control/PopupPanel" unique_id=62350264 node_paths=PackedStringArray("source_panel") instance=ExtResource("5_3jg7j")]
 layout_mode = 2
-script = ExtResource("5_os5r6")
-darken = 0.9
-metadata/_custom_type_script = "uid://do0p117rpnomi"
+theme_override_styles/panel = SubResource("StyleBoxFlat_cbjtu")
+source_panel = NodePath("..")
 
-[node name="ItemList" type="ItemList" parent="HBoxContainer/Control/PopupPanel" unique_id=1683113759]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/Control/PopupPanel" unique_id=122631195]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("2_edw5b")
+margin_scale_left = 25.0
+margin_scale_right = 25.0
+margin_scale_top = 25.0
+margin_scale_bottom = 25.0
+
+[node name="ItemList" type="ItemList" parent="HBoxContainer/Control/PopupPanel/MarginContainer" unique_id=1683113759]
+unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 allow_search = false
 auto_width = true
+item_count = 2
 fixed_icon_size = Vector2i(20, 20)
+item_0/text = "test"
+item_1/text = "tesyt"
 
 [node name="AspectRatioContainer" type="AspectRatioContainer" parent="HBoxContainer" unique_id=32606962]
 custom_minimum_size = Vector2(40, 0)
@@ -152,7 +160,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 mouse_behavior_recursive = 1
-theme_override_styles/panel = SubResource("StyleBoxFlat_cbjtu")
+theme_override_styles/panel = SubResource("StyleBoxFlat_edw5b")
 script = ExtResource("2_3grv6")
 texture_off = ExtResource("3_2ee44")
 texture_on = ExtResource("4_r51ah")

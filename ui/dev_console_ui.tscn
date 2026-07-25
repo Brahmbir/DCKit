@@ -9,8 +9,9 @@
 [ext_resource type="FontFile" uid="uid://b7fd0pf4fn00b" path="res://addons/dc_kit/assets/fonts/IBMPlexSans-Italic.ttf" id="5_sntsg"]
 [ext_resource type="PackedScene" uid="uid://et2y2rdht6kl" path="res://addons/dc_kit/ui/log_view/log_view_controller.tscn" id="6_22agt"]
 [ext_resource type="PackedScene" uid="uid://kvucga56re18" path="res://addons/dc_kit/ui/info_panel/info_panel.tscn" id="7_22agt"]
+[ext_resource type="Script" uid="uid://cguts2hqdpac7" path="res://addons/dc_kit/ui/utills/rel_margin_container.gd" id="7_l7cum"]
 [ext_resource type="PackedScene" uid="uid://h8j5o73fp15j" path="res://addons/dc_kit/ui/error_container/error_container.tscn" id="10_es6bh"]
-[ext_resource type="Shader" uid="uid://yrkr1fp74sdl" path="res://addons/dc_kit/ui/utills/frost_blur/frost_blur.gdshader" id="12_begow"]
+[ext_resource type="PackedScene" uid="uid://dr6g0iah47pcl" path="res://addons/dc_kit/ui/utills/frost_blur/panel_container.tscn" id="11_l7cum"]
 [ext_resource type="Script" uid="uid://df4aajcnft6ag" path="res://addons/dc_kit/ui/panel_style_code.gd" id="12_es6bh"]
 [ext_resource type="PackedScene" uid="uid://cbkm4rh68ysk8" path="res://addons/dc_kit/ui/cmd_edit/cmd_edit.tscn" id="13_l7cum"]
 
@@ -178,9 +179,9 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 corner_detail = 2
 
-[sub_resource type="Theme" id="Theme_o83vh"]
+[sub_resource type="Theme" id="Theme_l7cum"]
 default_font = ExtResource("2_es6bh")
-default_font_size = 33
+default_font_size = 26
 BasePanel/base_type = &"PanelContainer"
 BasePanel/styles/panel = SubResource("StyleBoxFlat_fcwua")
 Button/constants/h_separation = 12
@@ -190,23 +191,29 @@ Button/styles/focus = SubResource("StyleBoxFlat_crk3g")
 Button/styles/hover = SubResource("StyleBoxFlat_crk3g")
 Button/styles/normal = SubResource("StyleBoxFlat_crk3g")
 Button/styles/pressed = SubResource("StyleBoxFlat_crk3g")
+Consts/colors/highlighted_colour = Color(0.23137255, 0.50980395, 0.9647059, 1)
+Consts/colors/normal_colour = Color(0.9411765, 0.972549, 1, 1)
 HScrollBar/constants/padding_top = 4
-HScrollBar/font_sizes/padding_top = 3
+HScrollBar/font_sizes/padding_top = 2
 HScrollBar/styles/grabber = SubResource("StyleBoxFlat_qlix7")
 HScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_3312h")
 HScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_cre8g")
 HScrollBar/styles/scroll = SubResource("StyleBoxFlat_fm6od")
-Label/font_sizes/font_size = 33
+Label/font_sizes/font_size = 26
+MarginContainer/constants/margin_bottom = 16
+MarginContainer/constants/margin_left = 16
+MarginContainer/constants/margin_right = 16
+MarginContainer/constants/margin_top = 16
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_3euy8")
 PopupPanelContainer/base_type = &"PanelContainer"
 PopupPanelContainer/styles/panel = SubResource("StyleBoxFlat_de3ri")
 RichTextLabel/colors/selection_color = Color(0.21568628, 0.22745098, 0.2901961, 1)
 RichTextLabel/constants/paragraph_separation = 10
-RichTextLabel/font_sizes/bold_font_size = 33
-RichTextLabel/font_sizes/bold_italics_font_size = 33
-RichTextLabel/font_sizes/italics_font_size = 33
-RichTextLabel/font_sizes/mono_font_size = 33
-RichTextLabel/font_sizes/normal_font_size = 33
+RichTextLabel/font_sizes/bold_font_size = 26
+RichTextLabel/font_sizes/bold_italics_font_size = 26
+RichTextLabel/font_sizes/italics_font_size = 26
+RichTextLabel/font_sizes/mono_font_size = 26
+RichTextLabel/font_sizes/normal_font_size = 26
 RichTextLabel/fonts/bold_font = ExtResource("3_begow")
 RichTextLabel/fonts/bold_italics_font = ExtResource("4_secrp")
 RichTextLabel/fonts/italics_font = ExtResource("5_sntsg")
@@ -226,7 +233,7 @@ TextEdit/colors/search_result_color = Color(0.3, 0.3, 0.3, 1)
 TextEdit/colors/selection_color = Color(0.21721247, 0.22716843, 0.29022282, 1)
 TextEdit/colors/word_highlighted_color = Color(0.5, 0.5, 0.5, 0.25)
 TextEdit/constants/caret_width = 2
-TextEdit/font_sizes/font_size = 42
+TextEdit/font_sizes/font_size = 30
 TextEdit/icons/space = SubResource("DPITexture_qlix7")
 TextEdit/icons/tab = SubResource("DPITexture_3312h")
 TextEdit/styles/focus = SubResource("StyleBoxEmpty_qlix7")
@@ -239,7 +246,7 @@ VScrollBar/styles/scroll = SubResource("StyleBoxFlat_7e8xj")
 VSeparator/constants/separation = 24
 VSeparator/styles/separator = SubResource("StyleBoxFlat_v1qa0")
 cmd_label/base_type = &"Label"
-cmd_label/font_sizes/font_size = 42
+cmd_label/font_sizes/font_size = 31
 
 [sub_resource type="InputEventKey" id="InputEventKey_l7cum"]
 command_or_control_autoremap = true
@@ -249,84 +256,21 @@ keycode = 32
 [sub_resource type="Shortcut" id="Shortcut_0nc27"]
 events = [SubResource("InputEventKey_l7cum")]
 
-[sub_resource type="Theme" id="Theme_l7cum"]
-default_font = ExtResource("2_es6bh")
-default_font_size = 0
-0_125em/base_type = &"MarginContainer"
-0_125em/constants/margin_bottom = 4
-0_125em/constants/margin_left = 4
-0_125em/constants/margin_right = 4
-0_125em/constants/margin_top = 4
-0_25em/base_type = &"MarginContainer"
-0_25em/constants/margin_bottom = 8
-0_25em/constants/margin_left = 8
-0_25em/constants/margin_right = 8
-0_25em/constants/margin_top = 8
-0_5em/base_type = &"MarginContainer"
-0_5em/constants/margin_bottom = 17
-0_5em/constants/margin_left = 17
-0_5em/constants/margin_right = 17
-0_5em/constants/margin_top = 17
-0_625em/base_type = &"MarginContainer"
-0_625em/constants/margin_bottom = 21
-0_625em/constants/margin_left = 21
-0_625em/constants/margin_right = 21
-0_625em/constants/margin_top = 21
-0_75em/base_type = &"MarginContainer"
-0_75em/constants/margin_bottom = 26
-0_75em/constants/margin_left = 26
-0_75em/constants/margin_right = 26
-0_75em/constants/margin_top = 26
-1_25em/base_type = &"MarginContainer"
-1_25em/constants/margin_bottom = 43
-1_25em/constants/margin_left = 43
-1_25em/constants/margin_right = 43
-1_25em/constants/margin_top = 43
-1em/base_type = &"MarginContainer"
-1em/constants/margin_bottom = 35
-1em/constants/margin_left = 35
-1em/constants/margin_right = 35
-1em/constants/margin_top = 35
-Consts/colors/highlighted_colour = Color(0.23137255, 0.50980395, 0.9647059, 1)
-Consts/colors/normal_colour = Color(0.9411765, 0.972549, 1, 1)
-MarginContainer/constants/margin_bottom = 0
-MarginContainer/constants/margin_left = 0
-MarginContainer/constants/margin_right = 0
-MarginContainer/constants/margin_top = 0
-error_cmd_area/base_type = &"MarginContainer"
-error_cmd_area/constants/margin_bottom = 43
-error_cmd_area/constants/margin_left = 43
-error_cmd_area/constants/margin_right = 43
-error_cmd_area/constants/margin_top = 17
-error_root_margin/base_type = &"MarginContainer"
-error_root_margin/constants/margin_bottom = 43
-error_root_margin/constants/margin_left = 26
-error_root_margin/constants/margin_right = 17
-error_root_margin/constants/margin_top = 35
-info_clip_margin/base_type = &"MarginContainer"
-info_clip_margin/constants/margin_bottom = 21
-info_clip_margin/constants/margin_left = 35
-info_clip_margin/constants/margin_right = 17
-info_clip_margin/constants/margin_top = 0
-log_info_area/base_type = &"MarginContainer"
-log_info_area/constants/margin_bottom = 0
-log_info_area/constants/margin_left = 43
-log_info_area/constants/margin_right = 21
-log_info_area/constants/margin_top = 0
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hk3qb"]
 
 [sub_resource type="Gradient" id="Gradient_begow"]
 colors = PackedColorArray(0, 0, 0, 0, 1, 1, 1, 1)
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_secrp"]
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_5g3it"]
 gradient = SubResource("Gradient_begow")
 use_hdr = true
 fill_from = Vector2(0, 0.01)
 fill_to = Vector2(0, 0.1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_sntsg"]
-texture = SubResource("GradientTexture2D_secrp")
+texture = SubResource("GradientTexture2D_5g3it")
 
-[sub_resource type="Shader" id="Shader_sc1hg"]
+[sub_resource type="Shader" id="Shader_dlj55"]
 code = "// ============================================================
 //  blur_material.gdshader  –  Optimised Frost-Glass / Terminal
 //  Technique stack (single pass, no extra viewports needed):
@@ -473,7 +417,7 @@ void fragment() {
 }"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sntsg"]
-shader = SubResource("Shader_sc1hg")
+shader = SubResource("Shader_dlj55")
 shader_parameter/blur_radius = 78.0
 shader_parameter/blur_strength = 1.0
 shader_parameter/glass_color = Color(0.039, 0.055, 0.078, 0.65)
@@ -484,17 +428,13 @@ shader_parameter/chroma_shift = 0.8
 shader_parameter/scanline_str = 0.0
 shader_parameter/edge_vignette = 0.22
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_secrp"]
-shader = ExtResource("12_begow")
-shader_parameter/blur_radius = 80.0
-shader_parameter/blur_strength = 1.0
-shader_parameter/glass_color = Color(0.039, 0.055, 0.078, 0.65)
-shader_parameter/darken = 0.75
-shader_parameter/frost_grain = 0.045
-shader_parameter/frost_scale = 8.0
-shader_parameter/chroma_shift = 0.8
-shader_parameter/scanline_str = 0.0
-shader_parameter/edge_vignette = 0.22
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l7cum"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.5058824)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0nc27"]
 content_margin_left = 1.0
@@ -525,7 +465,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = SubResource("Theme_o83vh")
+theme = SubResource("Theme_l7cum")
 script = ExtResource("1_22agt")
 sct_toggle_info_panel = SubResource("Shortcut_0nc27")
 font_scale = 1.6
@@ -538,14 +478,22 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = SubResource("Theme_l7cum")
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("7_l7cum")
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer" unique_id=884248081]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_hk3qb")
+
+[node name="BGContainer" type="PanelContainer" parent="MarginContainer/PanelContainer" unique_id=2079178628]
 clip_children = 1
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_sntsg")
 
-[node name="ColorRect" type="ColorRect" parent="MarginContainer/PanelContainer" unique_id=187613475]
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/PanelContainer/BGContainer" unique_id=187613475]
 material = SubResource("ShaderMaterial_sntsg")
 layout_mode = 2
 script = ExtResource("3_22agt")
@@ -556,6 +504,11 @@ metadata/_custom_type_script = "uid://do0p117rpnomi"
 [node name="Content" type="MarginContainer" parent="MarginContainer/PanelContainer" unique_id=687423998]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("7_l7cum")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/Content" unique_id=1515166436]
 layout_mode = 2
@@ -565,9 +518,20 @@ theme_override_constants/separation = 0
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 20.0
-theme_type_variation = &"log_info_area"
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 0
+script = ExtResource("7_l7cum")
+margin_scale_left = 125.0
+margin_scale_right = 65.0
 
-[node name="log_viewer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Log_Info_Area" unique_id=1654494674 instance=ExtResource("6_22agt")]
+[node name="BGContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Log_Info_Area" unique_id=1630104190]
+clip_children = 1
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_sntsg")
+
+[node name="log_viewer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Log_Info_Area/BGContainer" unique_id=1654494674 instance=ExtResource("6_22agt")]
 unique_name_in_owner = true
 layout_mode = 2
 
@@ -606,10 +570,12 @@ layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 3.0
 mouse_filter = 2
-theme_type_variation = &"0_625em"
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 0
+script = ExtResource("7_l7cum")
+margin_scale_right = 65.0
 
 [node name="InfoLayoutArea" type="VBoxContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Log_Info_Area/Control/HBoxContainer/VBoxContainer/MarginContainer" unique_id=630061726]
 clip_contents = true
@@ -624,20 +590,24 @@ layout_mode = 2
 [node name="Error_Cmd_Area" type="MarginContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer" unique_id=662507096]
 layout_mode = 2
 size_flags_vertical = 8
-theme_type_variation = &"error_cmd_area"
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 20
+script = ExtResource("7_l7cum")
+margin_scale_left = 75.0
+margin_scale_right = 50.0
+margin_scale_top = 100.0
+margin_scale_bottom = 125.0
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area" unique_id=1765322943]
 layout_mode = 2
 theme_type_variation = &"BasePanel"
 
-[node name="FrostBlurRect" type="ColorRect" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer" unique_id=1934536445]
-show_behind_parent = true
-material = SubResource("ShaderMaterial_secrp")
-clip_contents = true
+[node name="PanelContainer2" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer" unique_id=62350264 node_paths=PackedStringArray("source_panel") instance=ExtResource("11_l7cum")]
 layout_mode = 2
-script = ExtResource("3_22agt")
-darken = 0.75
-metadata/_custom_type_script = "uid://do0p117rpnomi"
+theme_override_styles/panel = SubResource("StyleBoxFlat_l7cum")
+source_panel = NodePath("..")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer" unique_id=2093271139]
 layout_mode = 2
@@ -648,6 +618,10 @@ unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 expanded = false
 
 [node name="CMDContainer" type="PanelContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer/VBoxContainer" unique_id=1581047597]
@@ -659,7 +633,15 @@ debug_focus_effect = true
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer/VBoxContainer/CMDContainer" unique_id=68701197]
 layout_mode = 2
-theme_type_variation = &"0_75em"
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+script = ExtResource("7_l7cum")
+margin_scale_left = 75.0
+margin_scale_right = 75.0
+margin_scale_top = 75.0
+margin_scale_bottom = 75.0
 
 [node name="CmdEdit" parent="MarginContainer/PanelContainer/Content/VBoxContainer/Error_Cmd_Area/PanelContainer/VBoxContainer/CMDContainer/MarginContainer" unique_id=1590452007 instance=ExtResource("13_l7cum")]
 unique_name_in_owner = true
