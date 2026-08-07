@@ -22,7 +22,7 @@ func _ready() -> void:
 
 				if not regex.search(arg):
 					return DCResult.fail(
-						"Invalid version. Expected format: MAJOR.MINOR.PATCH (e.g. 0.0.1)."
+						"Invalid version. Expected format: MAJOR.MINOR.PATCH[-alpha|-beta|-rc] (e.g. 0.0.1, 0.0.1-alpha)."
 					)
 				
 				if compare_versions(arg, plugin_version) > 0:
@@ -54,7 +54,7 @@ func _ready() -> void:
 		"Exports a Godot addon as a ZIP archive.",
 		[
 			DCDefinition.Param.new("version")
-				.describe("Addon version (e.g. 0.0.1).").suggest([get_plugin_version()])
+				.describe("Addon version (e.g. 0.0.1 or 0.9.0-<alpha/beta/rc>]).").suggest([get_plugin_version()])
 		],
 		true
 	)
@@ -221,8 +221,8 @@ static func compare_versions(a: String, b: String) -> int:
 		"alpha": 0,
 	}
 
-	var ar : String = order.get(pa.suffix, -1)
-	var br : String = order.get(pb.suffix, -1)
+	var ar : int = order.get(pa.suffix, -1)
+	var br : int = order.get(pb.suffix, -1)
 
 	if ar < br:
 		return -1
