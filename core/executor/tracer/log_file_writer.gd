@@ -1,6 +1,5 @@
-extends RefCounted
-
 class_name LogFileWriter
+extends RefCounted
 
 var enabled: bool = true
 
@@ -47,8 +46,8 @@ func open_session() -> void:
 		DirAccess.remove_absolute(_log_dir + files.pop_front())
 
 	var datetime := Time.get_datetime_string_from_system(false, true) \
-		.replace(":", "-") \
-		.replace(" ", "_")
+			.replace(":", "-") \
+			.replace(" ", "_")
 
 	_file_path = _log_dir + datetime + "_session.log"
 

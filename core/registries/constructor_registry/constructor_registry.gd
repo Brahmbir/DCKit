@@ -43,9 +43,8 @@ const _TypeTransform2D = preload("./inbuilt/t_transform2d.gd")
 const _TypeTransform3D = preload("./inbuilt/t_transform3d.gd")
 const _TypeProjection = preload("./inbuilt/t_projection.gd")
 
-
 # State
-var _defs : Dictionary = {}   # name (String) →  _DCKitNamespace.ConstructorDef
+var _defs: Dictionary = { } # name (String) →  _DCKitNamespace.ConstructorDef
 
 
 func _init() -> void:
@@ -59,22 +58,23 @@ func _init() -> void:
 #   • name collides with a built-in type
 #   • name was already registered by a previous custom call
 #   • handler is not a valid Callable
-func register(def:  _DCKitNamespace.ConstructorDef) -> bool:
+func register(def: _DCKitNamespace.ConstructorDef) -> bool:
 	if _defs.has(def.name):
-		var existing :  _DCKitNamespace.ConstructorDef = _defs[def.name]
+		var existing: _DCKitNamespace.ConstructorDef = _defs[def.name]
 		if existing.is_builtin:
 			push_warning(
 				"ConstructorRegistry: '%s' is a built-in type and cannot be replaced." \
-				% def.name)
+						% def.name
+			)
 		else:
 			push_warning(
 				"ConstructorRegistry: '%s' is already registered — ignored." \
-				% def.name)
+						% def.name
+			)
 		return false
 
 	if not def.handler.is_valid():
-		push_warning(
-			"ConstructorRegistry: '%s' has an invalid handler — ignored." % def.name)
+		push_warning("ConstructorRegistry: '%s' has an invalid handler — ignored." % def.name)
 		return false
 
 	_defs[def.name] = def
@@ -84,32 +84,37 @@ func register(def:  _DCKitNamespace.ConstructorDef) -> bool:
 func knows(name: String) -> bool:
 	return _defs.has(name)
 
-func get_def(name: String) ->  _DCKitNamespace.ConstructorDef:
+
+func get_def(name: String) -> _DCKitNamespace.ConstructorDef:
 	return _defs.get(name)
+
 
 func get_all() -> Array:
 	var out := _defs.values()
-	out.sort_custom(func(a, b): return a.name < b.name)
+	out.sort_custom(
+		func(a, b):
+			return a.name < b.name,
+	)
 	return out
+
 
 # Executor entry point
 # Called after all parts are already resolved depth-first.
 # Returns a Godot Variant on success, or a DCResult.fail() on error.
 func resolve(name: String, parts: Array):
-	var def :  _DCKitNamespace.ConstructorDef = _defs.get(name)
+	var def: _DCKitNamespace.ConstructorDef = _defs.get(name)
 	if def == null:
 		return DCResult.fail("Unknown constructor type '%s'." % name)
 	return def.handler.call(parts)
 
+
 # BUILT-IN SEEDING
 func _seed_builtins() -> void:
-	
 	_add_builtin(_TypeStr.create())
 	_add_builtin(_TypeInt.create())
 	_add_builtin(_TypeFloat.create())
 	_add_builtin(_TypeBool.create())
-	
-	
+
 	_add_builtin(_TypeVector2.create())
 	_add_builtin(_TypeVector2i.create())
 	_add_builtin(_TypeVector3.create())
@@ -127,6 +132,7 @@ func _seed_builtins() -> void:
 	_add_builtin(_TypeTransform3D.create())
 	_add_builtin(_TypeProjection.create())
 
-func _add_builtin(def:  _DCKitNamespace.ConstructorDef) -> void:
+
+func _add_builtin(def: _DCKitNamespace.ConstructorDef) -> void:
 	def.is_builtin = true
 	_defs[def.name] = def

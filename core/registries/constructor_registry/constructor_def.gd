@@ -9,30 +9,32 @@ extends RefCounted
 
 const BbCodeUtils = preload("../bb_code_utils.gd")
 
-var name        : String    # Exact type name as registered   e.g. "Vector3"
-var description : String    # BBCode — shown in info panel header
-var signatures  : Array     # Array[DCTypeSignature] — all valid calling forms
-var handler     : Callable  # (parts: Array) -> Variant | DevConsoleResult
-							# Must return DevConsoleResult.fail() on error, not null
-var is_builtin  : bool      # True = sealed by the registry; cannot be replaced
+var name: String # Exact type name as registered   e.g. "Vector3"
+var description: String # BBCode — shown in info panel header
+var signatures: Array # Array[DCTypeSignature] — all valid calling forms
+var handler: Callable # (parts: Array) -> Variant | DevConsoleResult
+# Must return DevConsoleResult.fail() on error, not null
+var is_builtin: bool # True = sealed by the registry; cannot be replaced
 
 
 func _init(
-		p_name        : String,
-		p_handler     : Callable,
-		p_description : String = "",
-		p_signatures  : Array  = [],
-		p_is_builtin  : bool   = false) -> void:
-	name        = p_name
-	handler     = p_handler
+	p_name: String,
+	p_handler: Callable,
+	p_description: String = "",
+	p_signatures: Array = [],
+	p_is_builtin: bool = false,
+) -> void:
+	name = p_name
+	handler = p_handler
 	description = BbCodeUtils.close_bbcode(p_description)
-	signatures  = p_signatures
-	is_builtin  = p_is_builtin
+	signatures = p_signatures
+	is_builtin = p_is_builtin
 
 
 func _to_string() -> String:
 	return "ConstructorDef(%s)[%d sigs, builtin=%s]" \
-		% [name, signatures.size(), is_builtin]
+			% [name, signatures.size(), is_builtin]
+
 
 #region TypeSignature inner class
 # One valid calling convention for a constructor type.
@@ -42,16 +44,14 @@ func _to_string() -> String:
 #   Vector3(x, y, z)  component form
 #
 # Analogous to an Overload on a command definition.
-
 class TypeSignature extends RefCounted:
-
-	var description : String          # Short label  e.g. "XYZ components"
-	var parts       : Array           # Array[DCPartHint]
+	var description: String # Short label  e.g. "XYZ components"
+	var parts: Array # Array[DCPartHint]
 
 
 	func _init(p_desc: String, p_parts: Array = []) -> void:
 		description = BbCodeUtils.close_bbcode(p_desc)
-		parts       = p_parts
+		parts = p_parts
 
 
 	# Builds the usage string shown in the info panel.
@@ -59,7 +59,10 @@ class TypeSignature extends RefCounted:
 	func usage(type_name: String) -> String:
 		if parts.is_empty():
 			return "%s()" % type_name
-		var labels := parts.map(func(p: PartHint): return p.name)
+		var labels := parts.map(
+			func(p: PartHint):
+				return p.name,
+		)
 		return "%s(%s)" % [type_name, ", ".join(labels)]
 
 
@@ -71,9 +74,7 @@ class TypeSignature extends RefCounted:
 
 	func _to_string() -> String:
 		return "Signature(%s)[%d parts]" % [description, parts.size()]
-
 #endregion
-
 
 
 #region Part inner class
@@ -111,40 +112,36 @@ class TypeSignature extends RefCounted:
 #   PartHint.new("x", "<float>", "World-space X component")
 #   PartHint.new("name", "<const>", "Named constant").suggest(fn).validate(fn)
 #   PartHint.new("pos", "<Vector2>").accepts([TYPE_VECTOR2, TYPE_STRING])
-
 class PartHint extends RefCounted:
+	var name: String # Slot label shown in the info panel   e.g. "x"
+	var type_hint: String # Type label                           e.g. "<float>"
+	var description: String # BBCode — shown below the slot label
+	var validator: Callable # (value: String) -> String   empty string = valid
+	var suggestor: Callable # (prefix: String) -> Array[String]
+	var accepted_types: Array # Array[int] TYPE_* constants — hint system only, never enforced
 
 
-	var name           : String    # Slot label shown in the info panel   e.g. "x"
-	var type_hint      : String    # Type label                           e.g. "<float>"
-	var description    : String    # BBCode — shown below the slot label
-	var validator      : Callable  # (value: String) -> String   empty string = valid
-	var suggestor      : Callable  # (prefix: String) -> Array[String]
-	var accepted_types : Array     # Array[int] TYPE_* constants — hint system only, never enforced
-
-
-	func _init(
-			p_name      : String,
-			p_type_hint : String = "",
-			p_desc      : String = "") -> void:
-		name        = p_name
-		type_hint   = p_type_hint
+	func _init(p_name: String, p_type_hint: String = "", p_desc: String = "") -> void:
+		name = p_name
+		type_hint = p_type_hint
 		description = BbCodeUtils.close_bbcode(p_desc)
 
 
 	# Fluent builders
-
 	func describe(text: String) -> PartHint:
 		description = BbCodeUtils.close_bbcode(text)
 		return self
+
 
 	func validate(fn: Callable) -> PartHint:
 		validator = fn
 		return self
 
+
 	func suggest(fn: Callable) -> PartHint:
 		suggestor = fn
 		return self
+
 
 	# Sets the accepted Godot TYPE_* constants for the hint system.
 	# Has NO effect on executor behaviour — purely advisory.
@@ -164,16 +161,18 @@ class PartHint extends RefCounted:
 			return true
 		return godot_type in accepted_types
 
+
 	# Human-readable label for the accepted types — shown in the info panel
 	# when the user passes a non-literal value into this slot.
 	# Returns "" when accepted_types is empty.
 	func accepted_types_label() -> String:
 		if accepted_types.is_empty():
 			return ""
-		var names : Array = accepted_types.map(func(t: int) -> String:
-			return type_string(t))
+		var names: Array = accepted_types.map(
+			func(t: int) -> String:
+				return type_string(t),
+		)
 		return ", ".join(names)
-
 
 	# Built-in validators (static helpers for convenience)
 	#
@@ -192,14 +191,16 @@ class PartHint extends RefCounted:
 
 	# Accepts only values present in `options` (case-insensitive).
 	static func enum_validator(options: Array) -> Callable:
-		var upper := options.map(func(s): return (s as String).to_upper())
+		var upper := options.map(
+			func(s):
+				return (s as String).to_upper(),
+		)
 		return func(value: String) -> String:
 			if value.is_empty() or value.begins_with("$"):
 				return ""
 			if value.to_upper() in upper:
 				return ""
-			return "'%s' is not valid. Expected one of: %s." % [
-				value, ", ".join(options)]
+			return "'%s' is not valid. Expected one of: %s." % [value, ", ".join(options)]
 
 
 	# Accepts floats in the 0.0–1.0 range.

@@ -1,23 +1,23 @@
 extends "./collapsible_info_base.gd"
 
-const PANEL_BG       := Color("#111827")
-const PANEL_BORDER   := Color("#243041")
-const TITLE_COLOR    := Color("#e5eefb")
-const TEXT_COLOR     := Color("#c7d2e1")
-const DIM_COLOR      := Color("#8b9ab0")
-const ACCENT_COLOR   := Color("#8be9fd")
-const ACTIVE_BG      := Color("#172233")
-const ACTIVE_BORDER  := Color("#3b82f6")
-const HINT_COLOR     := Color("#50fa7b")
-const DIM_BG         := Color("#0f1824")
-const WARN_COLOR     := Color("#f59e0b")
-const ALIAS_COLOR    := Color("#bd93f9")
+const PANEL_BG := Color("#111827")
+const PANEL_BORDER := Color("#243041")
+const TITLE_COLOR := Color("#e5eefb")
+const TEXT_COLOR := Color("#c7d2e1")
+const DIM_COLOR := Color("#8b9ab0")
+const ACCENT_COLOR := Color("#8be9fd")
+const ACTIVE_BG := Color("#172233")
+const ACTIVE_BORDER := Color("#3b82f6")
+const HINT_COLOR := Color("#50fa7b")
+const DIM_BG := Color("#0f1824")
+const WARN_COLOR := Color("#f59e0b")
+const ALIAS_COLOR := Color("#bd93f9")
 
-var _cmd_container:  VBoxContainer
+var _cmd_container: VBoxContainer
 var _ctor_container: VBoxContainer
-var _active_arg_row:  Control = null
-var _active_sig_row:  Control = null
-var _scroll_tween:   Tween    = null
+var _active_arg_row: Control = null
+var _active_sig_row: Control = null
+var _scroll_tween: Tween = null
 
 
 func _ready() -> void:
@@ -43,11 +43,15 @@ func show_info(current_dict: Dictionary) -> void:
 	match kind:
 		"command":
 			_rebuild_command(current_dict)
-			await set_content(PanelContent.new(str(current_dict.get("title", "Command")), _cmd_container))
+			await set_content(
+				PanelContent.new(str(current_dict.get("title", "Command")), _cmd_container)
+			)
 			_smooth_scroll_to_active()
 		"constructor":
 			_rebuild_constructor(current_dict)
-			await set_content(PanelContent.new(str(current_dict.get("title", "Constructor")), _ctor_container))
+			await set_content(
+				PanelContent.new(str(current_dict.get("title", "Constructor")), _ctor_container)
+			)
 			_smooth_scroll_to_active()
 		_:
 			set_content(null)
@@ -58,12 +62,12 @@ func _rebuild_command(data: Dictionary) -> void:
 	for c in _cmd_container.get_children():
 		c.queue_free()
 
-	var desc          := str(data.get("description", ""))
-	var params: Array  = data.get("params", [])
-	var active_idx    := int(data.get("active_index", -1))
+	var desc := str(data.get("description", ""))
+	var params: Array = data.get("params", [])
+	var active_idx := int(data.get("active_index", -1))
 	var aliases: Array = data.get("aliases", [])
-	var deprecated    := bool(data.get("deprecated", false))
-	var dep_msg       := str(data.get("deprecated_message", ""))
+	var deprecated := bool(data.get("deprecated", false))
+	var dep_msg := str(data.get("deprecated_message", ""))
 	var log_mode_name := str(data.get("log_mode_name", "NORMAL"))
 
 	# 1. Deprecated warning banner (most prominent — always first).
@@ -102,7 +106,7 @@ func _rebuild_command(data: Dictionary) -> void:
 
 
 func _make_deprecated_banner(msg: String) -> Control:
-	var lbl  := _make_rich_label()
+	var lbl := _make_rich_label()
 	var warn := WARN_COLOR.to_html(false)
 	var text := "[color=%s][b]⚠  deprecated[/b][/color]" % warn
 	if msg != "":
@@ -112,8 +116,8 @@ func _make_deprecated_banner(msg: String) -> Control:
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var s := StyleBoxFlat.new()
-	s.bg_color         = Color(WARN_COLOR, 0.08)
-	s.border_color     = Color(WARN_COLOR, 0.45)
+	s.bg_color = Color(WARN_COLOR, 0.08)
+	s.border_color = Color(WARN_COLOR, 0.45)
 	s.set_border_width_all(1)
 	s.border_width_left = 3
 	s.set_corner_radius_all(4)
@@ -124,18 +128,23 @@ func _make_deprecated_banner(msg: String) -> Control:
 
 func _make_aliases_row(aliases: Array) -> Control:
 	var lbl := _make_oneliner()
-	var formatted := ", ".join(aliases.map(
+	var formatted := ", ".join(
+		aliases.map(
 			func(a: String) -> String:
-				return "[b][color=%s]%s[/color][/b]" % [ALIAS_COLOR.to_html(false), a]))
+				return "[b][color=%s]%s[/color][/b]" % [ALIAS_COLOR.to_html(false), a],
+		)
+	)
 	lbl.text = "[color=%s]also  [/color]%s" % [DIM_COLOR.to_html(false), formatted]
 	return _boxed(lbl, 0, 0, 0, 2)
 
 
 func _make_log_mode_row(mode_name: String) -> Control:
-	var lbl  := _make_oneliner()
+	var lbl := _make_oneliner()
 	var label := mode_name.to_lower().replace("_", " ")
 	lbl.text = "[color=%s]log  [/color][color=%s]%s[/color]" % [
-		DIM_COLOR.to_html(false), DIM_COLOR.to_html(false), label
+		DIM_COLOR.to_html(false),
+		DIM_COLOR.to_html(false),
+		label,
 	]
 	return _boxed(lbl, 0, 0, 0, 2)
 
@@ -143,20 +152,20 @@ func _make_log_mode_row(mode_name: String) -> Control:
 func _make_command_row(idx: int, param, is_active: bool) -> Control:
 	var p_name: String = _get_val(param, "name", "param_%d" % (idx + 1))
 	var p_desc: String = _get_val(param, "description", "")
-	var has_sug: bool  = bool(_get_val(param, "has_suggestions", false))
-	var is_rest: bool  = bool(_get_val(param, "is_rest", false))
+	var has_sug: bool = bool(_get_val(param, "has_suggestions", false))
+	var is_rest: bool = bool(_get_val(param, "is_rest", false))
 
 	var root := VBoxContainer.new()
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.add_theme_constant_override("separation", 2)
 
 	# index badge + name
-	var line      := _make_oneliner()
+	var line := _make_oneliner()
 	var badge_col := ACCENT_COLOR.to_html(false) if is_active else DIM_COLOR.to_html(false)
-	var name_col  := TITLE_COLOR.to_html(false)  if is_active else TEXT_COLOR.to_html(false)
-	var arrow     := "▶ " if is_active else "   "
-	var sug_tag   := ("  [color=%s]◈[/color]" % HINT_COLOR.to_html(false)) if has_sug else ""
-	var rest_tag  := ("[color=%s]…_[/color]" % DIM_COLOR.to_html(false)) if is_rest else ""
+	var name_col := TITLE_COLOR.to_html(false) if is_active else TEXT_COLOR.to_html(false)
+	var arrow := "▶ " if is_active else "   "
+	var sug_tag := ("  [color=%s]◈[/color]" % HINT_COLOR.to_html(false)) if has_sug else ""
+	var rest_tag := ("[color=%s]…_[/color]" % DIM_COLOR.to_html(false)) if is_rest else ""
 
 	line.text = (
 		"[color=%s]%s[b][%d %s][/b][/color]  [color=%s]%s[/color] %s"
@@ -168,7 +177,7 @@ func _make_command_row(idx: int, param, is_active: bool) -> Control:
 		var dl := _make_rich_label()
 		dl.text = "[color=%s]%s[/color]" % [
 			TEXT_COLOR.to_html(false) if is_active else DIM_COLOR.to_html(false),
-			p_desc
+			p_desc,
 		]
 		root.add_child(_boxed(dl, 26, 0, 0, 0))
 
@@ -176,13 +185,12 @@ func _make_command_row(idx: int, param, is_active: bool) -> Control:
 
 
 # CONSTRUCTOR
-
 func _rebuild_constructor(data: Dictionary) -> void:
 	for c in _ctor_container.get_children():
 		c.queue_free()
 
-	var desc        := str(data.get("description", ""))
-	var sigs: Array  = data.get("signatures", [])
+	var desc := str(data.get("description", ""))
+	var sigs: Array = data.get("signatures", [])
 	var active_part := int(data.get("active_index", -1))
 
 	if desc != "":
@@ -195,18 +203,20 @@ func _rebuild_constructor(data: Dictionary) -> void:
 		return
 
 	# pick best-matching signature automatically
-	var best_idx   := 0
+	var best_idx := 0
 	var best_score := -1
 	for i in sigs.size():
 		var m := int(sigs[i].get("matches", 0))
 		if m > best_score:
 			best_score = m
-			best_idx   = i
+			best_idx = i
 
 	if sigs.size() > 1:
 		var count_lbl := _make_rich_label()
 		count_lbl.text = "[color=%s]signature %d / %d[/color]" % [
-			DIM_COLOR.to_html(false), best_idx + 1, sigs.size()
+			DIM_COLOR.to_html(false),
+			best_idx + 1,
+			sigs.size(),
 		]
 		_ctor_container.add_child(_boxed(count_lbl, 0, 0, 0, 0))
 
@@ -219,7 +229,7 @@ func _rebuild_constructor(data: Dictionary) -> void:
 
 func _make_sig_block(sig: Dictionary, active_part: int, is_best: bool) -> Control:
 	var parts: Array = sig.get("parts", [])
-	var usage    := str(sig.get("usage", ""))
+	var usage := str(sig.get("usage", ""))
 	var sig_desc := str(sig.get("description", ""))
 
 	var root := VBoxContainer.new()
@@ -230,7 +240,7 @@ func _make_sig_block(sig: Dictionary, active_part: int, is_best: bool) -> Contro
 		var ul := _make_oneliner()
 		ul.text = "[color=%s][code]%s[/code][/color]" % [
 			ACCENT_COLOR.to_html(false) if is_best else DIM_COLOR.to_html(false),
-			usage
+			usage,
 		]
 		root.add_child(ul)
 
@@ -248,7 +258,7 @@ func _make_sig_block(sig: Dictionary, active_part: int, is_best: bool) -> Contro
 		var dim := PanelContainer.new()
 		dim.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var ds := StyleBoxFlat.new()
-		ds.bg_color     = DIM_BG
+		ds.bg_color = DIM_BG
 		ds.border_color = PANEL_BORDER
 		ds.set_border_width_all(1)
 		ds.set_corner_radius_all(5)
@@ -259,7 +269,7 @@ func _make_sig_block(sig: Dictionary, active_part: int, is_best: bool) -> Contro
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var ps := StyleBoxFlat.new()
-	ps.bg_color     = ACTIVE_BG
+	ps.bg_color = ACTIVE_BG
 	ps.border_color = ACTIVE_BORDER
 	ps.set_border_width_all(1)
 	ps.set_corner_radius_all(6)
@@ -269,18 +279,27 @@ func _make_sig_block(sig: Dictionary, active_part: int, is_best: bool) -> Contro
 
 
 func _make_part_detail(part: Dictionary) -> Control:
-	var p_name    := str(part.get("name", ""))
+	var p_name := str(part.get("name", ""))
 	var type_hint := str(part.get("type_hint", ""))
-	var p_desc    := str(part.get("description", ""))
-	var accepted  := str(part.get("accepted_types", ""))
+	var p_desc := str(part.get("description", ""))
+	var accepted := str(part.get("accepted_types", ""))
 
 	var root := VBoxContainer.new()
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.add_theme_constant_override("separation", 3)
 
 	var name_line := _make_oneliner()
-	var type_tag  := ("  [color=%s]%s[/color]" % [DIM_COLOR.to_html(false), type_hint]) if type_hint != "" else ""
-	name_line.text = "[b][color=%s]%s[/color][/b]%s" % [ACCENT_COLOR.to_html(false), p_name, type_tag]
+	var type_tag: String
+	if type_hint != "":
+		type_tag = ("  [color=%s]%s[/color]" % [DIM_COLOR.to_html(false), type_hint])
+	else:
+		type_tag = ""
+
+	name_line.text = "[b][color=%s]%s[/color][/b]%s" % [
+		ACCENT_COLOR.to_html(false),
+		p_name,
+		type_tag,
+	]
 	root.add_child(name_line)
 
 	if p_desc != "":
@@ -296,8 +315,8 @@ func _make_part_detail(part: Dictionary) -> Control:
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var s := StyleBoxFlat.new()
-	s.bg_color         = Color("#0d1829")
-	s.border_color     = ACTIVE_BORDER
+	s.bg_color = Color("#0d1829")
+	s.border_color = ACTIVE_BORDER
 	s.set_border_width_all(1)
 	s.border_width_left = 3
 	s.set_corner_radius_all(4)
@@ -318,9 +337,9 @@ func _smooth_scroll_to_active() -> void:
 	if not is_instance_valid(target):
 		return
 
-	var row_top    := target.get_global_rect().position.y
+	var row_top := target.get_global_rect().position.y
 	var scroll_top := _scroll.get_global_rect().position.y
-	var dest       := int(row_top - scroll_top) + _scroll.scroll_vertical
+	var dest := int(row_top - scroll_top) + _scroll.scroll_vertical
 	dest = clampi(dest, 0, _scroll.get_v_scroll_bar().max_value)
 
 	if _scroll_tween and _scroll_tween.is_valid():
@@ -340,7 +359,7 @@ func _param_panel(inner: Control, is_active: bool) -> Control:
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var s := StyleBoxFlat.new()
-	s.bg_color     = ACTIVE_BG
+	s.bg_color = ACTIVE_BG
 	s.border_color = ACTIVE_BORDER
 	s.set_border_width_all(1)
 	s.set_corner_radius_all(6)
@@ -357,20 +376,20 @@ func _make_empty_state(msg: String) -> Control:
 
 func _make_oneliner() -> RichTextLabel:
 	var lbl := RichTextLabel.new()
-	lbl.bbcode_enabled  = true
-	lbl.fit_content     = true
-	lbl.scroll_active   = false
-	lbl.autowrap_mode   = TextServer.AUTOWRAP_OFF
+	lbl.bbcode_enabled = true
+	lbl.fit_content = true
+	lbl.scroll_active = false
+	lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return lbl
 
 
 func _make_rich_label() -> RichTextLabel:
 	var lbl := RichTextLabel.new()
-	lbl.bbcode_enabled  = true
-	lbl.fit_content     = true
-	lbl.scroll_active   = false
-	lbl.autowrap_mode   = TextServer.AUTOWRAP_WORD_SMART
+	lbl.bbcode_enabled = true
+	lbl.fit_content = true
+	lbl.scroll_active = false
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return lbl
 
@@ -387,7 +406,10 @@ func _boxed(node: Control, l: int, t: int, r: int, b: int) -> MarginContainer:
 
 
 func _get_val(item, key: String, default = null):
-	if item == null:      return default
-	if item is Dictionary: return item.get(key, default)
-	if item is Object:     return item.get(key)
+	if item == null:
+		return default
+	if item is Dictionary:
+		return item.get(key, default)
+	if item is Object:
+		return item.get(key)
 	return default

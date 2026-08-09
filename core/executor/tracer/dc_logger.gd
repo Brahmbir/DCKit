@@ -4,23 +4,36 @@
 class_name DCLogger
 extends RefCounted
 
-var _logger_ref : WeakRef
-var _origin     : String
-var _stack      : Array
+var _logger_ref: WeakRef
+var _origin: String
+var _stack: Array
+
 
 func _init(logger, origin: String, stack: Array) -> void:
 	_logger_ref = weakref(logger)
-	_origin     = origin
-	_stack      = stack.duplicate()
+	_origin = origin
+	_stack = stack.duplicate()
+
 
 ## Logs an informational message.
-func info(msg: String)  -> void: _write("INFO",  msg)
+func info(msg: String) -> void:
+	_write("INFO", msg)
+
+
 ## Logs a warning message.
-func warn(msg: String)  -> void: _write("WARN",  msg)
+func warn(msg: String) -> void:
+	_write("WARN", msg)
+
+
 ## Logs an error message.
-func error(msg: String) -> void: _write("ERROR", msg)
+func error(msg: String) -> void:
+	_write("ERROR", msg)
+
+
 ## Logs a help message.
-func help(msg: String)  -> void: _write("HELP",  msg)
+func help(msg: String) -> void:
+	_write("HELP", msg)
+
 
 ## Forwards a stamped entry to the backing logger, if it still exists.
 func _write(level: String, msg: String) -> void:

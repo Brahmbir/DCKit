@@ -1,25 +1,9 @@
 extends RefCounted
 
-class ProfilerNode:
-	var name     : String
-	var start_us : int
-	var end_us   : int
-	var children : Array[ProfilerNode] = []
-
-	func total_ms() -> float:
-		return float(end_us - start_us) / 1000.0
-
-	func self_ms() -> float:
-		var child := 0.0
-		for c in children:
-			child += c.total_ms()
-		return total_ms() - child
-
-
 var enabled := false
-var root    : ProfilerNode = null
+var root: ProfilerNode = null
 
-var _stack  : Array[ProfilerNode] = []
+var _stack: Array[ProfilerNode] = []
 
 
 func begin(command: String) -> void:
@@ -36,7 +20,7 @@ func begin(command: String) -> void:
 
 
 func end() -> void:
-	var node :ProfilerNode= _stack.pop_back()
+	var node: ProfilerNode = _stack.pop_back()
 	node.end_us = Time.get_ticks_usec()
 
 
@@ -49,7 +33,7 @@ func report() -> String:
 	if root == null:
 		return "No profiling data."
 
-	var out : PackedStringArray = []
+	var out: PackedStringArray = []
 	_print(root, "", true, out)
 	out.append("")
 	out.append("Total: %.3f ms" % root.total_ms())
@@ -66,3 +50,21 @@ func _print(node: ProfilerNode, prefix: String, last: bool, out: PackedStringArr
 
 	for i in node.children.size():
 		_print(node.children[i], next_prefix, i == node.children.size() - 1, out)
+
+
+class ProfilerNode:
+	var name: String
+	var start_us: int
+	var end_us: int
+	var children: Array[ProfilerNode] = []
+
+
+	func total_ms() -> float:
+		return float(end_us - start_us) / 1000.0
+
+
+	func self_ms() -> float:
+		var child := 0.0
+		for c in children:
+			child += c.total_ms()
+		return total_ms() - child

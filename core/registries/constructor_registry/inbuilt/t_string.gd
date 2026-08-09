@@ -29,29 +29,26 @@
 #   const DCString = preload("./t_string.gd")
 #
 #   var s : String = DCString.extract(parts[0])  # always a String, never null
-
 extends "./inbuilt_base.gd"
 
 
 # Core extraction
-
 # Always returns a String. Never returns null.
 static func extract(val: DCResult.Value) -> String:
 	return val.as_string()
 
 
 # Part hint factory
-
 # Returns a  _DCKitNamespace. _DCKitNamespace.ConstructorDef.PartHint configured for a string slot.
 # p_suggest — optional callable (prefix: String) -> Array[String] for suggestions.
 static func part_hint(
-		p_name    : String,
-		p_desc    : String   = "",
-		p_suggest : Callable = Callable()) ->  _DCKitNamespace.ConstructorDef.PartHint:
-
-	var hint := ( _DCKitNamespace.ConstructorDef.PartHint
-		.new(p_name, "<string>", p_desc)
-		.accepts([TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL]))
+	p_name: String,
+	p_desc: String = "",
+	p_suggest: Callable = Callable(),
+) -> _DCKitNamespace.ConstructorDef.PartHint:
+	var hint := (_DCKitNamespace.ConstructorDef.PartHint.new(p_name, "<string>", p_desc).accepts(
+			[TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL]
+		))
 
 	if p_suggest.is_valid():
 		hint.suggest(p_suggest)
@@ -60,10 +57,8 @@ static func part_hint(
 
 
 # Constructor type definition
-
-static func create() ->  _DCKitNamespace.ConstructorDef:
+static func create() -> _DCKitNamespace.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
-
 		# Zero-arg → empty string
 		if parts.is_empty():
 			return ""
@@ -81,7 +76,7 @@ static func create() ->  _DCKitNamespace.ConstructorDef:
 			joined += extract(parts[i])
 		return joined
 
-	return  _DCKitNamespace.ConstructorDef.new(
+	return _DCKitNamespace.ConstructorDef.new(
 		"Str",
 		handler,
 		"Converts a value to a [b]string[/b], or joins multiple values with spaces.\n"
@@ -89,16 +84,29 @@ static func create() ->  _DCKitNamespace.ConstructorDef:
 		+ "[color=gray]Str(hello)      →  \"hello\"[/color]\n"
 		+ "[color=gray]Str(hello world)  →  \"hello world\"[/color]",
 		[
-			 _DCKitNamespace.ConstructorDef.TypeSignature.new("Empty string", []),
-
-			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNamespace.ConstructorDef.TypeSignature.new("Empty string", []),
+			_DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Convert to string",
-				[( _DCKitNamespace.ConstructorDef.PartHint
-					.new("value", "<any>",
-						"Any value — converted to its string representation.")
-					.accepts([TYPE_STRING, TYPE_INT, TYPE_FLOAT,
-							  TYPE_BOOL, TYPE_VECTOR2, TYPE_VECTOR3,
-							  TYPE_COLOR, TYPE_RECT2]))]
+				[
+					(
+						_DCKitNamespace
+						.ConstructorDef
+						.PartHint
+						.new("value", "<any>", "Any value — converted to its string representation.")
+						.accepts(
+							[
+								TYPE_STRING,
+								TYPE_INT,
+								TYPE_FLOAT,
+								TYPE_BOOL,
+								TYPE_VECTOR2,
+								TYPE_VECTOR3,
+								TYPE_COLOR,
+								TYPE_RECT2,
+							]
+						)
+					)
+				],
 			),
-		]
+		],
 	)

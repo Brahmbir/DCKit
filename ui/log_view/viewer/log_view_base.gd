@@ -7,8 +7,13 @@
 extends Control
 
 # STATE
-var _logger    : Object = null
-var _connected : bool   = false
+var _logger: Object = null
+var _connected: bool = false
+
+
+func _exit_tree() -> void:
+	_disconnect_logger()
+
 
 # PUBLIC API
 # Attach to [param logger].  Safe to call multiple times — swaps loggers cleanly.
@@ -19,8 +24,6 @@ func setup(logger: Object) -> void:
 	_connect_logger()
 	_replay_all()
 
-func _exit_tree() -> void:
-	_disconnect_logger()
 
 # ABSTRACT OVERRIDES — subclasses implement these
 # Receive one log entry.  Called both during history replay and for live entries.
@@ -28,24 +31,28 @@ func _exit_tree() -> void:
 func _append_entry(_entry: _DCKitNamespace.Tracer.LogEntry) -> void:
 	pass
 
+
 # The logger was cleared.  Reset the display.
 func _on_cleared() -> void:
 	pass
+
 
 # PRIVATE — LOGGER WIRING
 func _connect_logger() -> void:
 	if _logger == null:
 		return
 	_safe_connect(_logger, "entry_added", _append_entry)
-	_safe_connect(_logger, "cleared",     _on_cleared)
+	_safe_connect(_logger, "cleared", _on_cleared)
 	_connected = true
+
 
 func _disconnect_logger() -> void:
 	if _logger == null or not _connected:
 		return
 	_safe_disconnect(_logger, "entry_added", _append_entry)
-	_safe_disconnect(_logger, "cleared",     _on_cleared)
+	_safe_disconnect(_logger, "cleared", _on_cleared)
 	_connected = false
+
 
 func _replay_all() -> void:
 	_on_cleared()
@@ -54,10 +61,12 @@ func _replay_all() -> void:
 	for entry: _DCKitNamespace.Tracer.LogEntry in _logger.get_all():
 		_append_entry(entry)
 
+
 # Signal helpers
 func _safe_connect(obj: Object, sig: StringName, callable: Callable) -> void:
 	if obj.has_signal(sig) and not obj.is_connected(sig, callable):
 		obj.connect(sig, callable)
+
 
 func _safe_disconnect(obj: Object, sig: StringName, callable: Callable) -> void:
 	if obj.has_signal(sig) and obj.is_connected(sig, callable):
