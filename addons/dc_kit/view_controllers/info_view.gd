@@ -2,8 +2,7 @@ extends RefCounted
 
 signal update_posted(data)
 
-
-var current_data: Dictionary = {}
+var current_data: Dictionary = { }
 
 
 func update(scope) -> void:
@@ -27,26 +26,28 @@ func _build_command_data(def: DCDefinition, arg_index: int) -> Dictionary:
 	var params := []
 	for i in def.params.size():
 		var p: DCDefinition.Param = def.params[i]
-		params.append({
-			"index":           i,
-			"name":            p.name,
-			"description":     p.description,
-			"active":          i == arg_index,
-			"has_suggestions": p.suggestor.is_valid(),
-			"is_rest":         p.is_rest,
-		})
+		params.append(
+			{
+				"index": i,
+				"name": p.name,
+				"description": p.description,
+				"active": i == arg_index,
+				"has_suggestions": p.suggestor.is_valid(),
+				"is_rest": p.is_rest,
+			}
+		)
 
 	return {
-		"kind":               "command",
-		"title":              def.name,
-		"description":        def.description,
-		"active_index":       arg_index,
-		"params":             params,
-		"aliases":            Array(def._aliases),
-		"deprecated":         def._deprecated,
-		"deprecated_message": def._deprecated_message,
-		"log_mode":           def.log_mode,
-		"log_mode_name":      DCDefinition.LogMode.keys()[def.log_mode],
+		"kind": "command",
+		"title": def.name,
+		"description": def.description,
+		"active_index": arg_index,
+		"params": params,
+		"aliases": Array(def.aliases),
+		"deprecated": def.deprecated,
+		"deprecated_message": def.deprecated_message,
+		"log_mode": def.log_mode,
+		"log_mode_name": DCDefinition.LogMode.keys()[def.log_mode],
 	}
 
 
@@ -56,23 +57,27 @@ func _build_constructor_data(def: _DCKitNamespace.ConstructorDef, part_index: in
 		var parts := []
 		for i in sig.parts.size():
 			var p: _DCKitNamespace.ConstructorDef.PartHint = sig.parts[i]
-			parts.append({
-				"name":           p.name,
-				"type_hint":      p.type_hint,
-				"description":    p.description,
-				"accepted_types": p.accepted_types_label(),
-				"active":         i == part_index,
-			})
-		signatures.append({
-			"description": sig.description,
-			"usage":       sig.usage(def.name),
-			"matches":     sig.matches_count(part_index),
-			"parts":       parts,
-		})
+			parts.append(
+				{
+					"name": p.name,
+					"type_hint": p.type_hint,
+					"description": p.description,
+					"accepted_types": p.accepted_types_label(),
+					"active": i == part_index,
+				}
+			)
+		signatures.append(
+			{
+				"description": sig.description,
+				"usage": sig.usage(def.name),
+				"matches": sig.matches_count(part_index),
+				"parts": parts,
+			}
+		)
 	return {
-		"kind":         "constructor",
-		"title":        def.name,
-		"description":  def.description,
+		"kind": "constructor",
+		"title": def.name,
+		"description": def.description,
 		"active_index": part_index,
-		"signatures":   signatures,
+		"signatures": signatures,
 	}

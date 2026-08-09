@@ -1,8 +1,8 @@
 static func close_bbcode(text: String) -> String:
 	const SELF_CLOSING := ["img", "lb", "rb", "lbracket", "rbracket", "newline"]
 
-	var stack : Array = []
-	var i     := 0
+	var stack: Array = []
+	var i := 0
 
 	while i < text.length():
 		if text[i] != "[":
@@ -11,12 +11,11 @@ static func close_bbcode(text: String) -> String:
 
 		var end := text.find("]", i + 1)
 		if end == -1:
-			break   # unclosed bracket — stop scanning
+			break # unclosed bracket — stop scanning
 
 		# Extract and normalise the tag content, e.g. "COLOR=yellow" → "color"
 		var raw := text.substr(i + 1, end - i - 1).strip_edges().to_lower()
-		var tag := raw.split("=")[0].split(" ")[0]  # strip parameters
-
+		var tag := raw.split("=")[0].split(" ")[0] # strip parameters
 		if tag.begins_with("/"):
 			# Closing tag — pop the stack if the innermost open tag matches.
 			var close_tag := tag.substr(1)
@@ -38,10 +37,11 @@ static func close_bbcode(text: String) -> String:
 
 	return text + "".join(suffix)
 
+
 static func strip_bbcode(text: String) -> String:
-	var parts  := PackedStringArray()
-	var i      := 0
-	var start  := 0
+	var parts := PackedStringArray()
+	var i := 0
+	var start := 0
 
 	while i < text.length():
 		if text[i] == "[":
@@ -51,8 +51,8 @@ static func strip_bbcode(text: String) -> String:
 
 			var close := text.find("]", i + 1)
 			if close == -1:
-				break      # truncated tag — discard the remainder
-			i     = close + 1
+				break # truncated tag — discard the remainder
+			i = close + 1
 			start = i
 		else:
 			i += 1

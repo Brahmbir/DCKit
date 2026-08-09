@@ -8,31 +8,25 @@
 #
 # Note: Vector4 has no named constants beyond ZERO and ONE in Godot,
 # so there is no named-constant form.
-
 extends "./inbuilt_base.gd"
 
 const DCFloat = preload("./t_float.gd")
 
 
-static func create() ->  _DCKitNamespace.ConstructorDef:
-	const CONSTS := {
-		"ZERO": Vector4.ZERO,
-		"ONE":  Vector4.ONE,
-		"INF":  Vector4.INF,
-	}
+static func create() -> _DCKitNamespace.ConstructorDef:
+	const CONSTS := { "ZERO": Vector4.ZERO, "ONE": Vector4.ONE, "INF": Vector4.INF }
 
-	var const_names : Array = CONSTS.keys()
+	var const_names: Array = CONSTS.keys()
 	const_names.sort()
 
 	var handler := func(parts: Array) -> Variant:
-
 		# Zero-arg
 		if parts.is_empty():
 			return Vector4.ZERO
 
 		# One arg — named constant only
 		if parts.size() == 1:
-			var val : DCResult.Value = parts[0]
+			var val: DCResult.Value = parts[0]
 
 			var vec := extract_vector4(val)
 			if vec != null:
@@ -51,58 +45,59 @@ static func create() ->  _DCKitNamespace.ConstructorDef:
 		# Four args — XYZW components
 		if parts.size() == 4:
 			var labels := ["x", "y", "z", "w"]
-			var values : Array = []
+			var values: Array = []
 			for i in 4:
 				var f = DCFloat.extract(parts[i])
 				if f == null:
 					return DCResult.fail(
 						"Vector4 part '%s': expected a number, got %s." \
-						% [labels[i], val_label(parts[i])])
+								% [labels[i], val_label(parts[i])]
+					)
 				values.append(f)
 			return Vector4(values[0], values[1], values[2], values[3])
 
-		return DCResult.fail(
-			"Vector4: expected 0, 1, or 4 parts — got %d." % parts.size())
+		return DCResult.fail("Vector4: expected 0, 1, or 4 parts — got %d." % parts.size())
 
-	return  _DCKitNamespace.ConstructorDef.new(
+	return _DCKitNamespace.ConstructorDef.new(
 		"Vector4",
 		handler,
 		"A 4D vector with [b]x[/b], [b]y[/b], [b]z[/b], and [b]w[/b] float components.",
 		[
 			sig_zero("Zero vector — Vector4(0, 0, 0, 0)"),
-
-			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
-				[const_part(const_names)]
+				[const_part(const_names)],
 			),
-			
-			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"Convert Vector4/Vector4i",
-				[part_hint_vector4(
-						"value",
-						"Existing Vector4 or Vector4i")]
+				[part_hint_vector4("value", "Existing Vector4 or Vector4i")],
 			),
-
-			 _DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNamespace.ConstructorDef.TypeSignature.new(
 				"XYZW components",
 				[
 					DCFloat.part_hint("x", "X component"),
 					DCFloat.part_hint("y", "Y component"),
 					DCFloat.part_hint("z", "Z component"),
 					DCFloat.part_hint("w", "W component"),
-				]
+				],
 			),
-		]
+		],
 	)
+
 
 static func extract_vector4(val: DCResult.Value) -> Variant:
 	var r := val.raw
-	if r is Vector4:  return r
-	if r is Vector4i: return Vector4(r)
+	if r is Vector4:
+		return r
+	if r is Vector4i:
+		return Vector4(r)
 	return null
- 
-static func part_hint_vector4(p_name: String, p_desc: String = "") ->  _DCKitNamespace.ConstructorDef.PartHint:
-	return ( _DCKitNamespace.ConstructorDef.PartHint
-		.new(p_name, "<Vector4>", p_desc)
-		.accepts([TYPE_VECTOR4, TYPE_VECTOR4I]))
- 
+
+
+static func part_hint_vector4(
+	p_name: String,
+	p_desc: String = "",
+) -> _DCKitNamespace.ConstructorDef.PartHint:
+	return (_DCKitNamespace.ConstructorDef.PartHint.new(p_name, "<Vector4>", p_desc).accepts(
+			[TYPE_VECTOR4, TYPE_VECTOR4I]
+		))

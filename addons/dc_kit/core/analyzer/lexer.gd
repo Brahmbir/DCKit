@@ -1,83 +1,71 @@
 extends RefCounted
 
 #region TYPES
-
 enum TokenType {
-	IDENTIFIER, NUMBER, STRING, VARIABLE,
-	LPAREN, RPAREN, COMMA, SEMICOLON, END,
+	IDENTIFIER,
+	NUMBER,
+	STRING,
+	VARIABLE,
+	LPAREN,
+	RPAREN,
+	COMMA,
+	SEMICOLON,
+	END,
 }
 
-class Token:
-	var type          : int
-	var value         : String
-	var position      : int
-	var is_silent     : bool = false
-	var fallback             = null   # Token | null — set for $?... variables; may itself have a fallback
-	var prefix_len    : int  = 0
-	## Set only on a fallback-sentinel LPAREN token produced by _read_nested_cmd_fallback().
-	## Holds the inner token stream (IDENTIFIER … END) of the nested command.
-	var nested_tokens : Array = []
-
-	func _init(t: int, v: String, p: int, silent := false) -> void:
-		type = t; value = v; position = p; is_silent = silent
-
-	func _to_string() -> String:
-		return "[%d] %s:'%s'%s%s%s" % [position, TokenType.keys()[type], value,
-				" (silent)"     if is_silent                  else "",
-				" (fallback)"   if fallback != null            else "",
-				" (nested_cmd)" if not nested_tokens.is_empty() else ""]
-
-
-class LexError:
-	var message  : String
-	var position : int
-
-	func _init(msg: String, pos: int) -> void:
-		position = pos; message = "[pos %d] %s" % [pos, msg]
-
-	func _to_string() -> String: return message
-
-#endregion
-
-
 var _input := ""
-var _pos   := 0
+var _pos := 0
 
 
 # Returns { ok=true, tokens=Array } or { ok=false, error=LexError }
 func lex(input: String) -> Dictionary:
 	_input = input if input else ""
-	_pos   = 0
-	var tokens : Array = []
+	_pos = 0
+	var tokens: Array = []
 
 	while not _at_end():
 		_skip_whitespace()
-		if _at_end(): break
+		if _at_end():
+			break
 		var c := _peek()
 
 		if c == "#":
 			break
 		if c == ";":
 			#return _with_tokens(_err("; is not supported",_pos), tokens)
-			tokens.append(Token.new(TokenType.SEMICOLON, c, _pos)); _pos += 1; continue
+			tokens.append(Token.new(TokenType.SEMICOLON, c, _pos))
+			_pos += 1
+			continue
 		if c == "(":
-			tokens.append(Token.new(TokenType.LPAREN, c, _pos)); _pos += 1; continue
+			tokens.append(Token.new(TokenType.LPAREN, c, _pos))
+			_pos += 1
+			continue
 		if c == ")":
-			tokens.append(Token.new(TokenType.RPAREN, c, _pos)); _pos += 1; continue
+			tokens.append(Token.new(TokenType.RPAREN, c, _pos))
+			_pos += 1
+			continue
 		if c == ",":
-			tokens.append(Token.new(TokenType.COMMA, c, _pos)); _pos += 1; continue
+			tokens.append(Token.new(TokenType.COMMA, c, _pos))
+			_pos += 1
+			continue
 		if _is_quote(c):
 			var r := _read_string()
-			if not r.ok: return _with_tokens(r, tokens)
-			tokens.append(r.token); continue
+			if not r.ok:
+				return _with_tokens(r, tokens)
+			tokens.append(r.token)
+			continue
 		if c == "$":
 			var r := _read_variable()
-			if not r.ok: return _with_tokens(r, tokens)
-			tokens.append(r.token); continue
+			if not r.ok:
+				return _with_tokens(r, tokens)
+			tokens.append(r.token)
+			continue
 		if _is_atom_start(c):
 			var r := _read_atom()
-			if not r.ok: return _with_tokens(r, tokens)
-			tokens.append(r.token); continue
+			if not r.ok:
+				return _with_tokens(r, tokens)
+			tokens.append(r.token)
+			continue
 
 		return _with_tokens(_err("Unexpected character '%s'." % c, _pos), tokens)
 
@@ -86,15 +74,15 @@ func lex(input: String) -> Dictionary:
 
 
 # READERS
-
 func _read_string() -> Dictionary:
 	var start := _pos
 	var quote := _eat()
-	var sb    := ""
+	var sb := ""
 	while not _at_end():
 		var c := _eat()
 		if c == "\\":
-			if not _at_end(): sb += _unescape(_eat())
+			if not _at_end():
+				sb += _unescape(_eat())
 			continue
 		if c == quote:
 			return { ok = true, token = Token.new(TokenType.STRING, sb, start) }
@@ -111,7 +99,7 @@ func _read_string() -> Dictionary:
 # Braces allow whitespace around the inner syntax.
 func _read_variable() -> Dictionary:
 	var start := _pos
-	_eat()  # '$'
+	_eat() # '$'
 	if _at_end():
 		return _err("Expected variable name after '$'.", start)
 
@@ -122,7 +110,7 @@ func _read_variable() -> Dictionary:
 
 
 func _read_braced_variable(start: int) -> Dictionary:
-	_eat()  # '{'
+	_eat() # '{'
 	_skip_whitespace()
 
 	var inner := _pos
@@ -138,8 +126,9 @@ func _read_braced_variable(start: int) -> Dictionary:
 
 	_skip_whitespace()
 	var r := _read_var_modifier(name, start, true)
-	if not r.ok: return r
-	var tok : Token = r.token
+	if not r.ok:
+		return r
+	var tok: Token = r.token
 
 	_skip_whitespace()
 	if _at_end() or _peek() != "}":
@@ -156,7 +145,11 @@ func _unclosed_brace_error(tok: Token, name: String, start: int) -> Dictionary:
 	if tok.fallback != null:
 		return _err("Unexpected content after fallback in '${%s:...}'. Expected '}'." % name, _pos)
 	if tok.is_silent:
-		return _err("'?' takes no value — did you mean '${%s:...}' for a fallback? Expected '}' after '?'." % name, _pos)
+		return _err(
+			"'?' takes no value — did you mean '${%s:...}' for a fallback? Expected '}' after '?'."
+			% name,
+			_pos,
+		)
 	if not _at_end() and _peek() in ["?", "!", ":"]:
 		return _err("Only one modifier ('!', '?', or ':fallback') is allowed per variable.", _pos)
 	return _err("Unclosed '${...}'. Expected '}'.", start)
@@ -183,8 +176,10 @@ func _read_compact_variable(start: int) -> Dictionary:
 func _read_var_modifier(name: String, start: int, allow_whitespace := false) -> Dictionary:
 	var tok := Token.new(TokenType.VARIABLE, name, start, false)
 
-	if allow_whitespace: _skip_whitespace()
-	if _at_end(): return { ok = true, token = tok }
+	if allow_whitespace:
+		_skip_whitespace()
+	if _at_end():
+		return { ok = true, token = tok }
 
 	match _peek():
 		"!":
@@ -200,7 +195,8 @@ func _read_var_modifier(name: String, start: int, allow_whitespace := false) -> 
 			_eat()
 			tok.is_silent = true
 			var fb := _read_fallback(allow_whitespace)
-			if not fb.ok: return fb
+			if not fb.ok:
+				return fb
 			tok.fallback = fb.token
 		_:
 			pass
@@ -220,7 +216,8 @@ func _read_fallback(allow_whitespace := false) -> Dictionary:
 
 	if _is_quote(_peek()):
 		var r := _read_string()
-		if not r.ok: return r
+		if not r.ok:
+			return r
 		return { ok = true, token = r.token }
 
 	if _peek() == "(":
@@ -239,36 +236,45 @@ func _read_fallback(allow_whitespace := false) -> Dictionary:
 
 func _read_nested_cmd_fallback() -> Dictionary:
 	var start := _pos
-	_eat()  # consume '('
-	var inner : Array = []
+	_eat() # consume '('
+	var inner: Array = []
 	var depth := 1
 
 	while not _at_end() and depth > 0:
 		_skip_whitespace()
-		if _at_end(): break
+		if _at_end():
+			break
 		var c := _peek()
 		if c == "(":
-			inner.append(Token.new(TokenType.LPAREN, c, _pos)); _eat()
+			inner.append(Token.new(TokenType.LPAREN, c, _pos))
+			_eat()
 			depth += 1
 		elif c == ")":
 			depth -= 1
-			if depth == 0: _eat(); break
-			inner.append(Token.new(TokenType.RPAREN, c, _pos)); _eat()
+			if depth == 0:
+				_eat()
+				break
+			inner.append(Token.new(TokenType.RPAREN, c, _pos))
+			_eat()
 		elif c == ";":
 			return _err("Command chains (';') are not allowed in a fallback command.", _pos)
 		elif c == ",":
-			inner.append(Token.new(TokenType.COMMA, c, _pos)); _eat()
+			inner.append(Token.new(TokenType.COMMA, c, _pos))
+			_eat()
 		elif _is_quote(c):
 			var r := _read_string()
-			if not r.ok: return r
+			if not r.ok:
+				return r
 			inner.append(r.token)
 		elif c == "$":
 			var r := _read_variable()
-			if not r.ok: return r
+			if not r.ok:
+				return r
 			inner.append(r.token)
 		elif _is_atom_start(c):
 			var r := _read_atom()
-			if not r.ok: return r
+			if not r.ok:
+				return r
 			inner.append(r.token)
 		else:
 			return _err("Unexpected character '%s' in nested command fallback." % c, _pos)
@@ -364,44 +370,69 @@ func _is_bare_identifier(raw: String) -> bool:
 
 
 # HELPERS
-
 func _is_ident_char(c: String) -> bool:
-	if c.length() != 1: return false
+	if c.length() != 1:
+		return false
 	var n := c.unicode_at(0)
-	return (n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) or c == "_" or c == "."
+	return (
+		(n >= 65 and n <= 90) or (n >= 97 and n <= 122)
+		or (n >= 48 and n <= 57) or c == "_" or c == "."
+	)
+
 
 func _is_ident_start(c: String) -> bool:
-	if c.length() != 1: return false
+	if c.length() != 1:
+		return false
 	var n := c.unicode_at(0)
 	return (n >= 65 and n <= 90) or (n >= 97 and n <= 122) or c == "_"
 
+
 func _is_var_char(c: String) -> bool:
-	if c.length() != 1: return false
+	if c.length() != 1:
+		return false
 	var n := c.unicode_at(0)
 	return (n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) or c == "_"
 
+
 func _is_bare_ident_char(c: String) -> bool:
-	if c.length() != 1: return false
+	if c.length() != 1:
+		return false
 	var n := c.unicode_at(0)
-	return (n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) or c == "_" or c == "." or c == "-"
+	return (
+		(n >= 65 and n <= 90) or (n >= 97 and n <= 122)
+		or (n >= 48 and n <= 57) or c == "_" or c == "." or c == "-"
+	)
+
 
 func _is_atom_start(c: String) -> bool:
-	if c.length() != 1: return false
+	if c.length() != 1:
+		return false
 	return not _is_atom_delim(c)
 
+
 func _is_atom_delim(c: String) -> bool:
-	return c == "" or c in [" ", "\t", "\r", "\n", "#", ";", "(", ")", ",", "{", "}", "$", ":", '"', "'", "`"]
+	return (
+		c == ""
+		or c in [" ", "\t", "\r", "\n", "#", ";", "(", ")", ",", "{", "}", "$", ":", '"', "'", "`"]
+	)
+
 
 func _is_digit(c: String) -> bool:
-	if c.length() != 1: return false
+	if c.length() != 1:
+		return false
 	return c.unicode_at(0) >= 48 and c.unicode_at(0) <= 57
 
+
 func _is_hex_digit(c: String) -> bool:
-	if c.length() != 1: return false
+	if c.length() != 1:
+		return false
 	var n := c.unicode_at(0)
 	return (n >= 48 and n <= 57) or (n >= 65 and n <= 70) or (n >= 97 and n <= 102)
 
-func _is_quote(c: String) -> bool: return c in ['"', "'", "`"]
+
+func _is_quote(c: String) -> bool:
+	return c in ['"', "'", "`"]
+
 
 func _is_valid_var(name: String) -> bool:
 	if name.is_empty():
@@ -413,28 +444,95 @@ func _is_valid_var(name: String) -> bool:
 			return false
 	return true
 
-func _peek()  -> String: return _input[_pos] if _pos < _input.length() else ""
-func _eat()   -> String: var c := _input[_pos]; _pos += 1; return c
-func _at_end() -> bool:  return _pos >= _input.length()
+
+func _peek() -> String:
+	return _input[_pos] if _pos < _input.length() else ""
+
+
+func _eat() -> String:
+	var c := _input[_pos]
+	_pos += 1
+	return c
+
+
+func _at_end() -> bool:
+	return _pos >= _input.length()
+
 
 func _skip_whitespace() -> void:
-	while not _at_end() and _peek() in [" ", "\t", "\r", "\n"]: _pos += 1
+	while not _at_end() and _peek() in [" ", "\t", "\r", "\n"]:
+		_pos += 1
+
 
 func _unescape(c: String) -> String:
 	match c:
-		"n":  return "\n"
-		"t":  return "\t"
-		"r":  return "\r"
-		"\\": return "\\"
-		'"':  return '"'
-		"'":  return "'"
-		_:    return c
+		"n":
+			return "\n"
+		"t":
+			return "\t"
+		"r":
+			return "\r"
+		"\\":
+			return "\\"
+		'"':
+			return '"'
+		"'":
+			return "'"
+		_:
+			return c
+
 
 func _err(msg: String, pos: int) -> Dictionary:
 	return { ok = false, error = LexError.new(msg, pos) }
+
 
 # Attaches whatever tokens were successfully read before a lex failure —
 # lets the highlighter render up to the error point instead of going blank.
 func _with_tokens(result: Dictionary, tokens: Array) -> Dictionary:
 	result["tokens"] = tokens
 	return result
+
+
+class Token:
+	var type: int
+	var value: String
+	var position: int
+	var is_silent: bool = false
+	var fallback = null # Token | null — set for $?... variables; may itself have a fallback
+	var prefix_len: int = 0
+	## Set only on a fallback-sentinel LPAREN token produced by _read_nested_cmd_fallback().
+	## Holds the inner token stream (IDENTIFIER … END) of the nested command.
+	var nested_tokens: Array = []
+
+
+	func _init(t: int, v: String, p: int, silent := false) -> void:
+		type = t
+		value = v
+		position = p
+		is_silent = silent
+
+
+	func _to_string() -> String:
+		return "[%d] %s:'%s'%s%s%s" % [
+			position,
+			TokenType.keys()[type],
+			value,
+			" (silent)" if is_silent else "",
+			" (fallback)" if fallback != null else "",
+			" (nested_cmd)" if not nested_tokens.is_empty() else "",
+		]
+
+
+class LexError:
+	var message: String
+	var position: int
+
+
+	func _init(msg: String, pos: int) -> void:
+		position = pos
+		message = "[pos %d] %s" % [pos, msg]
+
+
+	func _to_string() -> String:
+		return message
+#endregion

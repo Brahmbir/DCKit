@@ -1,77 +1,15 @@
 extends Node
 
-const ADDON_PATH :String= "res://addons/dc_kit"
+const ADDON_PATH: String = "res://addons/dc_kit"
 
-func _ready() -> void:
-	var export_addon_cmd := DCDefinition.new(
-		"exportAddonZip",
-		func(ctx: DCContext) -> DCResult:
-			if not OS.has_feature("editor"):
-				return DCResult.fail("This command is only available when running from the Godot editor.")
-			
-			var plugin_version := get_plugin_version()
-			var version := plugin_version
-			if ctx.args_length() > 1:
-				return DCResult.fail("Usage: exportAddonZip [version]")
-			
-			if ctx.args_length() == 1:
-				var arg := (await ctx.arg(0)).value.as_string()
-
-				var regex := RegEx.new()
-				regex.compile("^\\d+(?:\\.\\d+)*(?:-[A-Za-z0-9]+)?$")
-
-				if not regex.search(arg):
-					return DCResult.fail(
-						"Invalid version. Expected format: MAJOR.MINOR.PATCH[-alpha|-beta|-rc] (e.g. 0.0.1, 0.0.1-alpha)."
-					)
-				
-				if compare_versions(arg, plugin_version) > 0:
-					var err_config := set_plugin_version(arg)
-					if err_config != OK:
-						return DCResult.fail("Couldn't update plugin.cfg.")
-					
-					version = arg
-
-			var output_zip := "res://tmp/DCKit-v%s.zip" % version
-
-			var err := addon_export(
-				ADDON_PATH,
-				output_zip,
-				{
-					"res://LICENSE": "addons/dc_kit/LICENSE",
-					"res://README.md": "addons/dc_kit/README.md",
-					"res://icon.svg": "addons/dc_kit/icon.svg"
-				}
-			)
-
-			if err != OK:
-				return DCResult.fail("Failed to export addon (Error %d)." % err)
-
-			return DCResult.ok(
-				"Addon exported successfully.\nOutput: %s"
-				% ProjectSettings.globalize_path(output_zip)
-			),
-		"Exports a Godot addon as a ZIP archive.",
-		[
-			DCDefinition.Param.new("version")
-				.describe("Addon version (e.g. 0.0.1 or 0.9.0-<alpha/beta/rc>]).").suggest([get_plugin_version()])
-		],
-		true
-	)
-
-	DCKit.register_def(export_addon_cmd)
-	
 
 static func addon_export(
 	addon_path: String,
 	output_zip: String,
-	extra_files: Dictionary = {}
+	extra_files: Dictionary = { },
 ) -> Error:
-
 	var output_dir := output_zip.get_base_dir()
-	DirAccess.make_dir_recursive_absolute(
-		ProjectSettings.globalize_path(output_dir)
-	)
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output_dir))
 
 	var zipper := ZIPPacker.new()
 
@@ -94,11 +32,61 @@ static func addon_export(
 	return OK
 
 
-static func _zip_directory(
-	zipper: ZIPPacker,
-	directory: String
-) -> Error:
+#region helper methods
+static func _get_plugin_version() -> String:
+	var cfg := ConfigFile.new()
 
+	if cfg.load(ADDON_PATH + "/plugin.cfg") != OK:
+		return "0.0.0"
+
+	return cfg.get_value("plugin", "version", "0.0.0")
+
+
+static func _set_plugin_version(version_str: String) -> Error:
+	var cfg := ConfigFile.new()
+
+	var err := cfg.load(ADDON_PATH + "/plugin.cfg")
+	if err != OK:
+		return err
+
+	cfg.set_value("plugin", "version", version_str)
+	return cfg.save(ADDON_PATH + "/plugin.cfg")
+
+
+static func _compare_versions(a: String, b: String) -> int:
+	var pa := _parse_version(a)
+	var pb := _parse_version(b)
+
+	var count := maxi(pa.numbers.size(), pb.numbers.size())
+
+	for i in count:
+		var av: int = pa.numbers[i] if i < pa.numbers.size() else 0
+		var bv: int = pb.numbers[i] if i < pb.numbers.size() else 0
+
+		if av < bv:
+			return -1
+		elif av > bv:
+			return 1
+
+	var order := { "alpha": 0, "beta": 1, "rc": 2, "": 3 }
+
+	var ar: int = order.get(pa.suffix, -1)
+	var br: int = order.get(pb.suffix, -1)
+
+	if ar < br:
+		return -1
+	elif ar > br:
+		return 1
+
+	if pa.suffix_number < pb.suffix_number:
+		return -1
+	elif pa.suffix_number > pb.suffix_number:
+		return 1
+
+	return 0
+
+
+static func _zip_directory(zipper: ZIPPacker, directory: String) -> Error:
 	var dir := DirAccess.open(directory)
 	if dir == null:
 		return ERR_CANT_OPEN
@@ -110,13 +98,12 @@ static func _zip_directory(
 
 		if filename.is_empty():
 			break
-#
+		#
 		#if filename.begins_with("."):
-			#continue
-#
+		#continue
+		#
 		#if filename.get_extension() == "import":
-			#continue
-
+		#continue
 		var full_path := directory.path_join(filename)
 
 		if dir.current_is_dir():
@@ -138,9 +125,7 @@ static func _zip_directory(
 				dir.list_dir_end()
 				return err
 
-			err = zipper.write_file(
-				file.get_buffer(file.get_length())
-			)
+			err = zipper.write_file(file.get_buffer(file.get_length()))
 
 			file.close()
 
@@ -152,12 +137,7 @@ static func _zip_directory(
 	return OK
 
 
-static func _zip_file(
-	zipper: ZIPPacker,
-	source: String,
-	destination: String
-) -> Error:
-
+static func _zip_file(zipper: ZIPPacker, source: String, destination: String) -> Error:
 	if not FileAccess.file_exists(source):
 		return OK
 
@@ -170,66 +150,11 @@ static func _zip_file(
 		file.close()
 		return err
 
-	err = zipper.write_file(
-		file.get_buffer(file.get_length())
-	)
+	err = zipper.write_file(file.get_buffer(file.get_length()))
 
 	file.close()
 
 	return err
-
-#region helper methods
-
-static func get_plugin_version() -> String:
-	var cfg := ConfigFile.new()
-
-	if cfg.load(ADDON_PATH + "/plugin.cfg") != OK:
-		return "0.0.0"
-
-	return cfg.get_value("plugin", "version", "0.0.0")
-
-
-static func set_plugin_version(version_str: String) -> Error:
-	var cfg := ConfigFile.new()
-
-	var err := cfg.load(ADDON_PATH + "/plugin.cfg")
-	if err != OK:
-		return err
-
-	cfg.set_value("plugin", "version", version_str)
-	return cfg.save(ADDON_PATH + "/plugin.cfg")
-
-static func compare_versions(a: String, b: String) -> int:
-	var pa := _parse_version(a)
-	var pb := _parse_version(b)
-	
-	var count := maxi(pa.numbers.size(), pb.numbers.size())
-
-	for i in count:
-		var av :int= pa.numbers[i] if i < pa.numbers.size() else 0
-		var bv :int= pb.numbers[i] if i < pb.numbers.size() else 0
-
-		if av < bv:
-			return -1
-		elif av > bv:
-			return 1
-
-	var order := {
-		"": 3,
-		"rc": 2,
-		"beta": 1,
-		"alpha": 0,
-	}
-
-	var ar : int = order.get(pa.suffix, -1)
-	var br : int = order.get(pb.suffix, -1)
-
-	if ar < br:
-		return -1
-	elif ar > br:
-		return 1
-
-	return 0
 
 
 static func _parse_version(version_str: String) -> Dictionary:
@@ -240,9 +165,93 @@ static func _parse_version(version_str: String) -> Dictionary:
 	for s in split[0].split("."):
 		numbers.append(s.to_int())
 
-	return {
-		"numbers": numbers,
-		"suffix": split[1].to_lower() if split.size() > 1 else ""
-	}
+	var suffix := ""
+	var suffix_number := 0
 
-#endregion
+	if split.size() > 1:
+		var prerelease := split[1].split(".", false)
+		suffix = prerelease[0].to_lower()
+
+		if prerelease.size() > 1:
+			suffix_number = prerelease[1].to_int()
+
+	return { "numbers": numbers, "suffix": suffix, "suffix_number": suffix_number }
+
+
+func _ready() -> void:
+	var export_addon_cmd := DCDefinition.new(
+		"exportAddonZip",
+		func(ctx: DCContext) -> DCResult:
+			if not OS.has_feature("editor"):
+				return DCResult.fail(
+					"This command is only available when running from the Godot editor."
+				)
+
+			var plugin_version := _get_plugin_version()
+			var version := plugin_version
+			if ctx.args_length() > 1:
+				return DCResult.fail("Usage: exportAddonZip [version]")
+
+			if ctx.args_length() == 1:
+				var arg := (await ctx.arg(0)).value.as_string()
+
+				var regex := RegEx.new()
+				regex.compile("^\\d+(?:\\.\\d+)*(?:-(?:alpha|beta|rc)(?:\\.\\d+)?)?$")
+
+				if not regex.search(arg):
+					return DCResult.fail(
+						"Invalid version. Expected format: MAJOR.MINOR.PATCH[-alpha|-beta|-rc[.N]] "
+						+ "(e.g. 0.0.1, 0.0.1-alpha, 0.0.1-alpha.1, 0.0.1-rc.2)."
+					)
+
+				if _compare_versions(arg, plugin_version) > 0:
+					var err_config := _set_plugin_version(arg)
+					if err_config != OK:
+						return DCResult.fail("Couldn't update plugin.cfg.")
+
+					version = arg
+
+			var output_zip := "res://tmp/DCKit-v%s.zip" % version
+
+			var err := addon_export(
+				ADDON_PATH,
+				output_zip,
+				{
+					"res://LICENSE": "addons/dc_kit/LICENSE",
+					"res://README.md": "addons/dc_kit/README.md",
+					"res://icon.svg": "addons/dc_kit/icon.svg",
+				},
+			)
+
+			if err != OK:
+				return DCResult.fail("Failed to export addon (Error %d)." % err)
+
+			return DCResult.ok(
+				"Addon exported successfully.\nOutput: %s"
+				% ProjectSettings.globalize_path(output_zip)
+			),
+		"Exports a Godot addon as a ZIP archive.",
+		[
+			DCDefinition
+			.Param
+			.new("version")
+			.describe("Addon version (e.g. '0.0.1', '0.9.0-rc.3' or '0.9.0-alpha').")
+			.suggest(
+				func():
+					var current_version := _get_plugin_version()
+					var result: Array[String] = [current_version]
+
+					const SUFFIX_ARRAY := ["alpha", "beta", "rc"]
+					for suffix in SUFFIX_ARRAY:
+						result.append("%s-%s" % [current_version, suffix])
+						result.append("%s-%s.1" % [current_version, suffix])
+						result.append("%s-%s.2" % [current_version, suffix])
+						result.append("%s-%s.3" % [current_version, suffix])
+
+					return result,
+			)
+		],
+		true,
+	)
+
+	DCKit.register_def(export_addon_cmd)

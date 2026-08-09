@@ -1,8 +1,5 @@
 extends RefCounted
 
-static func get_command_def_array() -> Array[DCDefinition]: 
-	return [echo_cmd, wait_cmd, abort_cmd, time_cmd, type_of_cmd]
-
 static var echo_cmd := DCDefinition.new(
 	"echo",
 	func(ctx: DCContext) -> DCResult:
@@ -15,12 +12,13 @@ static var echo_cmd := DCDefinition.new(
 				return result
 			parts.append(result.value.as_string())
 		return DCResult.ok(" ".join(parts)),
-		"Prints text to the console.",
-		[DCDefinition.Param.new("text").describe("Text to display.").rest()],
-		true
-	)
+	"Prints text to the console.",
+	[DCDefinition.Param.new("text").describe("Text to display.").rest()],
+	true,
+)
 
-static var wait_cmd := DCDefinition.new(
+static var wait_cmd := DCDefinition \
+		.new(
 	"wait",
 	func(ctx: DCContext) -> DCResult:
 		if ctx.args_length() != 1:
@@ -38,20 +36,22 @@ static var wait_cmd := DCDefinition.new(
 
 		var timer: SceneTreeTimer = null
 
-		var was_aborted := await ctx.step().exec(func() -> Signal:
-			return Engine.get_main_loop().create_timer(seconds).timeout
-			).run()
+		var was_aborted := await ctx \
+				.step() \
+				.exec(
+			func() -> Signal:
+				return Engine.get_main_loop().create_timer(seconds).timeout,
+		) \
+				.run()
 
 		if was_aborted:
 			return DCResult.fail("Wait aborted.")
 
 		return DCResult.ok("Waited %s." % duration_text),
 	"Pauses execution for a duration.",
-	[
-		DCDefinition.Param.new("duration")
-			.describe("Examples: 500ms, 2s, 1m")
-	]
-).as_utility()
+	[DCDefinition.Param.new("duration").describe("Examples: 500ms, 2s, 1m")],
+) \
+		.as_utility()
 
 static var abort_cmd := DCDefinition.new(
 	"abort",
@@ -67,10 +67,7 @@ static var abort_cmd := DCDefinition.new(
 
 		return DCResult.fail("Execution aborted.\n%s" % result.value.as_string()),
 	"Aborts the current command or script.",
-	[
-		DCDefinition.Param.new("reason")
-			.describe("Optional reason.")
-	]
+	[DCDefinition.Param.new("reason").describe("Optional reason.")],
 )
 
 static var time_cmd := DCDefinition.new(
@@ -86,21 +83,12 @@ static var time_cmd := DCDefinition.new(
 		var elapsed_ms := float(Time.get_ticks_usec() - start) / 1000.0
 
 		if not result.success:
-			return DCResult.fail(
-				"%s\nExecuted in %.3f ms."
-				% [result.message, elapsed_ms]
-			)
+			return DCResult.fail("%s\nExecuted in %.3f ms." % [result.message, elapsed_ms])
 
-		return DCResult.ok(
-			"%s\nExecuted in %.3f ms."
-			% [result.message, elapsed_ms]
-		),
+		return DCResult.ok("%s\nExecuted in %.3f ms." % [result.message, elapsed_ms]),
 	"Measures how long a nested command takes.",
-	[
-		DCDefinition.Param.new("command")
-			.describe("Command to execute.")
-	],
-	true
+	[DCDefinition.Param.new("command").describe("Command to execute.")],
+	true,
 )
 
 static var type_of_cmd := DCDefinition.new(
@@ -180,12 +168,13 @@ static var type_of_cmd := DCDefinition.new(
 
 		return DCResult.ok(type_name),
 	"Returns the type of a value.",
-	[
-		DCDefinition.Param.new("value")
-			.describe("Value to inspect.")
-	],
-	true
+	[DCDefinition.Param.new("value").describe("Value to inspect.")],
+	true,
 )
+
+
+static func get_command_def_array() -> Array[DCDefinition]:
+	return [echo_cmd, wait_cmd, abort_cmd, time_cmd, type_of_cmd]
 
 
 static func _parse_duration(text: String) -> float:

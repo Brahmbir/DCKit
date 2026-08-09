@@ -13,6 +13,7 @@ extends PanelContainer
 
 var _in_theme_update := false
 
+
 func _ready() -> void:
 	_update_stylebox()
 
@@ -46,11 +47,12 @@ func _update_stylebox() -> void:
 
 	add_theme_stylebox_override("panel", stylebox)
 
+
 func _merge_stylebox(dst: StyleBoxFlat, src: StyleBoxFlat) -> void:
 	dst.bg_color = src.bg_color
 
 	dst.corner_detail = src.corner_detail
-	
+
 	dst.corner_radius_top_left = src.corner_radius_top_left
 	dst.corner_radius_top_right = src.corner_radius_top_right
 	dst.corner_radius_bottom_left = src.corner_radius_bottom_left

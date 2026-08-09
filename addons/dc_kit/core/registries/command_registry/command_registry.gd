@@ -13,8 +13,8 @@
 #   get_alias_matches() gives autocomplete the alias labels it needs.
 extends RefCounted
 
-var _commands : Dictionary = {}  # primary name → DCDefinition
-var _aliases  : Dictionary = {}  # alias name   → primary name
+var _commands: Dictionary = { } # primary name → DCDefinition
+var _aliases: Dictionary = { } # alias name   → primary name
 
 
 # Validates name then stores the definition and all its aliases.
@@ -29,13 +29,15 @@ func register(def: DCDefinition) -> bool:
 		return false
 	_commands[def.name] = def
 
-	for a in def._aliases:
+	for a in def.aliases:
 		var aerr := _validate_name(a)
 		if aerr != "":
 			push_warning("CommandRegistry: alias '%s' for '%s' — %s" % [a, def.name, aerr])
 			continue
 		if _commands.has(a) or _aliases.has(a):
-			push_warning("CommandRegistry: alias '%s' for '%s' is already taken — ignored." % [a, def.name])
+			push_warning(
+				"CommandRegistry: alias '%s' for '%s' is already taken — ignored." % [a, def.name]
+			)
 			continue
 		_aliases[a] = def.name
 
@@ -44,7 +46,7 @@ func register(def: DCDefinition) -> bool:
 
 # Removes a command and all its aliases. Returns false + warns if locked or absent.
 func unregister(name: String) -> bool:
-	var def : DCDefinition = _commands.get(name)
+	var def: DCDefinition = _commands.get(name)
 	if def == null:
 		push_warning("CommandRegistry: unregister('%s') — not found." % name)
 		return false
@@ -60,16 +62,19 @@ func unregister(name: String) -> bool:
 # lock/unlock accept both primary names and aliases.
 func lock(name: String) -> void:
 	var def := get_definition(name)
-	if def != null: def.locked = true
+	if def != null:
+		def.locked = true
+
 
 func unlock(name: String) -> void:
 	var def := get_definition(name)
-	if def != null: def.locked = false
+	if def != null:
+		def.locked = false
 
 
 # Returns an invalid Callable when name (or alias) is unknown.
 func get_handler(name: String) -> Callable:
-	var def : DCDefinition = get_definition(name)
+	var def: DCDefinition = get_definition(name)
 	return def.handler if def else Callable()
 
 
@@ -77,7 +82,7 @@ func get_handler(name: String) -> Callable:
 func get_definition(name: String) -> DCDefinition:
 	if _commands.has(name):
 		return _commands[name]
-	var primary : String = _aliases.get(name, "")
+	var primary: String = _aliases.get(name, "")
 	return _commands.get(primary) if not primary.is_empty() else null
 
 
@@ -85,7 +90,10 @@ func get_definition(name: String) -> DCDefinition:
 # Never returns duplicates for aliased commands.
 func get_all() -> Array:
 	var out := _commands.values()
-	out.sort_custom(func(a, b): return a.name < b.name)
+	out.sort_custom(
+		func(a, b):
+			return a.name < b.name,
+	)
 	return out
 
 
@@ -105,8 +113,10 @@ func get_matching(query: String) -> Array:
 	return _rank_matches(
 		_commands.values(),
 		query,
-		func(def: DCDefinition): return def.name,
-		func(a: DCDefinition, b: DCDefinition): return a.name < b.name
+		func(def: DCDefinition):
+			return def.name,
+		func(a: DCDefinition, b: DCDefinition):
+			return a.name < b.name,
 	)
 
 
@@ -116,17 +126,20 @@ func get_alias_matches(query: String) -> Array:
 	for alias in _aliases:
 		var def: DCDefinition = _commands.get(_aliases[alias])
 		if def != null:
-			aliases.append({
-				"alias": alias,
-				"def": def
-			})
+			aliases.append({ "alias": alias, "def": def })
 
 	return _rank_matches(
 		aliases,
 		query,
-		func(entry): return entry.alias,
-		func(a, b): return a.alias < b.alias
+		func(entry):
+			return entry.alias,
+		func(a, b):
+			return a.alias < b.alias,
 	)
+
+
+func has(name: String) -> bool:
+	return _commands.has(name) or _aliases.has(name)
 
 
 func _rank_matches(items: Array, query: String, text_fn: Callable, sort_fn: Callable) -> Array:
@@ -149,10 +162,6 @@ func _rank_matches(items: Array, query: String, text_fn: Callable, sort_fn: Call
 		out.append_array(bucket)
 
 	return out
-
-
-func has(name: String) -> bool:
-	return _commands.has(name) or _aliases.has(name)
 
 
 # Returns "" on success or a human-readable error string on failure.
@@ -187,18 +196,26 @@ func _is_ident_start(c: String) -> bool:
 	var code := c.unicode_at(0)
 	return (code >= 65 and code <= 90) or (code >= 97 and code <= 122) or c == "_"
 
+
 func _is_ident_char(c: String) -> bool:
 	var code := c.unicode_at(0)
-	return (code >= 65 and code <= 90) or (code >= 97 and code <= 122) \
-		or (code >= 48 and code <= 57) or c == "_"
+	return (
+		(code >= 65 and code <= 90) or (code >= 97 and code <= 122) \
+				or (code >= 48 and code <= 57)
+		or c == "_"
+	)
 
 
 # Returns the rank (0–3) of the best match, or -1 for no match.
 func _match_rank(cmd_name: String, query: String) -> int:
-	if cmd_name == query:                           return 0  # exact
-	if cmd_name.begins_with(query):                 return 1  # full-name prefix
+	if cmd_name == query:
+		return 0 # exact
+	if cmd_name.begins_with(query):
+		return 1 # full-name prefix
 	var segs := cmd_name.split(".")
-	if segs[0].begins_with(query):                  return 2  # first-segment prefix
+	if segs[0].begins_with(query):
+		return 2 # first-segment prefix
 	for i in range(1, segs.size()):
-		if segs[i].begins_with(query):              return 3  # any other segment
+		if segs[i].begins_with(query):
+			return 3 # any other segment
 	return -1

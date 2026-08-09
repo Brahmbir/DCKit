@@ -1,12 +1,13 @@
-@tool 
+@tool
 extends Node3D
 
 @export var day_length: float = 60.0 # Seconds for a full day
 
+var time := 0.0
+
 @onready var directional_light: DirectionalLight3D = $DirectionalLight3D
 @onready var pause: Node3D = $Pause
 
-var time := 0.0
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -19,6 +20,16 @@ func _process(delta: float) -> void:
 	directional_light.rotation_degrees.x = angle + 180.0
 
 	_update_sun()
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_QUOTELEFT:
+		DCKit.toggle_console()
+		if DCKit.is_console_open():
+			pause.process_mode = Node.PROCESS_MODE_DISABLED
+		else:
+			pause.process_mode = Node.PROCESS_MODE_INHERIT
+		get_viewport().set_input_as_handled()
 
 
 func _update_sun() -> void:
@@ -39,13 +50,3 @@ func _update_sun() -> void:
 		# Night (moonlight)
 		directional_light.light_color = Color(0.45, 0.55, 0.8)
 		directional_light.light_energy = 0.08
-
-
-func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_QUOTELEFT:
-		DCKit.toggle_console()
-		if DCKit.is_console_open():
-			pause.process_mode = Node.PROCESS_MODE_DISABLED
-		else : 
-			pause.process_mode = Node.PROCESS_MODE_INHERIT
-		get_viewport().set_input_as_handled()

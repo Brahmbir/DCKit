@@ -6,7 +6,7 @@
 ## [code]log[/code]   — scoped logger for this invocation[br]
 ## [code]abort[/code] — cooperative cancellation: is_aborted(), aborted signal, step()[br]
 ## [code]args[/code]  — lazy arg resolution: arg(n), get_all_args(), args_length()
-## 
+##
 ## [br]
 ## [br]
 ## [b]Arg resolution[/b]
@@ -48,7 +48,7 @@
 ## if not results.is_empty() and not results.back().success:
 ##     return results.back()
 ## [/codeblock]
-## 
+##
 ## [br]
 ## [b]Handler signature[/b]
 ## [codeblock]
@@ -65,7 +65,7 @@
 ##     var name : String = r0.value.as_string()
 ##     ...
 ## [/codeblock]
-## 
+##
 ## [b]Lazy control-flow handler[/b]
 ## [codeblock]
 ## func(ctx: DevConsoleCommandContext) -> DCResult:
@@ -80,56 +80,45 @@
 class_name DCContext
 extends RefCounted
 
-
 # Signals
-
 ## Emitted exactly once, when abort() is first called on the root context.
 signal aborted
 
-
 # Public fields
-
 ## Scoped logger for this command invocation.
-var log : DCLogger
-
+var log: DCLogger
 
 # Internal state
-
 # Raw unresolved argument nodes from the parser.
 # Array[DevConsoleParser.CommandNode | ConstructorNode | StringNode | VariableNode]
 # Set by the executor at construction; never modified after.
-var _raw_args : Array = []
+var _raw_args: Array = []
 
 # Cache: index → DCResult. Populated on first access per index.
 # Stored as Dictionary so unresolved indices are absent (not null).
-var _cache : Dictionary = {}
+var _cache: Dictionary = { }
 
 # The resolver callable injected by the executor.
 # Signature: func(raw_arg, root_ctx: DevConsoleCommandContext) -> DCResult
 # This decouples the context from the executor class entirely.
-var _resolver : Callable
+var _resolver: Callable
 
 # The raw-string runner callable injected by the executor (bound right after
 # construction via bind_raw_runner). Lets this command run other command
 # strings nested under its own abort scope. See run_raw() below.
-var _raw_runner : Callable
+var _raw_runner: Callable
 
-var _aborted  : bool = false
-var _root_ctx : DCContext = null
+var _aborted: bool = false
+var _root_ctx: DCContext = null
 
 
 # Construction — executor only
-
 ## Constructs a context for one command invocation.
 ## [param p_raw_args]  — unresolved parser nodes, one per argument.
 ## [param p_log]       — scoped logger for this command invocation.
 ## [param p_resolver]  — async callable the context uses to resolve one node.
 ## [param p_root]      — parent context when this is a nested command; null for root.
-func _init(
-		p_raw_args : Array,
-		p_log      : DCLogger,
-		p_resolver : Callable,
-		p_root     : DCContext = null) -> void:
+func _init(p_raw_args: Array, p_log: DCLogger, p_resolver: Callable, p_root: DCContext = null) -> void:
 	_raw_args = p_raw_args
 	_resolver = p_resolver
 	_root_ctx = p_root
@@ -137,7 +126,6 @@ func _init(
 
 
 # Arg API
-
 ## Returns the number of arguments this command was called with.
 ## Sync — no await needed.
 func args_length() -> int:
@@ -156,16 +144,16 @@ func arg(n: int, should_cache: bool = true) -> DCResult:
 	if n < 0 or n >= _raw_args.size():
 		return DCResult.fail(
 			"Argument %d does not exist — command received %d argument(s)." \
-			% [n, _raw_args.size()])
+					% [n, _raw_args.size()]
+		)
 
 	if _cache.has(n):
 		return _cache[n]
 
-	var result : DCResult = await _resolver.call(_raw_args[n], _root_ctx if _root_ctx else self)
+	var result: DCResult = await _resolver.call(_raw_args[n], _root_ctx if _root_ctx else self)
 	if should_cache:
 		_cache[n] = result
 	return result
-
 
 
 ## Resolves all arguments and returns one DCResult per argument.
@@ -175,18 +163,11 @@ func arg(n: int, should_cache: bool = true) -> DCResult:
 ## Returns [code]Array[DCResult][/code] — same length as args_length().
 ## Returns an empty array when the command has no arguments.
 func get_all_args() -> Array:
-	var out : Array = []
+	var out: Array = []
 	for i in _raw_args.size():
-		var result : DCResult = await arg(i)
+		var result: DCResult = await arg(i)
 		out.append(result)
 	return out
-
-
-# Raw-string execution
-
-# Called by the executor right after construction — not for handler use.
-func _bind_raw_runner(fn: Callable) -> void:
-	_raw_runner = fn
 
 
 ## Runs a raw command string through the executor's full pipeline
@@ -202,7 +183,6 @@ func run_raw(raw: String) -> Array:
 
 
 # Abort
-
 ## Returns whether this command has been aborted.
 ## Delegates upward — if root is aborted, so are all children.
 func is_aborted() -> bool:
@@ -244,6 +224,12 @@ func step() -> Step:
 	return Step.new(self)
 
 
+# Raw-string execution
+# Called by the executor right after construction — not for handler use.
+func _bind_raw_runner(fn: Callable) -> void:
+	_raw_runner = fn
+
+
 ## Abortable async block. Races an exec signal against ctx.aborted.
 ## Whichever fires first wins — no polling, no frame spinning.
 ##
@@ -259,13 +245,13 @@ func step() -> Step:
 ## before the signal fires, the step will hang. cleanup must prevent
 ## this by freeing or stopping the resource.
 class Step extends RefCounted:
-
 	signal _resolved(was_aborted: bool)
 
-	var _ctx        : DCContext
-	var _init_fn    : Callable
-	var _exec_fn    : Callable
-	var _cleanup_fn : Callable
+	var _ctx: DCContext
+	var _init_fn: Callable
+	var _exec_fn: Callable
+	var _cleanup_fn: Callable
+
 
 	func _init(ctx: DCContext) -> void:
 		_ctx = ctx
@@ -277,10 +263,12 @@ class Step extends RefCounted:
 		_init_fn = fn
 		return self
 
+
 	## Sets the async trigger. [param fn] must have signature: func() -> Signal.
 	func exec(fn: Callable) -> Step:
 		_exec_fn = fn
 		return self
+
 
 	## Sets a synchronous function to run only if aborted mid-exec.
 	func cleanup(fn: Callable) -> Step:
@@ -312,7 +300,7 @@ class Step extends RefCounted:
 
 		# Always race against the ROOT context's aborted signal.
 		# If this IS the root, _root_ctx is null and we use ourselves.
-		var abort_source : DCContext = _ctx._root_ctx if _ctx._root_ctx != null else _ctx
+		var abort_source: DCContext = _ctx._root_ctx if _ctx._root_ctx != null else _ctx
 
 		# Race both signals. _guard[0] is the fired flag.
 		# An Array is used instead of a plain bool because GDScript lambdas
@@ -323,12 +311,14 @@ class Step extends RefCounted:
 		var _guard := [false]
 
 		var on_exec_done := func() -> void:
-			if _guard[0]: return
+			if _guard[0]:
+				return
 			_guard[0] = true
 			_resolved.emit(false)
 
 		var on_aborted := func() -> void:
-			if _guard[0]: return
+			if _guard[0]:
+				return
 			_guard[0] = true
 			if _cleanup_fn.is_valid():
 				_cleanup_fn.call()
@@ -337,7 +327,7 @@ class Step extends RefCounted:
 		exec_signal.connect(on_exec_done, CONNECT_ONE_SHOT)
 		abort_source.aborted.connect(on_aborted, CONNECT_ONE_SHOT)
 
-		var was_aborted : bool = await _resolved
+		var was_aborted: bool = await _resolved
 
 		if exec_signal.is_connected(on_exec_done):
 			exec_signal.disconnect(on_exec_done)

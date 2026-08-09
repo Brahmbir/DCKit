@@ -102,6 +102,7 @@ margin_scale_top = 12.5
 margin_scale_bottom = 12.5
 
 [node name="TextureRect" type="TextureRect" parent="RootVBox/Header/MarginContainer/HBoxContainer/AspectRatioContainer/MarginContainer" unique_id=1868534911]
+unique_name_in_owner = true
 layout_mode = 2
 texture = ExtResource("3_rooy4")
 expand_mode = 1
