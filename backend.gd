@@ -20,6 +20,18 @@ var _executor: _DCKitExecutorNamespace.Executor = null
 
 var _view_controller = null # ViewController
 
+var _hint := """[i][b][color=gray]Keyboard shortcuts:[/color][/b]
+[color=#6C7086][color=gray]Autocomplete[/color]
+		[b]Ctrl+Space[/b] — toggle autocomplete
+		[b]Up[/b] / [b]Down[/b] — navigate suggestions (when open)
+		[b]Tab[/b] / [b]Enter[/b] — accept highlighted suggestion (when open)
+		[b]Esc[/b] — close autocomplete (when open)
+[color=gray]History[/color]
+		[b]Up[/b] / [b]Down[/b] — navigate history
+		[b]Ctrl+Up[/b] / [b]Ctrl+Down[/b] — navigate prefix-matched history
+[color=gray]Misc[/color]
+		[b]Enter[/b] — submit
+		[b]Ctrl+Shift+Space[/b] — expand/collapse info panel[/i][/color]"""
 
 func _init() -> void:
 	_read_project_settings()
@@ -33,6 +45,9 @@ func init_ui() -> Control:
 	var dc_kit_ui := DCKit_UI_PackScene.instantiate()
 	dc_kit_ui.setup_ui_controller(_view_controller)
 	dc_kit_ui.setup_executor_connection(_executor)
+	
+	_executor.logger.simple_print(_get_shotcuts_hint())
+	
 	dc_kit_ui.hide()
 	return dc_kit_ui
 
@@ -155,3 +170,7 @@ func _register_commands(_command_reg: _DCKitRegistriesNamespace.CommandRegistry)
 		_register_defs(_var_store.get_command_def_array())
 	if _executor:
 		_register_defs(_executor.get_command_def_array())
+
+
+func _get_shotcuts_hint() -> String:
+	return _hint

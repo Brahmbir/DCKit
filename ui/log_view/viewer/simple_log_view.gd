@@ -44,7 +44,6 @@ func _on_cleared() -> void:
 # Rendering
 func _render_entry(entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> void:
 	_render_badge(_badge_level(entry))
-	_label.add_text("  ")
 	match entry.kind:
 		"SYSTEM":
 			_label.push_color(Color.html(_C.muted))
@@ -72,8 +71,10 @@ func _render_body(text: String) -> void:
 
 
 func _render_badge(level: String) -> void:
+	if level.is_empty():
+		return
 	_label.push_color(Color.html(_C.get(level, _C.muted)))
-	_label.add_text("[%s]" % level)
+	_label.add_text("[%s]  "% level)
 	_label.pop()
 
 
