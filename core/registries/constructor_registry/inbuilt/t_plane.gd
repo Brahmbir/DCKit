@@ -29,7 +29,7 @@ const DCFloat = preload("./t_float.gd")
 const DCVector3 = preload("./t_vector3.gd")
 
 
-static func create() -> _DCKitNamespace.ConstructorDef:
+static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 	const CONSTS := {
 		"PLANE_XY": Plane(Vector3(0, 0, 1), 0),
 		"PLANE_XZ": Plane(Vector3(0, 1, 0), 0),
@@ -124,7 +124,7 @@ static func create() -> _DCKitNamespace.ConstructorDef:
 
 		return DCResult.fail("Plane: expected 0, 1, 2, 3, or 4 parts — got %d." % parts.size())
 
-	return _DCKitNamespace.ConstructorDef.new(
+	return _DCKitRegistriesNamespace.ConstructorDef.new(
 		"Plane",
 		handler,
 		"An infinite plane defined by a [b]normal[/b] and a distance [b]d[/b].\n"
@@ -132,15 +132,15 @@ static func create() -> _DCKitNamespace.ConstructorDef:
 		+ "Normal is automatically normalised.[/color]",
 		[
 			sig_zero("XZ plane — normal (0, 1, 0), d = 0"),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Existing Plane",
 				[part_hint_plane("value", "Existing Plane value.")],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Normal + distance",
 				[
 					DCVector3.part_hint_vector3(
@@ -154,7 +154,7 @@ static func create() -> _DCKitNamespace.ConstructorDef:
 					),
 				],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Normal + point on plane",
 				[
 					DCVector3.part_hint_vector3(
@@ -164,7 +164,7 @@ static func create() -> _DCKitNamespace.ConstructorDef:
 					DCVector3.part_hint_vector3("point", "Any point known to lie on the plane."),
 				],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Three points (counter-clockwise)",
 				[
 					DCVector3.part_hint_vector3("v1", "First point on the plane."),
@@ -172,7 +172,7 @@ static func create() -> _DCKitNamespace.ConstructorDef:
 					DCVector3.part_hint_vector3("v3", "Third point — counter-clockwise from v1."),
 				],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Components — a, b, c (normal) + d (distance)",
 				[
 					DCFloat.part_hint("a", "Normal X component."),
@@ -197,7 +197,9 @@ static func extract_plane(val: DCResult.Value) -> Variant:
 static func part_hint_plane(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitNamespace.ConstructorDef.PartHint:
-	return (_DCKitNamespace.ConstructorDef.PartHint.new(p_name, "<Plane>", p_desc).accepts(
+) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+	return (
+		_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(p_name, "<Plane>", p_desc).accepts(
 			[TYPE_PLANE]
-		))
+		)
+	)

@@ -51,12 +51,12 @@ func _build_command_data(def: DCDefinition, arg_index: int) -> Dictionary:
 	}
 
 
-func _build_constructor_data(def: _DCKitNamespace.ConstructorDef, part_index: int) -> Dictionary:
+func _build_constructor_data(def: _DCKitRegistriesNamespace.ConstructorDef, part_index: int) -> Dictionary:
 	var signatures := []
-	for sig: _DCKitNamespace.ConstructorDef.TypeSignature in def.signatures:
+	for sig: _DCKitRegistriesNamespace.ConstructorDef.TypeSignature in def.signatures:
 		var parts := []
 		for i in sig.parts.size():
-			var p: _DCKitNamespace.ConstructorDef.PartHint = sig.parts[i]
+			var p: _DCKitRegistriesNamespace.ConstructorDef.PartHint = sig.parts[i]
 			parts.append(
 				{
 					"name": p.name,

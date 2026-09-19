@@ -13,7 +13,7 @@ extends "./inbuilt_base.gd"
 const DCFloat = preload("./t_float.gd")
 
 
-static func create() -> _DCKitNamespace.ConstructorDef:
+static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 	const CONSTS := { "ZERO": Vector4.ZERO, "ONE": Vector4.ONE, "INF": Vector4.INF }
 
 	var const_names: Array = CONSTS.keys()
@@ -58,21 +58,21 @@ static func create() -> _DCKitNamespace.ConstructorDef:
 
 		return DCResult.fail("Vector4: expected 0, 1, or 4 parts — got %d." % parts.size())
 
-	return _DCKitNamespace.ConstructorDef.new(
+	return _DCKitRegistriesNamespace.ConstructorDef.new(
 		"Vector4",
 		handler,
 		"A 4D vector with [b]x[/b], [b]y[/b], [b]z[/b], and [b]w[/b] float components.",
 		[
 			sig_zero("Zero vector — Vector4(0, 0, 0, 0)"),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Convert Vector4/Vector4i",
 				[part_hint_vector4("value", "Existing Vector4 or Vector4i")],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"XYZW components",
 				[
 					DCFloat.part_hint("x", "X component"),
@@ -97,7 +97,9 @@ static func extract_vector4(val: DCResult.Value) -> Variant:
 static func part_hint_vector4(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitNamespace.ConstructorDef.PartHint:
-	return (_DCKitNamespace.ConstructorDef.PartHint.new(p_name, "<Vector4>", p_desc).accepts(
+) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+	return (
+		_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(p_name, "<Vector4>", p_desc).accepts(
 			[TYPE_VECTOR4, TYPE_VECTOR4I]
-		))
+		)
+	)

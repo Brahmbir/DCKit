@@ -36,7 +36,7 @@ func get_completions() -> Dictionary:
 	if _result == null:
 		return { start = _cursor_pos, items = [] }
 
-	var scope: _DCKitNamespace.Analyzer.DCScope = _result.scope
+	var scope: DCAnalysisResult.DCScope = _result.scope
 	var prefix := _scan_prefix(_input, _cursor_pos)
 	var start := _cursor_pos - prefix.length()
 
@@ -46,13 +46,13 @@ func get_completions() -> Dictionary:
 
 	var items: Array = []
 	match scope.kind:
-		_DCKitNamespace.Analyzer.DCScope.Kind.COMMAND:
+		DCAnalysisResult.DCScope.Kind.COMMAND:
 			if scope.arg_index == -1:
 				items = _command_items(prefix)
 			else:
 				items = _param_items(scope, prefix)
 				items.append_array(_type_items(prefix))
-		_DCKitNamespace.Analyzer.DCScope.Kind.CONSTRUCTOR:
+		DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
 			items = _part_items(scope, prefix)
 			items.append_array(_type_items(prefix))
 
@@ -136,10 +136,10 @@ func _part_items(scope, _prefix: String) -> Array:
 	var seen: Dictionary = { }
 	var prev: Array = _prev_arg_values(scope)
 
-	for sig: _DCKitNamespace.ConstructorDef.TypeSignature in def.signatures:
+	for sig: _DCKitRegistriesNamespace.ConstructorDef.TypeSignature in def.signatures:
 		if scope.part_index >= sig.parts.size():
 			continue
-		var part: _DCKitNamespace.ConstructorDef.PartHint = sig.parts[scope.part_index]
+		var part: _DCKitRegistriesNamespace.ConstructorDef.PartHint = sig.parts[scope.part_index]
 		if not part.suggestor.is_valid():
 			continue
 		#var suggestions = _call_suggestor(part.suggestor, prev, prefix)
@@ -157,17 +157,17 @@ func _part_items(scope, _prefix: String) -> Array:
 
 
 # HELPERS
-func _prev_arg_values(scope: _DCKitNamespace.Analyzer.DCScope) -> Array:
+func _prev_arg_values(scope: DCAnalysisResult.DCScope) -> Array:
 	if _result == null or _result.ast.is_empty():
 		return []
 	match scope.kind:
-		_DCKitNamespace.Analyzer.DCScope.Kind.COMMAND:
+		DCAnalysisResult.DCScope.Kind.COMMAND:
 			for node in _result.ast:
 				if "args" in node and "name" in node and node.name == scope.name:
 					return _literal_values(node.args, scope.arg_index)
 		# INFO it crash , so dont uncomment (i dont want to to it)
-		#_DCKitNamespace.Analyzer.DCScope.Kind.CONSTRUCTOR:
-		#var ctor :_DCKitNamespace.ConstructorDef= _find_ctor(_result.ast, scope.type_name)
+		#DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+		#var ctor :_DCKitRegistriesNamespace.ConstructorDef= _find_ctor(_result.ast, scope.type_name)
 		#if ctor != null:
 		#return _literal_values(ctor.parts, scope.part_index)
 	return []

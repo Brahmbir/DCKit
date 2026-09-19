@@ -7,7 +7,7 @@ enum ColorScheme {
 	CATPPUCCIN_MOCHA,
 }
 
-const TT := _DCKitNamespace.Lexer.TokenType
+const TT := _DCKitAnalyzerNamespace.Lexer.TokenType
 
 @export var palette := ColorScheme.TOKYO_NIGHT
 
@@ -62,7 +62,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 
 	var spans: Dictionary = { 0: { "color": color_dict[palette].color_default } }
 
-	var lex_r := _DCKitNamespace.Lexer.new().lex(text)
+	var lex_r := _DCKitAnalyzerNamespace.Lexer.new().lex(text)
 	var tokens: Array = lex_r.get("tokens", [])
 
 	var last_end := _add_token_spans(spans, text, tokens)

@@ -51,7 +51,10 @@ var _is_controller_bound := false
 
 
 func _init() -> void:
-	font_scale = _DCKitNamespace.Setting.get_setting(_DCKitNamespace.Setting.SETTING_UI_SCALE, 1.0)
+	font_scale = _DCKitUtilsNamespace.Setting.get_setting(
+		_DCKitUtilsNamespace.Setting.SETTING_UI_SCALE,
+		1.0,
+	)
 	_rebuild_theme()
 
 
@@ -60,8 +63,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 	if _input_comp.has_signal("focus_changed") and _input_comp.has_signal("abort_requested"):
-		_input_comp.command_submitted.connect(_on_command_submitted)
-		_input_comp.abort_requested.connect(_on_abort_requested)
+		_input_comp.connect("command_submitted", _on_command_submitted)
+		_input_comp.connect("abort_requested", _on_abort_requested)
 	_error_container.item_pressed.connect(
 		func(p: int, l: int):
 			_input_comp.move_caret_to(p),
@@ -89,7 +92,7 @@ func get_command_def_array() -> Array[DCDefinition]:
 	return def_arr
 
 
-func setup_executor_connection(executor: _DCKitNamespace.Executor) -> void:
+func setup_executor_connection(executor: _DCKitExecutorNamespace.Executor) -> void:
 	_executor_ref = weakref(executor)
 	_is_executor_bound = false
 
@@ -108,7 +111,7 @@ func setup_ui_controller(controller: ViewController) -> void:
 func _rebuild_theme():
 	var pixels := int(font_scale * 18)
 
-	var t_util := _DCKitNamespace.ThemeUtil.new()
+	var t_util := _DCKitUINamespace.ThemeUtil.new()
 
 	var font_theme := t_util.get_dckit_theme(pixels, normal_colour, highlighted_colour)
 	if font_theme != null and is_node_ready():
@@ -125,12 +128,12 @@ func _bind_executor():
 		return
 
 	var ref = _executor_ref.get_ref()
-	if (ref == null and not (ref is _DCKitNamespace.Executor)):
+	if (ref == null and not (ref is _DCKitExecutorNamespace.Executor)):
 		return
 
 	_is_executor_bound = true
 
-	var executor: _DCKitNamespace.Executor = ref
+	var executor: _DCKitExecutorNamespace.Executor = ref
 	_is_controller_bound = true
 
 	_log_view.setup(executor.logger)
@@ -146,9 +149,9 @@ func _bind_executor():
 func _on_command_submitted(raw: String) -> void:
 	_input_comp.set_busy(true)
 	var ref = _executor_ref.get_ref()
-	if (ref == null and not (ref is _DCKitNamespace.Executor)):
+	if (ref == null and not (ref is _DCKitExecutorNamespace.Executor)):
 		return
-	(ref as _DCKitNamespace.Executor).run(raw)
+	(ref as _DCKitExecutorNamespace.Executor).run(raw)
 
 
 func _on_execution_finished(_raw = null, _result = null) -> void:
@@ -157,9 +160,9 @@ func _on_execution_finished(_raw = null, _result = null) -> void:
 
 func _on_abort_requested() -> void:
 	var ref = _executor_ref.get_ref()
-	if (ref == null and not (ref is _DCKitNamespace.Executor)):
+	if (ref == null and not (ref is _DCKitExecutorNamespace.Executor)):
 		return
-	(ref as _DCKitNamespace.Executor).abort()
+	(ref as _DCKitExecutorNamespace.Executor).abort()
 #endregion
 
 

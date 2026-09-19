@@ -30,7 +30,7 @@ func _ready() -> void:
 	_on_cleared()
 
 
-func _append_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
+func _append_entry(entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> void:
 	_render_entry(entry)
 	_label.add_text("\n")
 
@@ -42,7 +42,7 @@ func _on_cleared() -> void:
 
 
 # Rendering
-func _render_entry(entry: _DCKitNamespace.Tracer.LogEntry) -> void:
+func _render_entry(entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> void:
 	_render_badge(_badge_level(entry))
 	_label.add_text("  ")
 	match entry.kind:
@@ -77,7 +77,7 @@ func _render_badge(level: String) -> void:
 	_label.pop()
 
 
-func _badge_level(entry: _DCKitNamespace.Tracer.LogEntry) -> String:
+func _badge_level(entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> String:
 	match entry.kind:
 		"COMMAND":
 			return "CMD"

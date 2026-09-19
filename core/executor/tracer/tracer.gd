@@ -11,12 +11,12 @@ const LogFileWriter := preload("./log_file_writer.gd")
 # Level ordering — used by get_at_or_above() and _maybe_print().
 # Higher value = more severe.
 const _LEVEL_ORDER: Dictionary = {
-	"OK": _DCKitNamespace.Setting.LoggerPrintThershold.OK,
-	"INFO": _DCKitNamespace.Setting.LoggerPrintThershold.INFO,
-	"HELP": _DCKitNamespace.Setting.LoggerPrintThershold.INFO,
-	"WARN": _DCKitNamespace.Setting.LoggerPrintThershold.WARN,
-	"FAIL": _DCKitNamespace.Setting.LoggerPrintThershold.FAIL,
-	"ERROR": _DCKitNamespace.Setting.LoggerPrintThershold.ERROR,
+	"OK": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.OK,
+	"INFO": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.INFO,
+	"HELP": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.INFO,
+	"WARN": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.WARN,
+	"FAIL": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.FAIL,
+	"ERROR": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.ERROR,
 }
 
 const _MEMORY_LIMIT_DEFAULT: int = 200
@@ -112,22 +112,22 @@ func _read_project_settings() -> void:
 	var log_dir: String = "user://DCKit/logs/"
 	var max_files: int = 5
 
-	file_logging_enabled = _DCKitNamespace.Setting.get_setting(
-		_DCKitNamespace.Setting.SETTING_LOGGING_ENABLED,
+	file_logging_enabled = _DCKitUtilsNamespace.Setting.get_setting(
+		_DCKitUtilsNamespace.Setting.SETTING_LOGGING_ENABLED,
 		file_logging_enabled,
 	)
-	log_dir = _DCKitNamespace.Setting.get_setting(
-		_DCKitNamespace.Setting.SETTING_LOGGING_DIRECTORY,
+	log_dir = _DCKitUtilsNamespace.Setting.get_setting(
+		_DCKitUtilsNamespace.Setting.SETTING_LOGGING_DIRECTORY,
 		log_dir,
 	)
-	max_files = _DCKitNamespace.Setting.get_setting(
-		_DCKitNamespace.Setting.SETTING_LOGGING_MAX_SESSION_FILES,
+	max_files = _DCKitUtilsNamespace.Setting.get_setting(
+		_DCKitUtilsNamespace.Setting.SETTING_LOGGING_MAX_SESSION_FILES,
 		max_files,
 	)
-	print_threshold = _DCKitNamespace.Setting.LoggerPrintThershold.keys()[
-		_DCKitNamespace.Setting.get_setting(
-			_DCKitNamespace.Setting.SETTING_LOGGING_PRINT_THRESHOLD,
-			_DCKitNamespace.Setting.LoggerPrintThershold[print_threshold],
+	print_threshold = _DCKitUtilsNamespace.Setting.LoggerPrintThershold.keys()[
+		_DCKitUtilsNamespace.Setting.get_setting(
+			_DCKitUtilsNamespace.Setting.SETTING_LOGGING_PRINT_THRESHOLD,
+			_DCKitUtilsNamespace.Setting.LoggerPrintThershold[print_threshold],
 		)
 	]
 
