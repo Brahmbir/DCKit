@@ -4,8 +4,8 @@ extends EditorExportPlugin
 const IGNORE_FILES := ["fonts/OFL.txt"]
 
 const INCLUDE_FILES := [
-	"plugin.cfg",
-	"plugin.gd",
+	# "plugin.cfg",
+	# "plugin.gd",
 	"dckit_autoload.gd",
 	"dc_analysis_result.gd",
 	"dc_result.gd",
