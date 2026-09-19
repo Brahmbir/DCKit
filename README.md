@@ -96,7 +96,7 @@ DCKit.register(
         player.heal(amount.as_float())
         return DCResult.ok("healed %s" % amount),
     "Heals the player by the given amount.",
-    [DCParam.new("amount").describe("HP to restore.")]
+    [DCDefinition.Param.new("amount").describe("HP to restore.")]
 )
 ```
 
