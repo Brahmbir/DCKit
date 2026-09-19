@@ -36,6 +36,11 @@ func open_session() -> void:
 	_file_writer.open_session()
 
 
+# Quick one-off log with no stack/origin bookkeeping.
+func simple_print(text: String) -> void:
+	_store(_make_entry("LOG", "", [], text), true)
+
+
 # Public write API — called by Executor stubs.
 # `origin` is accepted to match the executor interface but is not stored.
 func log_command(raw: String, stack: Array, _origin: String = "user") -> void:
@@ -144,9 +149,9 @@ func _make_entry(kind: String, level: String, stack: Array, body: String) -> Log
 	return LogEntry.new(kind, level, stack.duplicate(), body)
 
 
-func _store(entry: LogEntry) -> void:
+func _store(entry: LogEntry, ignore: bool = false) -> void:
 	# HELP is contextual output for the user — not a log event, skip the file.
-	if entry.level != "HELP":
+	if ignore or entry.level != "HELP":
 		_file_writer.append(entry.format_line())
 
 	_maybe_print(entry)
