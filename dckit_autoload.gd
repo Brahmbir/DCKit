@@ -5,11 +5,10 @@ signal console_closed # Emitted when the console UI is hidden.
 
 const DCBackend_Class_Path = "res://addons/dc_kit/backend.gd"
 
-#region commit after editing the addon (dc_kit) files 
+
+#INFO commit after editing the addon (dc_kit) files
 #const DCBackend = preload(DCBackend_Class_Path)
 #var _backend: DCBackend = null
-#endregion
-
 var _backend = null
 
 var _dc_kit_ui: Control = null
@@ -31,6 +30,7 @@ func _init() -> void:
 	_backend = DCBackend.new()
 	if _backend == null:
 		push_error("DC: backend instantiation returned null.")
+	
 
 
 func _ready() -> void:
@@ -54,7 +54,7 @@ func analyze(input: String, cursor_pos: int = -1) -> DCAnalysisResult:
 
 func run(raw_string: String) -> DCResult:
 	if _guard("run"):
-		return null
+		return DCResult.fail("Console disabled")
 	return await _backend.run(raw_string) as DCResult
 
 
@@ -75,7 +75,8 @@ func register(
 	return _backend.register(p_name, handler, description, params)
 
 
-func register_def(def) -> bool:
+func register_def(def: DCDefinition) -> bool:
+	print("trigger")
 	if _guard("register_def"):
 		return false
 	return _backend.register_def(def)
@@ -171,8 +172,12 @@ func _has_dc_kit_ui() -> bool:
 	return _dc_kit_ui != null
 
 
-func _guard(caller: String, backend_required: bool = true) -> bool:
+func _guard(method_name: String, backend_required: bool = true) -> bool:
 	if backend_required and not has_backend():
-		push_error("DCKit: '%s' called with no backend — aborting." % caller)
-		return false
-	return true
+		push_error("DCKit: '%s' called with no backend — aborting." % method_name)
+		return true
+
+	if not _backend.has_method(method_name):
+		push_error("DCKit: '%s' method dosen't in backend — aborting." % method_name)
+		return true
+	return false
