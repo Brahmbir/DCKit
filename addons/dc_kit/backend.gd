@@ -8,9 +8,6 @@ const ViewController := preload("./view_controllers/view_controller.gd")
 
 const DCKit_UI_PackScene = preload("./ui/dev_console_ui.tscn")
 
-# INFO In a release export, the command and ui is never added.
-var _enabled := OS.is_debug_build()
-
 var _cmd_reg: _DCKitRegistriesNamespace.CommandRegistry = null
 var _ctor_reg: _DCKitRegistriesNamespace.ConstructorRegistry = null
 var _var_store: _DCKitCoreNamespace.VariableStore = null
@@ -33,34 +30,33 @@ var _hint := """[i][b][color=gray]Keyboard shortcuts:[/color][/b]
 		[b]Enter[/b] — submit
 		[b]Ctrl+Shift+Space[/b] — expand/collapse info panel[/i][/color]"""
 
+
 func _init() -> void:
-	_read_project_settings()
 	_init_systems()
 
 
 func init_ui() -> Control:
-	if not _enabled:
-		return null
-
 	var dc_kit_ui := DCKit_UI_PackScene.instantiate()
 	dc_kit_ui.setup_ui_controller(_view_controller)
 	dc_kit_ui.setup_executor_connection(_executor)
-	
+
 	_executor.logger.simple_print(_get_shotcuts_hint())
-	
+
 	dc_kit_ui.hide()
 	return dc_kit_ui
 
 
 #region Public API
 func analyze(input: String, cursor_pos: int = -1) -> DCAnalysisResult:
+	if input.is_empty():
+		return null
 	_view_controller.on_text_changed(input, cursor_pos)
 	return _view_controller.last_result
 
 
 func run(raw_string: String) -> DCResult:
-	if not _enabled:
-		return DCResult.fail("Console disabled")
+	if raw_string.is_empty():
+		return DCResult.fail("Empty string passed")
 	return await _executor.run(raw_string)
 
 
@@ -75,15 +71,13 @@ func register(
 	description: String = "",
 	params: Array[DCDefinition.Param] = [],
 ) -> bool:
-	if not _enabled:
-		return false
-
 	var def := DCDefinition.new(p_name, handler, description, params)
 	return _cmd_reg.register(def)
 
 
 func register_def(def: DCDefinition) -> bool:
-	if not _enabled:
+	if not def:
+		push_warning("Definition is null")
 		return false
 	return _cmd_reg.register(def)
 
@@ -142,23 +136,12 @@ func _init_systems() -> void:
 	_register_commands(_cmd_reg)
 
 
-func _read_project_settings() -> void:
-	var enabled_in_release: bool = _DCKitUtilsNamespace.Setting.get_setting(
-		_DCKitUtilsNamespace.Setting.SETTING_ENABLED_IN_RELEASE,
-		false,
-	)
-	_enabled = OS.is_debug_build() or enabled_in_release
-
-
 func _register_defs(defs: Array[DCDefinition]) -> void:
 	for def in defs:
 		_cmd_reg.register(def)
 
 
 func _register_commands(_command_reg: _DCKitRegistriesNamespace.CommandRegistry) -> void:
-	if not _enabled:
-		return
-
 	if BasicCMD:
 		_register_defs(BasicCMD.get_command_def_array())
 	if ControlFlowCMD:
