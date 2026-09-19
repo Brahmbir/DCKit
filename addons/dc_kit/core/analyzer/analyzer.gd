@@ -1,6 +1,6 @@
 extends RefCounted
 
-const TT := _DCKitNamespace.Lexer.TokenType
+const TT := _DCKitAnalyzerNamespace.Lexer.TokenType
 
 # Maximum nested argument / fallback depth allowed for one command tree.
 const MAX_ARGUMENT_DEPTH: int = 32
@@ -22,15 +22,15 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 	if cursor_pos < 0:
 		cursor_pos = input.length()
 
-	var lex_r := _DCKitNamespace.Lexer.new().lex(input)
+	var lex_r := _DCKitAnalyzerNamespace.Lexer.new().lex(input)
 	if not lex_r.ok:
 		result.diagnostics.append(
 			_diag(
 				lex_r.error.message,
 				lex_r.error.position,
 				1,
-				DCDiagnostic.Severity.ERROR,
-				DCDiagnostic.Source.LEXER,
+				DCAnalysisResult.DCDiagnostic.Severity.ERROR,
+				DCAnalysisResult.DCDiagnostic.Source.LEXER,
 			)
 		)
 		result.tokens = lex_r.get("tokens", [])
@@ -38,15 +38,15 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 		return result
 	result.tokens = lex_r.tokens
 
-	var parse_r := _DCKitNamespace.Parser.new().parse_chain(result.tokens)
+	var parse_r := _DCKitAnalyzerNamespace.Parser.new().parse_chain(result.tokens)
 	if not parse_r.ok:
 		result.diagnostics.append(
 			_diag(
 				parse_r.error.message,
 				parse_r.error.position,
 				1,
-				DCDiagnostic.Severity.ERROR,
-				DCDiagnostic.Source.PARSER,
+				DCAnalysisResult.DCDiagnostic.Severity.ERROR,
+				DCAnalysisResult.DCDiagnostic.Source.PARSER,
 			)
 		)
 	else:
@@ -60,7 +60,7 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 
 
 # SCOPE
-func compute_scope(tokens: Array, cursor_pos: int) -> DCScope:
+func compute_scope(tokens: Array, cursor_pos: int) -> DCAnalysisResult.DCScope:
 	var stack: Array = [_cmd_frame()]
 	var prev = null
 
@@ -103,13 +103,13 @@ func compute_scope(tokens: Array, cursor_pos: int) -> DCScope:
 					nxt != null and nxt.type == TT.LPAREN
 					and tok.position + tok.value.length() == nxt.position
 				)
-				if f.k == DCScope.Kind.COMMAND:
+				if f.k == DCAnalysisResult.DCScope.Kind.COMMAND:
 					if f.arg == -1:
 						f.name = tok.value
 						f.arg = 0
 					elif not is_ctor:
 						f.arg += 1
-				elif f.k == DCScope.Kind.CONSTRUCTOR:
+				elif f.k == DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
 					if not is_ctor:
 						f.part += 1
 			TT.LPAREN:
@@ -122,14 +122,14 @@ func compute_scope(tokens: Array, cursor_pos: int) -> DCScope:
 				if stack.size() > 1:
 					stack.pop_back()
 					var p = stack.back()
-					if p.k == DCScope.Kind.COMMAND:
+					if p.k == DCAnalysisResult.DCScope.Kind.COMMAND:
 						p.arg += 1
-					elif p.k == DCScope.Kind.CONSTRUCTOR:
+					elif p.k == DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
 						p.part += 1
 			TT.VARIABLE, TT.NUMBER, TT.STRING:
-				if f.k == DCScope.Kind.COMMAND:
+				if f.k == DCAnalysisResult.DCScope.Kind.COMMAND:
 					f.arg += 1
-				elif f.k == DCScope.Kind.CONSTRUCTOR:
+				elif f.k == DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
 					f.part += 1
 			TT.SEMICOLON:
 				stack = [_cmd_frame()]
@@ -144,7 +144,7 @@ func _check_node(node, out: Array) -> void:
 	if node == null:
 		return
 
-	if node is _DCKitNamespace.Parser.VariableNode:
+	if node is _DCKitAnalyzerNamespace.Parser.VariableNode:
 		if not node.is_silent and _var_store != null \
 				and not _var_store.has(node.name):
 			out.append(
@@ -152,13 +152,13 @@ func _check_node(node, out: Array) -> void:
 					"'$%s' is not defined." % node.name,
 					node.start_pos,
 					node.name.length() + 1,
-					DCDiagnostic.Severity.WARNING,
-					DCDiagnostic.Source.SEMANTIC,
+					DCAnalysisResult.DCDiagnostic.Severity.WARNING,
+					DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
 				)
 			)
 		_check_node(node.fallback, out)
 
-	elif node is _DCKitNamespace.Parser.CommandNode:
+	elif node is _DCKitAnalyzerNamespace.Parser.CommandNode:
 		if _cmd_reg != null:
 			if not _cmd_reg.has(node.name):
 				out.append(
@@ -166,8 +166,8 @@ func _check_node(node, out: Array) -> void:
 						"Unknown command '%s'." % node.name,
 						node.start_pos,
 						node.name.length(),
-						DCDiagnostic.Severity.ERROR,
-						DCDiagnostic.Source.SEMANTIC,
+						DCAnalysisResult.DCDiagnostic.Severity.ERROR,
+						DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
 					)
 				)
 			else:
@@ -190,15 +190,15 @@ func _check_node(node, out: Array) -> void:
 							msg,
 							node.start_pos,
 							node.name.length(),
-							DCDiagnostic.Severity.WARNING,
-							DCDiagnostic.Source.SEMANTIC,
+							DCAnalysisResult.DCDiagnostic.Severity.WARNING,
+							DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
 						)
 					)
 		# Argument count is intentionally not validated — handlers are variadic by design.
 		for child in node.args:
 			_check_node(child, out)
 
-	elif node is _DCKitNamespace.Parser.ConstructorNode:
+	elif node is _DCKitAnalyzerNamespace.Parser.ConstructorNode:
 		if _ctor_reg != null:
 			if not _ctor_reg.knows(node.type_name):
 				out.append(
@@ -206,12 +206,12 @@ func _check_node(node, out: Array) -> void:
 						"Unknown constructor type '%s'." % node.type_name,
 						node.start_pos,
 						node.type_name.length(),
-						DCDiagnostic.Severity.ERROR,
-						DCDiagnostic.Source.SEMANTIC,
+						DCAnalysisResult.DCDiagnostic.Severity.ERROR,
+						DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
 					)
 				)
 			else:
-				var def: _DCKitNamespace.ConstructorDef = _ctor_reg.get_def(node.type_name)
+				var def: _DCKitRegistriesNamespace.ConstructorDef = _ctor_reg.get_def(node.type_name)
 				var count: int = node.parts.size()
 				if not def.signatures.is_empty():
 					var matched: bool = def.signatures.any(
@@ -224,8 +224,8 @@ func _check_node(node, out: Array) -> void:
 								"'%s' has no signature for %d part(s)." % [node.type_name, count],
 								node.start_pos,
 								node.type_name.length(),
-								DCDiagnostic.Severity.WARNING,
-								DCDiagnostic.Source.SEMANTIC,
+								DCAnalysisResult.DCDiagnostic.Severity.WARNING,
+								DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
 							)
 						)
 		for child in node.parts:
@@ -234,17 +234,17 @@ func _check_node(node, out: Array) -> void:
 
 # HELPERS
 func _cmd_frame() -> Dictionary:
-	return { k = DCScope.Kind.COMMAND, name = "", arg = -1, ctor = "", part = 0 }
+	return { k = DCAnalysisResult.DCScope.Kind.COMMAND, name = "", arg = -1, ctor = "", part = 0 }
 
 
 func _ctor_frame(type_name: String) -> Dictionary:
-	return { k = DCScope.Kind.CONSTRUCTOR, name = "", arg = -1, ctor = type_name, part = 0 }
+	return { k = DCAnalysisResult.DCScope.Kind.CONSTRUCTOR, name = "", arg = -1, ctor = type_name, part = 0 }
 
 
-func _to_scope(f: Dictionary, tok) -> DCScope:
-	var s := DCScope.new()
+func _to_scope(f: Dictionary, tok) -> DCAnalysisResult.DCScope:
+	var s := DCAnalysisResult.DCScope.new()
 	s.kind = f.k
-	if f.k == DCScope.Kind.COMMAND:
+	if f.k == DCAnalysisResult.DCScope.Kind.COMMAND:
 		if (tok != null and tok.type == TT.IDENTIFIER and f.arg == -1):
 			s.name = tok.value
 		else:
@@ -255,7 +255,7 @@ func _to_scope(f: Dictionary, tok) -> DCScope:
 			var def = _cmd_reg.get_definition(s.name)
 			if def != null:
 				s._active_ref = weakref(def)
-	elif f.k == DCScope.Kind.CONSTRUCTOR:
+	elif f.k == DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
 		s.type_name = f.ctor
 		s.part_index = f.part + (1 if tok != null else 0) # tok != null = cursor is on a part
 		if _ctor_reg != null and not s.type_name.is_empty():
@@ -294,8 +294,8 @@ func _tok_span(tok) -> int:
 			return tok.value.length()
 
 
-func _diag(msg: String, pos: int, len: int, sev: int, src: int) -> DCDiagnostic:
-	return DCDiagnostic.new(msg, pos, len, sev, src)
+func _diag(msg: String, pos: int, len: int, sev: int, src: int) -> DCAnalysisResult.DCDiagnostic:
+	return DCAnalysisResult.DCDiagnostic.new(msg, pos, len, sev, src)
 
 
 # Depth check for nested command / constructor / fallback trees.
@@ -310,128 +310,19 @@ func _check_argument_stack(node, depth: int, out: Array) -> void:
 				"Argument stack depth exceeds the limit (%d)." % MAX_ARGUMENT_DEPTH,
 				node.start_pos,
 				1,
-				DCDiagnostic.Severity.ERROR,
-				DCDiagnostic.Source.SEMANTIC,
+				DCAnalysisResult.DCDiagnostic.Severity.ERROR,
+				DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
 			)
 		)
 		return
 
-	if node is _DCKitNamespace.Parser.VariableNode:
+	if node is _DCKitAnalyzerNamespace.Parser.VariableNode:
 		_check_argument_stack(node.fallback, depth + 1, out)
 
-	elif node is _DCKitNamespace.Parser.CommandNode:
+	elif node is _DCKitAnalyzerNamespace.Parser.CommandNode:
 		for child in node.args:
 			_check_argument_stack(child, depth + 1, out)
 
-	elif node is _DCKitNamespace.Parser.ConstructorNode:
+	elif node is _DCKitAnalyzerNamespace.Parser.ConstructorNode:
 		for child in node.parts:
 			_check_argument_stack(child, depth + 1, out)
-
-
-#region TYPES
-class DCDiagnostic:
-	enum Severity {
-		HINT,
-		WARNING,
-		ERROR,
-	}
-	enum Source {
-		LEXER,
-		PARSER,
-		SEMANTIC,
-	}
-
-	var message: String
-	var position: int
-	var length: int = 1
-	var severity: int = Severity.ERROR
-	var source: int = Source.LEXER
-
-
-	func to_ui_dict() -> Dictionary:
-		return {
-			"message": message,
-			"position": position,
-			"length": length,
-			"severity": severity,
-			"source": source,
-			"severity_name": Severity.keys()[severity],
-			"source_name": Source.keys()[source],
-			"range_text": "Pos %d • Len %d" % [position, length],
-		}
-
-
-	func _init(msg: String, pos: int, len := 1, sev := Severity.ERROR, src := Source.LEXER) -> void:
-		message = msg
-		position = pos
-		length = len
-		severity = sev
-		source = src
-
-
-	func _to_string() -> String:
-		return "[%s/%s pos=%d] %s" % [
-			Severity.keys()[severity],
-			Source.keys()[source],
-			position,
-			message,
-		]
-
-
-class DCScope:
-	enum Kind {
-		EMPTY,
-		COMMAND,
-		CONSTRUCTOR,
-	}
-
-	var kind: int = Kind.EMPTY
-	# COMMAND: "" = cursor at name position
-	var name: String = "" 
-	# COMMAND: -1 = at name, 0+ = Nth arg slot
-	var arg_index: int = -1 
-	# CONSTRUCTOR: the type being constructed
-	var type_name: String = "" 
-	# CONSTRUCTOR: 0-based part index
-	var part_index: int = 0 
-	# → DCDefinition |  _DCKitNamespace.ConstructorDef | null
-	var _active_ref: WeakRef = WeakRef.new() 
-
-
-	func get_active():
-		return _active_ref.get_ref()
-
-
-	func _to_string() -> String:
-		match kind:
-			Kind.COMMAND:
-				return "COMMAND(name='%s' arg=%d)" % [name, arg_index]
-			Kind.CONSTRUCTOR:
-				return "CONSTRUCTOR(type='%s' part=%d)" % [type_name, part_index]
-			_:
-				return "EMPTY"
-
-
-class DCAnalysisResult:
-	var tokens: Array = []
-	var ast: Array = []
-	var diagnostics: Array = []
-	var scope: DCScope
-
-
-	func _init() -> void:
-		scope = DCScope.new()
-
-
-	func ok() -> bool:
-		for d in diagnostics:
-			if d.severity == DCDiagnostic.Severity.ERROR:
-				return false
-		return true
-
-
-	func has_warnings() -> bool:
-		for d in diagnostics:
-			if d.severity == DCDiagnostic.Severity.WARNING:
-				return true
-		return false

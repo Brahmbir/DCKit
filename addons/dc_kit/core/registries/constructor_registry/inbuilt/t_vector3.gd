@@ -11,7 +11,7 @@ extends "./inbuilt_base.gd"
 const DCFloat = preload("./t_float.gd")
 
 
-static func create() -> _DCKitNamespace.ConstructorDef:
+static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 	const CONSTS := {
 		"ZERO": Vector3.ZERO,
 		"ONE": Vector3.ONE,
@@ -72,21 +72,21 @@ static func create() -> _DCKitNamespace.ConstructorDef:
 
 		return DCResult.fail("Vector3: expected 0, 1, or 3 parts — got %d." % parts.size())
 
-	return _DCKitNamespace.ConstructorDef.new(
+	return _DCKitRegistriesNamespace.ConstructorDef.new(
 		"Vector3",
 		handler,
 		"A 3D vector with [b]x[/b], [b]y[/b], and [b]z[/b] float components.",
 		[
 			sig_zero("Zero vector — Vector3(0, 0, 0)"),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Convert Vector3/Vector3i",
 				[part_hint_vector3("value", "Existing Vector3 or Vector3i")],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"XYZ components",
 				[
 					DCFloat.part_hint("x", "Right (+), left (−)"),
@@ -110,7 +110,9 @@ static func extract_vector3(val: DCResult.Value) -> Variant:
 static func part_hint_vector3(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitNamespace.ConstructorDef.PartHint:
-	return (_DCKitNamespace.ConstructorDef.PartHint.new(p_name, "<Vector3>", p_desc).accepts(
+) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+	return (
+		_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(p_name, "<Vector3>", p_desc).accepts(
 			[TYPE_VECTOR3, TYPE_VECTOR3I]
-		))
+		)
+	)

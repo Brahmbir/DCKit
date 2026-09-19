@@ -17,7 +17,7 @@ const DCInt = preload("./t_int.gd")
 const DCVector2i = preload("./t_vector2i.gd")
 
 
-static func create() -> _DCKitNamespace.ConstructorDef:
+static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
 		# Zero-arg → zero rectangle
 		if parts.is_empty():
@@ -74,25 +74,25 @@ static func create() -> _DCKitNamespace.ConstructorDef:
 
 		return DCResult.fail("Rect2i: expected 0, 1, 2, or 4 parts — got %d." % parts.size())
 
-	return _DCKitNamespace.ConstructorDef.new(
+	return _DCKitRegistriesNamespace.ConstructorDef.new(
 		"Rect2i",
 		handler,
 		"A 2D axis-aligned rectangle defined by a [b]position[/b] and [b]size[/b] Vector2i.\n"
 		+ "[color=gray]Negative size is valid — call [b].abs()[/b] to normalise.[/color]",
 		[
 			sig_zero("Zero rectangle — Rect2i(Vector2i.ZERO, Vector2i.ZERO)"),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Convert Rect2/Rect2i",
 				[part_hint_rect2i("from", "Existing Rect2i or integer-valued Rect2.")],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Position + size as Vector2i",
 				[
 					DCVector2i.part_hint_vector2i("position", "Top-left corner of the rectangle."),
 					DCVector2i.part_hint_vector2i("size", "Width and height of the rectangle."),
 				],
 			),
-			_DCKitNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
 				"Flat integers — position (x, y) + size (w, h)",
 				[
 					DCInt.part_hint("x", "Position X — left edge."),
@@ -117,7 +117,9 @@ static func extract_rect2i(val: DCResult.Value) -> Variant:
 static func part_hint_rect2i(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitNamespace.ConstructorDef.PartHint:
-	return (_DCKitNamespace.ConstructorDef.PartHint.new(p_name, "<Rect2i>", p_desc).accepts(
+) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+	return (
+		_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(p_name, "<Rect2i>", p_desc).accepts(
 			[TYPE_RECT2, TYPE_RECT2I]
-		))
+		)
+	)

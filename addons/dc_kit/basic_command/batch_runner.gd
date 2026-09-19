@@ -124,8 +124,8 @@ func run(path: String, ctx: DCContext) -> DCResult:
 
 
 func _read_project_settings() -> void:
-	var path: String = _DCKitNamespace.Setting.get_setting(
-		_DCKitNamespace.Setting.SETTING_BATCH_DIR,
+	var path: String = _DCKitUtilsNamespace.Setting.get_setting(
+		_DCKitUtilsNamespace.Setting.SETTING_BATCH_DIR,
 		_root_folder,
 	)
 

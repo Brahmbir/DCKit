@@ -28,7 +28,7 @@ func setup(logger: Object) -> void:
 # ABSTRACT OVERRIDES — subclasses implement these
 # Receive one log entry.  Called both during history replay and for live entries.
 # entry.body is pre-parsed; no further parsing is needed in subclasses.
-func _append_entry(_entry: _DCKitNamespace.Tracer.LogEntry) -> void:
+func _append_entry(_entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> void:
 	pass
 
 
@@ -58,7 +58,7 @@ func _replay_all() -> void:
 	_on_cleared()
 	if _logger == null or not _logger.has_method("get_all"):
 		return
-	for entry: _DCKitNamespace.Tracer.LogEntry in _logger.get_all():
+	for entry: _DCKitExecutorNamespace.Tracer.LogEntry in _logger.get_all():
 		_append_entry(entry)
 
 

@@ -22,7 +22,7 @@ const BbCodeUtils = preload("../bb_code_utils.gd")
 var name: String
 ## BBCode; shown in info panel — supports full formatting.
 var description: String
-## (ctx: DevConsoleCommandContext) -> DevConsoleResult
+## (ctx: DCContext) -> DCResult
 var handler: Callable
 ## Ordered, matches handler's expected args.
 var params: Array[Param]

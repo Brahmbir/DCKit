@@ -1,6 +1,6 @@
 extends RefCounted
 
-const TT := _DCKitNamespace.Lexer.TokenType
+const TT := _DCKitAnalyzerNamespace.Lexer.TokenType
 
 var _tokens: Array = []
 var _pos: int = 0
@@ -17,7 +17,7 @@ func parse(tokens: Array) -> Dictionary:
 		return _fail("Empty input.", 0)
 	var r := _parse_command()
 	if r.ok:
-		var last: _DCKitNamespace.Lexer.Token = _tokens[_pos - 1]
+		var last: _DCKitAnalyzerNamespace.Lexer.Token = _tokens[_pos - 1]
 		var val_len := last.value.length() + (2 if last.type == TT.STRING else 0)
 		r.node.end_pos = last.position + val_len
 	return r
@@ -35,7 +35,7 @@ func parse_chain(tokens: Array) -> Dictionary:
 		var r := _parse_command()
 		if not r.ok:
 			return r
-		var last: _DCKitNamespace.Lexer.Token = _tokens[_pos - 1]
+		var last: _DCKitAnalyzerNamespace.Lexer.Token = _tokens[_pos - 1]
 		var val_len := last.value.length() + (2 if last.type == TT.STRING else 0)
 		r.node.end_pos = last.position + val_len
 		commands.append(r.node)
@@ -227,11 +227,11 @@ func _is_adjacent(a, b) -> bool:
 	return a.position + a.value.length() == b.position
 
 
-func _peek() -> _DCKitNamespace.Lexer.Token:
+func _peek() -> _DCKitAnalyzerNamespace.Lexer.Token:
 	return _tokens[_pos]
 
 
-func _peek_next() -> _DCKitNamespace.Lexer.Token:
+func _peek_next() -> _DCKitAnalyzerNamespace.Lexer.Token:
 	return _tokens[_pos + 1] if _pos + 1 < _tokens.size() else _tokens.back()
 
 

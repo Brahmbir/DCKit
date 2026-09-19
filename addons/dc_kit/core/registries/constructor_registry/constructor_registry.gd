@@ -9,10 +9,10 @@
 #   • Custom registration: first-write-wins. Duplicates are silently rejected.
 #
 # The executor calls resolve(name, parts) → value.
-# The hint provider calls get_def(name) →  _DCKitNamespace.ConstructorDef and knows(name).
+# The hint provider calls get_def(name) →  _DCKitRegistriesNamespace.ConstructorDef and knows(name).
 #
 # Built-in type definitions live in ./inbuilt/.
-# Each file exposes a single static func create() ->  _DCKitNamespace.ConstructorDef.
+# Each file exposes a single static func create() ->  _DCKitRegistriesNamespace.ConstructorDef.
 # Add a new built-in by:
 #   1. Creating ./inbuilt/<type_name>.gd
 #   2. Adding a preload constant below
@@ -44,7 +44,7 @@ const _TypeTransform3D = preload("./inbuilt/t_transform3d.gd")
 const _TypeProjection = preload("./inbuilt/t_projection.gd")
 
 # State
-var _defs: Dictionary = { } # name (String) →  _DCKitNamespace.ConstructorDef
+var _defs: Dictionary = { } # name (String) →  _DCKitRegistriesNamespace.ConstructorDef
 
 
 func _init() -> void:
@@ -58,9 +58,9 @@ func _init() -> void:
 #   • name collides with a built-in type
 #   • name was already registered by a previous custom call
 #   • handler is not a valid Callable
-func register(def: _DCKitNamespace.ConstructorDef) -> bool:
+func register(def: _DCKitRegistriesNamespace.ConstructorDef) -> bool:
 	if _defs.has(def.name):
-		var existing: _DCKitNamespace.ConstructorDef = _defs[def.name]
+		var existing: _DCKitRegistriesNamespace.ConstructorDef = _defs[def.name]
 		if existing.is_builtin:
 			push_warning(
 				"ConstructorRegistry: '%s' is a built-in type and cannot be replaced." \
@@ -85,7 +85,7 @@ func knows(name: String) -> bool:
 	return _defs.has(name)
 
 
-func get_def(name: String) -> _DCKitNamespace.ConstructorDef:
+func get_def(name: String) -> _DCKitRegistriesNamespace.ConstructorDef:
 	return _defs.get(name)
 
 
@@ -102,7 +102,7 @@ func get_all() -> Array:
 # Called after all parts are already resolved depth-first.
 # Returns a Godot Variant on success, or a DCResult.fail() on error.
 func resolve(name: String, parts: Array):
-	var def: _DCKitNamespace.ConstructorDef = _defs.get(name)
+	var def: _DCKitRegistriesNamespace.ConstructorDef = _defs.get(name)
 	if def == null:
 		return DCResult.fail("Unknown constructor type '%s'." % name)
 	return def.handler.call(parts)
@@ -133,6 +133,6 @@ func _seed_builtins() -> void:
 	_add_builtin(_TypeProjection.create())
 
 
-func _add_builtin(def: _DCKitNamespace.ConstructorDef) -> void:
+func _add_builtin(def: _DCKitRegistriesNamespace.ConstructorDef) -> void:
 	def.is_builtin = true
 	_defs[def.name] = def
