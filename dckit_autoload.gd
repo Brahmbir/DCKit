@@ -76,7 +76,6 @@ func register(
 
 
 func register_def(def: DCDefinition) -> bool:
-	print("trigger")
 	if _guard("register_def"):
 		return false
 	return _backend.register_def(def)
