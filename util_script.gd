@@ -6,24 +6,26 @@ const ADDON_PATH: String = "res://addons/dc_kit"
 static func addon_export(
 	addon_path: String,
 	output_zip: String,
+	logger: DCLogger,
 	extra_files: Dictionary = { },
 ) -> Error:
 	var output_dir := output_zip.get_base_dir()
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output_dir))
 
 	var zipper := ZIPPacker.new()
+	var added_files := { }
 
 	var err := zipper.open(output_zip)
 	if err != OK:
 		return err
 
-	err = _zip_directory(zipper, addon_path)
+	err = _zip_directory(zipper, addon_path, added_files)
 	if err != OK:
 		zipper.close()
 		return err
 
 	for source in extra_files:
-		err = _zip_file(zipper, source, extra_files[source])
+		err = _zip_file(zipper, logger, source, extra_files[source], added_files)
 		if err != OK:
 			zipper.close()
 			return err
@@ -86,7 +88,7 @@ static func _compare_versions(a: String, b: String) -> int:
 	return 0
 
 
-static func _zip_directory(zipper: ZIPPacker, directory: String) -> Error:
+static func _zip_directory(zipper: ZIPPacker, directory: String, added_files: Dictionary) -> Error:
 	var dir := DirAccess.open(directory)
 	if dir == null:
 		return ERR_CANT_OPEN
@@ -98,16 +100,11 @@ static func _zip_directory(zipper: ZIPPacker, directory: String) -> Error:
 
 		if filename.is_empty():
 			break
-		#
-		#if filename.begins_with("."):
-		#continue
-		#
-		#if filename.get_extension() == "import":
-		#continue
+
 		var full_path := directory.path_join(filename)
 
 		if dir.current_is_dir():
-			var err := _zip_directory(zipper, full_path)
+			var err := _zip_directory(zipper, full_path, added_files)
 			if err != OK:
 				dir.list_dir_end()
 				return err
@@ -119,6 +116,10 @@ static func _zip_directory(zipper: ZIPPacker, directory: String) -> Error:
 
 			var archive_path := full_path.trim_prefix("res://")
 
+			if added_files.has(archive_path):
+				file.close()
+				continue
+
 			var err := zipper.start_file(archive_path)
 			if err != OK:
 				file.close()
@@ -126,19 +127,30 @@ static func _zip_directory(zipper: ZIPPacker, directory: String) -> Error:
 				return err
 
 			err = zipper.write_file(file.get_buffer(file.get_length()))
-
 			file.close()
 
 			if err != OK:
 				dir.list_dir_end()
 				return err
 
+			added_files[archive_path] = true
+
 	dir.list_dir_end()
 	return OK
 
 
-static func _zip_file(zipper: ZIPPacker, source: String, destination: String) -> Error:
+static func _zip_file(
+	zipper: ZIPPacker,
+	logger: DCLogger,
+	source: String,
+	destination: String,
+	added_files: Dictionary,
+) -> Error:
 	if not FileAccess.file_exists(source):
+		logger.warn("Extra file not found: %s" % source)
+		return OK
+
+	if added_files.has(destination):
 		return OK
 
 	var file := FileAccess.open(source, FileAccess.READ)
@@ -151,8 +163,10 @@ static func _zip_file(zipper: ZIPPacker, source: String, destination: String) ->
 		return err
 
 	err = zipper.write_file(file.get_buffer(file.get_length()))
-
 	file.close()
+
+	if err == OK:
+		added_files[destination] = true
 
 	return err
 
@@ -216,6 +230,7 @@ func _ready() -> void:
 			var err := addon_export(
 				ADDON_PATH,
 				output_zip,
+				ctx.log,
 				{
 					"res://LICENSE": "addons/dc_kit/LICENSE",
 					"res://README.md": "addons/dc_kit/README.md",
@@ -227,7 +242,7 @@ func _ready() -> void:
 				return DCResult.fail("Failed to export addon (Error %d)." % err)
 
 			return DCResult.ok(
-				"Addon exported successfully.\nOutput: %s"
+				"Addon exported successfully. Output: [i]%s[/i]"
 				% ProjectSettings.globalize_path(output_zip)
 			),
 		"Exports a Godot addon as a ZIP archive.",
