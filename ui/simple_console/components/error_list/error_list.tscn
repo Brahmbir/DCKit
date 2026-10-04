@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://chm4u3x5uk6g5"]
+
+[ext_resource type="Script" uid="uid://b6sr41fd5uqaf" path="res://addons/dc_kit/ui/simple_console/components/error_list/error_list.gd" id="1_r5n8t"]
+
+[node name="ErrorList" type="PanelContainer" unique_id=1140330670 node_paths=PackedStringArray("label")]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"ErrorList_PanelContainer"
+script = ExtResource("1_r5n8t")
+label = NodePath("MarginContainer/RichTextLabel")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=578650757]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer" unique_id=269326282]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true

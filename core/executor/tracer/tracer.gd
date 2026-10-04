@@ -11,17 +11,25 @@ const LogFileWriter := preload("./log_file_writer.gd")
 # Level ordering — used by get_at_or_above() and _maybe_print().
 # Higher value = more severe.
 const _LEVEL_ORDER: Dictionary = {
-	"OK": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.OK,
-	"INFO": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.INFO,
-	"HELP": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.INFO,
-	"WARN": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.WARN,
-	"FAIL": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.FAIL,
-	"ERROR": _DCKitUtilsNamespace.Setting.LoggerPrintThershold.ERROR,
+	"OK": _DCKitSetting.LoggerPrintThershold.OK,
+	"INFO": _DCKitSetting.LoggerPrintThershold.INFO,
+	"HELP": _DCKitSetting.LoggerPrintThershold.INFO,
+	"WARN": _DCKitSetting.LoggerPrintThershold.WARN,
+	"FAIL": _DCKitSetting.LoggerPrintThershold.FAIL,
+	"ERROR": _DCKitSetting.LoggerPrintThershold.ERROR,
+}
+const _LEVEL_NAME: Dictionary = {
+	_DCKitSetting.LoggerPrintThershold.OK: "OK",
+	_DCKitSetting.LoggerPrintThershold.INFO: "INFO",
+	_DCKitSetting.LoggerPrintThershold.WARN: "WARN",
+	_DCKitSetting.LoggerPrintThershold.FAIL: "FAIL",
+	_DCKitSetting.LoggerPrintThershold.ERROR: "ERROR",
 }
 
 const _MEMORY_LIMIT_DEFAULT: int = 200
 
-var print_threshold: String = "WARN"
+var print_threshold: String = _LEVEL_NAME[_DCKitSetting.get_logging_print_threshold()]
+
 var memory_limit: int = _MEMORY_LIMIT_DEFAULT
 
 var _entries: Array = [] # Array[LogEntry]
@@ -29,7 +37,11 @@ var _file_writer := LogFileWriter.new()
 
 
 func _init() -> void:
-	_read_project_settings()
+	var file_logging_enabled: bool = _DCKitSetting.get_logging_enabled()
+	var log_dir: String = _DCKitSetting.get_logging_directory()
+	var max_files: int = _DCKitSetting.get_logging_max_session_files()
+
+	_file_writer.configure(log_dir, max_files, file_logging_enabled)
 
 
 func open_session() -> void:
@@ -110,33 +122,6 @@ func get_at_or_above(threshold: String) -> Array:
 func clear() -> void:
 	_entries.clear()
 	cleared.emit()
-
-
-func _read_project_settings() -> void:
-	var file_logging_enabled: bool = true
-	var log_dir: String = "user://DCKit/logs/"
-	var max_files: int = 5
-
-	file_logging_enabled = _DCKitUtilsNamespace.Setting.get_setting(
-		_DCKitUtilsNamespace.Setting.SETTING_LOGGING_ENABLED,
-		file_logging_enabled,
-	)
-	log_dir = _DCKitUtilsNamespace.Setting.get_setting(
-		_DCKitUtilsNamespace.Setting.SETTING_LOGGING_DIRECTORY,
-		log_dir,
-	)
-	max_files = _DCKitUtilsNamespace.Setting.get_setting(
-		_DCKitUtilsNamespace.Setting.SETTING_LOGGING_MAX_SESSION_FILES,
-		max_files,
-	)
-	print_threshold = _DCKitUtilsNamespace.Setting.LoggerPrintThershold.keys()[
-		_DCKitUtilsNamespace.Setting.get_setting(
-			_DCKitUtilsNamespace.Setting.SETTING_LOGGING_PRINT_THRESHOLD,
-			_DCKitUtilsNamespace.Setting.LoggerPrintThershold[print_threshold],
-		)
-	]
-
-	_file_writer.configure(log_dir, max_files, file_logging_enabled)
 
 
 # Called by DCLogger — origin already resolved by DCLogger, not stored here.

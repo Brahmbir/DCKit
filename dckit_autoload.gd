@@ -5,13 +5,12 @@ signal console_closed # Emitted when the console UI is hidden.
 
 const DCBackend_Class_Path = "res://addons/dc_kit/backend.gd"
 
-
 #INFO commit after editing the addon (dc_kit) files
 #const DCBackend = preload(DCBackend_Class_Path)
 #var _backend: DCBackend = null
 var _backend = null
 
-var _dc_kit_ui: Control = null
+var _dc_kit_ui: Node = null
 
 
 func _init() -> void:
@@ -30,7 +29,6 @@ func _init() -> void:
 	_backend = DCBackend.new()
 	if _backend == null:
 		push_error("DC: backend instantiation returned null.")
-	
 
 
 func _ready() -> void:
@@ -132,43 +130,50 @@ func get_var_keys() -> Array:
 
 #region visibility API
 func show_console() -> void:
-	if not _has_dc_kit_ui():
+	if not _dc_kit_ui:
 		return
 
-	if _dc_kit_ui.visible:
+	if not _dc_kit_ui.has_method("show_console"):
 		return
-	_dc_kit_ui.show()
-	_dc_kit_ui.focus_input()
+	_dc_kit_ui.show_console()
+
 	console_opened.emit()
 
 
 func hide_console() -> void:
-	if not _has_dc_kit_ui():
+	if not _dc_kit_ui:
 		return
 
-	if not _dc_kit_ui.visible:
+	if not _dc_kit_ui.has_method("hide_console"):
 		return
-	_dc_kit_ui.hide()
+	_dc_kit_ui.hide_console()
+
 	console_closed.emit()
 
 
 func toggle_console() -> void:
-	if not _has_dc_kit_ui():
+	if not _dc_kit_ui:
 		return
 
-	if _dc_kit_ui.visible:
-		hide_console()
+	if not _dc_kit_ui.has_method("toggle_console"):
+		return
+	_dc_kit_ui.toggle_console()
+
+	if is_console_open():
+		console_opened.emit()
 	else:
-		show_console()
+		console_closed.emit()
 
 
 func is_console_open() -> bool:
-	return _has_dc_kit_ui() and _dc_kit_ui.visible
+	if not _dc_kit_ui:
+		return false
+
+	if not _dc_kit_ui.has_method("is_console_open"):
+		return false
+
+	return _dc_kit_ui.is_console_open() as bool
 #endregion
-
-
-func _has_dc_kit_ui() -> bool:
-	return _dc_kit_ui != null
 
 
 func _guard(method_name: String, backend_required: bool = true) -> bool:
@@ -180,3 +185,7 @@ func _guard(method_name: String, backend_required: bool = true) -> bool:
 		push_error("DCKit: '%s' method dosen't in backend — aborting." % method_name)
 		return true
 	return false
+
+
+class ui_config extends RefCounted:
+	pass

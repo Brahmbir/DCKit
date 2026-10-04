@@ -6,7 +6,7 @@ var current_data: Dictionary = { }
 
 
 func update(scope) -> void:
-	current_data.clear()
+	current_data = { }
 	if scope == null or not scope.has_method("get_active"):
 		update_posted.emit(current_data)
 		return
@@ -51,7 +51,10 @@ func _build_command_data(def: DCDefinition, arg_index: int) -> Dictionary:
 	}
 
 
-func _build_constructor_data(def: _DCKitRegistriesNamespace.ConstructorDef, part_index: int) -> Dictionary:
+func _build_constructor_data(
+	def: _DCKitRegistriesNamespace.ConstructorDef,
+	part_index: int,
+) -> Dictionary:
 	var signatures := []
 	for sig: _DCKitRegistriesNamespace.ConstructorDef.TypeSignature in def.signatures:
 		var parts := []

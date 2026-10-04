@@ -51,16 +51,12 @@ var bat_cmd := DCDefinition.new(
 	],
 	true,
 )
-var _root_folder: String = "res://batch_file/"
+var _root_folder: String = _resolve_batch_root(_DCKitSetting.get_batch_directory())
 
 var _predefined_files: Dictionary[String, String] = {
 	#"init": "res://batch_file/init.txt",
 	#"dev": "res://batch_file/dev_tools.txt"
 }
-
-
-func _init() -> void:
-	_read_project_settings()
 
 
 # COMMAND REGISTRATION
@@ -121,15 +117,6 @@ func run(path: String, ctx: DCContext) -> DCResult:
 		if last_result.success
 		else last_result
 	)
-
-
-func _read_project_settings() -> void:
-	var path: String = _DCKitUtilsNamespace.Setting.get_setting(
-		_DCKitUtilsNamespace.Setting.SETTING_BATCH_DIR,
-		_root_folder,
-	)
-
-	_root_folder = _resolve_batch_root(path)
 
 
 func _resolve_batch_root(path: String) -> String:

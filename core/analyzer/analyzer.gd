@@ -3,7 +3,7 @@ extends RefCounted
 const TT := _DCKitAnalyzerNamespace.Lexer.TokenType
 
 # Maximum nested argument / fallback depth allowed for one command tree.
-const MAX_ARGUMENT_DEPTH: int = 32
+var MAX_ARGUMENT_DEPTH: int = _DCKitSetting.get_max_argument_depth()
 
 # Provided at init — all optional; omit to skip that category of semantic check.
 var _cmd_reg = null # CommandRegistry     — .has(name), .get_definition(name)

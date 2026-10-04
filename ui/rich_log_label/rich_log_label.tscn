@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://bokp0qrlc3y04"]
+
+[ext_resource type="Script" uid="uid://bjpjj4vktd3hp" path="res://addons/dc_kit/ui/rich_log_label/rich_log_label.gd" id="1_8gsdv"]
+
+[node name="RichLogLabel" type="Container" unique_id=1258050635 node_paths=PackedStringArray("_label")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8gsdv")
+_label = NodePath("RichTextLabel")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="." unique_id=1414348721]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+theme_type_variation = &"Looger_RichTextLabel"
+bbcode_enabled = true
+text = "zXZXzXasXzxzXZxZxZxzX"
+scroll_following = true
+vertical_alignment = 2
+selection_enabled = true

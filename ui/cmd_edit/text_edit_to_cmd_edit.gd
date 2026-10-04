@@ -38,10 +38,6 @@ func _gui_input(event: InputEvent) -> void:
 	var ctrl := false
 	if event is InputEventWithModifiers:
 		ctrl = event.is_command_or_control_pressed()
-	if ctrl and event.keycode == KEY_V:
-		get_viewport().set_input_as_handled()
-		_my_custom_paste()
-		return
 
 	if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
 		on_submit()
@@ -86,11 +82,14 @@ func on_submit() -> void:
 	if syntax_highlighter:
 		syntax_highlighter.clear_highlighting_cache()
 
+func _paste(caret_index: int) -> void:
+	_my_custom_paste(caret_index)
+	
 
-func _my_custom_paste():
+func _my_custom_paste(caret_col := -1):
 	var clipboard_text: String = DisplayServer.clipboard_get()
 	var modified_text = clipboard_text.replace("\n", " ").replace("\r", "")
-	insert_text_at_caret(modified_text)
+	insert_text_at_caret(modified_text,caret_col)
 
 
 func _set_line_text(t: String) -> void:
