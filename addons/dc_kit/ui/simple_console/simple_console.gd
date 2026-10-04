@@ -25,6 +25,7 @@ func _enter_tree() -> void:
 		func():
 			_DCKitUINamespace.mobile_layout.set_screen_width(size.x),
 	)
+	_DCKitUINamespace.mobile_layout.set_screen_width(size.x)
 
 
 func _ready() -> void:

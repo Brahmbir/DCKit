@@ -14,17 +14,17 @@ const ErrorComponentBase := preload("./ui_base_class/error_comp_base.gd")
 
 const InputFeedbackController := preload("./controllers/input_feedback_controller.gd")
 
-static var mobile_layout: MobileLayout = null:
-	get ():
-		if mobile_layout == null:
-			mobile_layout = MobileLayout.new()
-		return mobile_layout
-
 static var scales: Scales = null:
 	get ():
 		if scales == null:
 			scales = Scales.new()
 		return scales
+
+static var mobile_layout: MobileLayout = null:
+	get ():
+		if mobile_layout == null:
+			mobile_layout = MobileLayout.new(scales)
+		return mobile_layout
 
 
 static func call_from_comp(obj: Object, method_name: String, args: Array = []) -> Variant:
@@ -110,11 +110,38 @@ class MobileLayout extends RefCounted:
 	signal screen_changed(value: bool)
 	signal changed(value: bool)
 
-	var breakpoint_width: float = 600.0
+	const AUTO_BREAKPOINT_EM := 35.0 # 600px at font scale 1.0, matching the old fixed value
+	const FALLBACK_BREAKPOINT := 600.0
+
+	# Negative means auto.
+	var breakpoint_width: float = -1.0:
+		set(value):
+			if is_equal_approx(breakpoint_width, value):
+				return
+			breakpoint_width = value
+			_refresh_screen()
 
 	var manual := false
 	var screen := false
 	var mobile := false
+
+	var _scales: Scales
+	var _screen_width := INF
+
+
+	func _init(scales: Scales = null) -> void:
+		_scales = scales
+		if _scales:
+			_scales.font_changed.connect(_on_scales_changed)
+		_on_scales_changed()
+
+
+	func get_breakpoint_width() -> float:
+		if breakpoint_width >= 0.0:
+			return breakpoint_width
+		if _scales == null:
+			return FALLBACK_BREAKPOINT
+		return _scales.em_font(AUTO_BREAKPOINT_EM)
 
 
 	func set_manual(value: bool) -> void:
@@ -126,12 +153,22 @@ class MobileLayout extends RefCounted:
 
 
 	func set_screen_width(width: float) -> void:
-		var value := width < breakpoint_width
+		_screen_width = width
+		_refresh_screen()
+
+
+	func _refresh_screen() -> void:
+		var value := _screen_width < get_breakpoint_width()
 		if screen == value:
 			return
 		screen = value
 		screen_changed.emit(value)
 		_update()
+
+
+	func _on_scales_changed(_value: float = -1) -> void:
+		if breakpoint_width < 0.0:
+			_refresh_screen()
 
 
 	func _update() -> void:
