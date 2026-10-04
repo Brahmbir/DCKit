@@ -44,23 +44,37 @@ extends RefCounted
 
 signal command_executed(raw: String, result: DCResult)
 signal command_aborted
+signal state_changed
 
-# Call-stack safety limits — tune per project. These bound recursion depth,
-# not total work (see header).
-const MAX_EXECUTION_DEPTH: int = 8
 const Profiler := preload("./profiler.gd")
+const Detail := _DCKitExecutorNamespace.StateTracker.Detail
 
 const _ORIGIN_USER := "user"
 
+# Call-stack safety limits — tune per project. These bound recursion depth,
+# not total work (see header).
+var MAX_EXECUTION_DEPTH: int = _DCKitSetting.get_max_execution_depth()
+var MAX_ARGUMENT_DEPTH: int = _DCKitSetting.get_max_argument_depth()
+
 var logger: _DCKitExecutorNamespace.Tracer = null
 var profiler: Profiler = null
+
+var detail: Detail:
+	get:
+		return _tracker.detail
+	set(value):
+		_tracker.detail = value
+
+var _tracker := _DCKitExecutorNamespace.StateTracker.new()
+
 var _cmd_reg
 var _vars
 var _ctor_reg
 var _analyzer
 
 var _active_ctx: DCContext = null
-var _running: bool = false
+
+var _root_exec: _DCKitExecutorNamespace.Execution = null # the user's run only; nested run_raw never replaces it
 
 
 func _init(cmd_reg, ctor_reg, vars_store, analyzer) -> void:
@@ -72,6 +86,7 @@ func _init(cmd_reg, ctor_reg, vars_store, analyzer) -> void:
 	profiler = Profiler.new()
 
 	logger = _DCKitExecutorNamespace.Tracer.new()
+	_tracker.changed.connect(state_changed.emit)
 	logger.open_session()
 
 
@@ -119,20 +134,39 @@ func get_command_def_array() -> Array[DCDefinition]:
 	return def_arr
 
 
-# PUBLIC
+# INFO PUBLIC Methods
+func is_running() -> bool:
+	return _tracker.is_running()
+
+
+func get_state() -> _DCKitExecutorNamespace.ExecutorState:
+	return _tracker.snapshot()
+
+
+func reset() -> void:
+	_active_ctx = null
+	_tracker.end()
+
+
 func run(raw: String) -> DCResult:
 	# Always log what the user typed first — even if we reject it below.
 	_log_command(raw, _ORIGIN_USER, [])
 
-	if _running:
+	if _tracker.is_running():
 		var f := DCResult.fail("A command is already running.")
 		_log_result(f, _ORIGIN_USER, [])
 		return f
 
-	_running = true
-	var exec := _Execution.new(raw, _ORIGIN_USER, null, _CallStack.new())
+	var exec := _DCKitExecutorNamespace.Execution.new(
+		raw,
+		_ORIGIN_USER,
+		null,
+		_DCKitExecutorNamespace.CallStack.new(),
+	)
+
+	_tracker.begin(exec, raw)
 	var result: DCResult = await _run_execution(exec)
-	_running = false
+	_tracker.end()
 	command_executed.emit(raw, result)
 	return result
 
@@ -143,14 +177,13 @@ func abort() -> void:
 		command_aborted.emit()
 
 
-func reset() -> void:
-	_active_ctx = null
-	_running = false
+func _publish() -> void:
+	_tracker.publish()
 
 
 # PIPELINE
 # Shared by run() and ctx.run_raw(). Does NOT touch _running.
-func _run_execution(exec: _Execution) -> DCResult:
+func _run_execution(exec: _DCKitExecutorNamespace.Execution) -> DCResult:
 	var analysis: DCAnalysisResult = _analyzer.analyze(exec.raw)
 	if not analysis.ok():
 		var f := DCResult.fail(_format_errors(analysis.diagnostics))
@@ -165,6 +198,7 @@ func _run_execution(exec: _Execution) -> DCResult:
 	# Single-command runs (including run_raw) are announced by their caller.
 	var is_chain := exec.commands.size() > 1
 	var total := exec.commands.size()
+	exec.chain_total = total
 
 	for i in total:
 		var cmd: _DCKitAnalyzerNamespace.Parser.CommandNode = exec.commands[i]
@@ -177,7 +211,14 @@ func _run_execution(exec: _Execution) -> DCResult:
 				exec.call_stack.snapshot(),
 			)
 
-		var r: DCResult = await _execute(cmd, exec, _CallStack.FrameKind.EXECUTION)
+		exec.chain_index = i + 1
+		_publish()
+
+		var r: DCResult = await _execute(
+			cmd,
+			exec,
+			_DCKitExecutorNamespace.CallStack.FrameKind.EXECUTION,
+		)
 		exec.record(r)
 		if not r.success:
 			break
@@ -193,7 +234,11 @@ func _run_execution(exec: _Execution) -> DCResult:
 # kind — _CallStack.FrameKind.EXECUTION for chain items (root run() and
 #        anything ctx.run_raw() triggers), or .ARGUMENT for commands
 #        resolved as arguments / constructor parts / variable fallbacks.
-func _execute(node: _DCKitAnalyzerNamespace.Parser.CommandNode, exec: _Execution, kind: int) -> DCResult:
+func _execute(
+	node: _DCKitAnalyzerNamespace.Parser.CommandNode,
+	exec: _DCKitExecutorNamespace.Execution,
+	kind: int,
+) -> DCResult:
 	var definition: DCDefinition = _cmd_reg.get_definition(node.name)
 	if definition == null:
 		return DCResult.fail("Unknown command '%s'." % node.name)
@@ -203,15 +248,11 @@ func _execute(node: _DCKitAnalyzerNamespace.Parser.CommandNode, exec: _Execution
 	if not handler.is_valid():
 		return DCResult.fail("Unknown command '%s'." % node.name)
 
-	var max_arg_depth := 8
-	if _analyzer != null:
-		max_arg_depth = _analyzer.MAX_ARGUMENT_DEPTH
-
-	if kind == _CallStack.FrameKind.ARGUMENT:
-		if exec.call_stack.argument_depth() >= max_arg_depth:
+	if kind == _DCKitExecutorNamespace.CallStack.FrameKind.ARGUMENT:
+		if exec.call_stack.argument_depth() >= MAX_ARGUMENT_DEPTH:
 			return DCResult.fail(
 				"Maximum nested-argument depth (%d) exceeded at '%s'." \
-						% [max_arg_depth, node.name]
+						% [MAX_ARGUMENT_DEPTH, node.name]
 			)
 	else:
 		if exec.call_stack.execution_depth() >= MAX_EXECUTION_DEPTH:
@@ -222,6 +263,7 @@ func _execute(node: _DCKitAnalyzerNamespace.Parser.CommandNode, exec: _Execution
 
 	var is_root := exec.abort_root == null
 	exec.call_stack.push(node.name, kind)
+	_publish()
 
 	var resolver := func(raw_arg, ctx: DCContext) -> DCResult:
 		return await _resolve_node(raw_arg, exec, ctx)
@@ -239,7 +281,12 @@ func _execute(node: _DCKitAnalyzerNamespace.Parser.CommandNode, exec: _Execution
 	cmd_ctx._bind_raw_runner(
 		func(s: String) -> DCResult:
 			_log_system("run_raw: %s" % s, exec.origin, exec.call_stack.snapshot())
-			var nested := _Execution.new(s, exec.origin, effective_root, exec.call_stack)
+			var nested := _DCKitExecutorNamespace.Execution.new(
+				s,
+				exec.origin,
+				effective_root,
+				exec.call_stack,
+			)
 			return await _run_execution(nested),
 	)
 
@@ -283,13 +330,14 @@ func _execute(node: _DCKitAnalyzerNamespace.Parser.CommandNode, exec: _Execution
 				_log_result(result, exec.origin, exec.call_stack.snapshot())
 
 	exec.call_stack.pop()
+	_publish()
 	return result
 
 
 # NODE RESOLUTION
 # root_ctx passed from DCContext.arg() — the command's own context,
 # used as abort parent for anything resolved under it.
-func _resolve_node(node, exec: _Execution, root_ctx: DCContext) -> DCResult:
+func _resolve_node(node, exec: _DCKitExecutorNamespace.Execution, root_ctx: DCContext) -> DCResult:
 	if node is _DCKitAnalyzerNamespace.Parser.StringNode:
 		return DCResult.ok(DCResult.Value.literal(node.value))
 	if node is _DCKitAnalyzerNamespace.Parser.VariableNode:
@@ -299,9 +347,18 @@ func _resolve_node(node, exec: _Execution, root_ctx: DCContext) -> DCResult:
 	if node is _DCKitAnalyzerNamespace.Parser.CommandNode:
 		# Nested arg command: runs under the same exec (same stack, same origin).
 		# abort_root is temporarily set to the calling command's context.
-		var scoped := _Execution.new("", exec.origin, root_ctx, exec.call_stack)
+		var scoped := _DCKitExecutorNamespace.Execution.new(
+			"",
+			exec.origin,
+			root_ctx,
+			exec.call_stack,
+		)
 		scoped.commands = [node]
-		var inner: DCResult = await _execute(node, scoped, _CallStack.FrameKind.ARGUMENT)
+		var inner: DCResult = await _execute(
+			node,
+			scoped,
+			_DCKitExecutorNamespace.CallStack.FrameKind.ARGUMENT,
+		)
 		if not inner.success:
 			return DCResult.fail("Nested '%s' failed: %s" % [node.name, inner.message])
 		return DCResult.ok(DCResult.Value.from_command(inner.raw))
@@ -313,7 +370,7 @@ func _resolve_node(node, exec: _Execution, root_ctx: DCContext) -> DCResult:
 # $?name:node  → missing = resolve fallback node recursively
 func _resolve_variable(
 	node: _DCKitAnalyzerNamespace.Parser.VariableNode,
-	exec: _Execution,
+	exec: _DCKitExecutorNamespace.Execution,
 	root_ctx: DCContext,
 ) -> DCResult:
 	var value = _vars.get_value_raw(node.name)
@@ -331,7 +388,7 @@ func _resolve_variable(
 # Parts resolved eagerly depth-first; first failure short-circuits.
 func _resolve_ctor(
 	node: _DCKitAnalyzerNamespace.Parser.ConstructorNode,
-	exec: _Execution,
+	exec: _DCKitExecutorNamespace.Execution,
 	root_ctx: DCContext,
 ) -> DCResult:
 	var parts: Array = []
@@ -393,106 +450,3 @@ func _slice(raw: String, node: _DCKitAnalyzerNamespace.Parser.CommandNode) -> St
 	var a := clampi(node.start_pos, 0, raw.length())
 	var b := clampi(node.end_pos, a, raw.length())
 	return raw.substr(a, b - a)
-
-
-#region inner classes
-# CALL STACK
-# Tracks the live command call hierarchy for one execution tree, plus two
-# independent depth counters used for the safety caps in _execute().
-# Shared (not copied) across nested run_raw calls so ancestry is always
-# visible and depth accumulates correctly across the whole tree.
-#
-#   root run()          frames: []                exec=0 arg=0
-#   → player.warp       frames: [player.warp]     exec=1 arg=0
-#     → (var.get speed) frames: [player.warp,     exec=1 arg=1
-#                                 var.get]
-#     ← var.get done    frames: [player.warp]     exec=1 arg=0
-#     → run_raw(...)    frames: [player.warp,     exec=2 arg=0
-#                                 other.cmd]
-#     ← done            frames: [player.warp]     exec=1 arg=0
-#   ← player.warp done  frames: []                exec=0 arg=0
-class _CallStack:
-	enum FrameKind {
-		EXECUTION,
-		ARGUMENT,
-	}
-
-	# Array[Dictionary] — {name: String, kind: FrameKind}, oldest → newest.
-	var frames: Array = []
-
-	var _execution_depth: int = 0
-	var _argument_depth: int = 0
-
-
-	func push(cmd: String, kind: int) -> void:
-		frames.append({ "name": cmd, "kind": kind })
-		if kind == FrameKind.EXECUTION:
-			_execution_depth += 1
-		else:
-			_argument_depth += 1
-
-
-	func pop() -> void:
-		if frames.is_empty():
-			return
-		var frame: Dictionary = frames.pop_back()
-		if frame.kind == FrameKind.EXECUTION:
-			_execution_depth -= 1
-		else:
-			_argument_depth -= 1
-
-
-	func depth() -> int:
-		return frames.size()
-
-
-	func execution_depth() -> int:
-		return _execution_depth
-
-
-	func argument_depth() -> int:
-		return _argument_depth
-
-
-	func top() -> String:
-		return frames.back().name if not frames.is_empty() else ""
-
-
-	func breadcrumb() -> String:
-		return " > ".join(snapshot())
-
-
-	# Immutable list of command names, oldest → newest — safe to store in a log entry.
-	func snapshot() -> Array:
-		var names: Array = []
-		for f in frames:
-			names.append(f.name)
-		return names
-
-
-# EXECUTION
-# One pipeline run: parsed chain + accumulated results + shared call stack.
-# Created by run() (fresh stack) and by ctx.run_raw() (inherited stack).
-class _Execution:
-	var raw: String
-	var origin: String
-	var abort_root: DCContext # null = this is the outermost run
-	var commands: Array # Array[_DCKitAnalyzerNamespace.Parser.CommandNode]
-	var results: Array # Array[DCResult]
-	var call_stack: _CallStack
-
-
-	func _init(p_raw: String, p_origin: String, p_root: DCContext, p_stack: _CallStack) -> void:
-		raw = p_raw
-		origin = p_origin
-		abort_root = p_root
-		call_stack = p_stack
-
-
-	func record(r: DCResult) -> void:
-		results.append(r)
-
-
-	func to_result() -> DCResult:
-		return results.back() if not results.is_empty() else DCResult.ok(null)
-#endregion

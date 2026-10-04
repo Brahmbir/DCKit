@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://bfbuaygg7fps0"]
+
+[ext_resource type="Script" uid="uid://csk6wf6fo0u51" path="res://addons/dc_kit/ui/dckit_ui_host.gd" id="1_a8uxx"]
+
+[node name="DckitUiHost" type="Node" unique_id=325115929]
+script = ExtResource("1_a8uxx")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=97658836]
+
+[node name="SplitContainer" type="SplitContainer" parent="CanvasLayer" unique_id=1262113173]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+dragger_visibility = 2
+touch_dragger_enabled = true
+drag_area_highlight_in_editor = true
+
+[node name="Control" type="Control" parent="CanvasLayer/SplitContainer" unique_id=248247541]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Window" type="Window" parent="." unique_id=732133751]
+oversampling_override = 1.0
+initial_position = 2
+size = Vector2i(720, 480)
+always_on_top = true
+
+[node name="ColorRect" type="ColorRect" parent="Window" unique_id=1140056017]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.16470589, 0.16470589, 0.16470589, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="Window" unique_id=2001646928]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

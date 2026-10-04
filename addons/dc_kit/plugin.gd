@@ -16,7 +16,7 @@ var _export_plugin: ExportPlugin = ExportPlugin.new()
 
 
 func _enter_tree() -> void:
-	_DCKitUtilsNamespace.Setting._register_project_settings()
+	_DCKitSetting.register_dckit_settings()
 	add_export_plugin(_export_plugin)
 
 
@@ -29,13 +29,13 @@ func _get_plugin_icon():
 
 
 func _enable_plugin() -> void:
-	_DCKitUtilsNamespace.Setting._register_project_settings()
-	_DCKitUtilsNamespace.Setting.set_settings_internal(false)
+	_DCKitSetting.register_dckit_settings()
+	_DCKitSetting.set_dckit_settings_as_internal(false)
 
 	if not ProjectSettings.has_setting("autoload/" + _AUTOLOAD_NAME):
 		add_autoload_singleton(_AUTOLOAD_NAME, _AUTOLOAD_SCRIPT)
 
 
 func _disable_plugin() -> void:
-	_DCKitUtilsNamespace.Setting.set_settings_internal(true)
+	_DCKitSetting.set_dckit_settings_as_internal(true)
 	remove_autoload_singleton(_AUTOLOAD_NAME)

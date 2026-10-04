@@ -1,0 +1,503 @@
+[gd_scene format=3 uid="uid://diuuuu04kjo0b"]
+
+[ext_resource type="Script" uid="uid://di6fuf24actgn" path="res://addons/dc_kit/ui/simple_console/simple_console.gd" id="1_0wgy3"]
+[ext_resource type="FontFile" uid="uid://0bs703x6reir" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-Italic-VariableFont_wght.ttf" id="2_0x88e"]
+[ext_resource type="Theme" uid="uid://bed2ko8wcdjjh" path="res://addons/dc_kit/ui/simple_console/utils/simple_console_default.tres" id="2_dyj5x"]
+[ext_resource type="FontFile" uid="uid://6gunmtyx1g7e" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf" id="2_vwtn4"]
+[ext_resource type="PackedScene" uid="uid://bihuh3740pvx3" path="res://addons/dc_kit/ui/simple_console/components/input_section/input_component_panel.tscn" id="5_v1qrv"]
+[ext_resource type="PackedScene" uid="uid://bokp0qrlc3y04" path="res://addons/dc_kit/ui/rich_log_label/rich_log_label.tscn" id="5_vwtn4"]
+[ext_resource type="PackedScene" uid="uid://chm4u3x5uk6g5" path="res://addons/dc_kit/ui/simple_console/components/error_list/error_list.tscn" id="6_i6iku"]
+[ext_resource type="Script" uid="uid://sjdr1ft0d8ba" path="res://addons/dc_kit/ui/simple_console/utils/info_auto_container.gd" id="7_gasbt"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooera"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2v68d"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hfuff"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5jp6g"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_savn3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2t7b6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7cbjf"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_45o6f"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_er2vm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_34r5h"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dlema"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s3qfw"]
+bg_color = Color(0.17641899, 0.17641914, 0.17641908, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s3qfw"]
+
+[sub_resource type="FontVariation" id="FontVariation_ooera"]
+base_font = ExtResource("2_0x88e")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0jfm5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0x88e"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7jkh5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4jtcb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6u0a8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0mlb5"]
+bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dlema"]
+bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gasbt"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+bg_color = Color(0, 0, 0, 0.14117648)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0x88e"]
+content_margin_left = 10.0
+content_margin_top = 28.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.25, 0.25, 0.25, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+expand_margin_left = 8.0
+expand_margin_top = 32.0
+expand_margin_right = 8.0
+expand_margin_bottom = 6.0
+
+[sub_resource type="SystemFont" id="SystemFont_0nc27"]
+font_names = PackedStringArray("Monospace")
+subpixel_positioning = 0
+
+[sub_resource type="FontVariation" id="FontVariation_l7cum"]
+fallbacks = Array[Font]([SubResource("SystemFont_0nc27")])
+base_font = ExtResource("2_vwtn4")
+
+[sub_resource type="Theme" id="Theme_4jtcb"]
+default_font = SubResource("FontVariation_l7cum")
+default_font_size = 24
+Button/constants/icon_max_width = 21
+Button/styles/disabled = SubResource("StyleBoxEmpty_ooera")
+Button/styles/disabled_mirrored = SubResource("StyleBoxEmpty_2v68d")
+Button/styles/focus = SubResource("StyleBoxEmpty_hfuff")
+Button/styles/hover = SubResource("StyleBoxEmpty_5jp6g")
+Button/styles/hover_mirrored = SubResource("StyleBoxEmpty_savn3")
+Button/styles/hover_pressed = SubResource("StyleBoxEmpty_2t7b6")
+Button/styles/hover_pressed_mirrored = SubResource("StyleBoxEmpty_7cbjf")
+Button/styles/normal = SubResource("StyleBoxEmpty_45o6f")
+Button/styles/normal_mirrored = SubResource("StyleBoxEmpty_er2vm")
+Button/styles/pressed = SubResource("StyleBoxEmpty_34r5h")
+Button/styles/pressed_mirrored = SubResource("StyleBoxEmpty_dlema")
+ErrorList_PanelContainer/base_type = &"PanelContainer"
+ErrorList_PanelContainer/styles/panel = SubResource("StyleBoxFlat_s3qfw")
+HBoxContainer/constants/separation = 14
+HBoxContainer_LineEdit/constants/separation = 12
+HScrollBar/constants/padding_bottom = 20
+HScrollBar/styles/scroll = SubResource("StyleBoxEmpty_s3qfw")
+Header_Label/base_type = &"Label"
+Header_Label/font_sizes/font_size = 19
+LoggerComponentPanel_Margin/base_type = &"MarginContainer"
+LoggerComponentPanel_Margin/constants/margin_right = 8
+Looger_RichTextLabel/base_type = &"RichTextLabel"
+Looger_RichTextLabel/font_sizes/bold_font_size = 20
+Looger_RichTextLabel/font_sizes/bold_italics_font_size = 20
+Looger_RichTextLabel/font_sizes/italics_font_size = 20
+Looger_RichTextLabel/font_sizes/mono_font_size = 20
+Looger_RichTextLabel/font_sizes/normal_font_size = 20
+Looger_RichTextLabel/fonts/bold_italics_font = SubResource("FontVariation_ooera")
+Looger_RichTextLabel/fonts/italics_font = SubResource("FontVariation_ooera")
+MarginContainer/constants/margin_bottom = 16
+MarginContainer/constants/margin_left = 16
+MarginContainer/constants/margin_right = 16
+MarginContainer/constants/margin_top = 16
+PanelContainer/styles/panel = SubResource("StyleBoxEmpty_0jfm5")
+RichTextLabel/font_sizes/bold_font_size = 18
+RichTextLabel/font_sizes/bold_italics_font_size = 18
+RichTextLabel/font_sizes/italics_font_size = 18
+RichTextLabel/font_sizes/mono_font_size = 18
+RichTextLabel/font_sizes/normal_font_size = 18
+RichTextLabel/fonts/bold_italics_font = SubResource("FontVariation_ooera")
+RichTextLabel/fonts/italics_font = SubResource("FontVariation_ooera")
+TextEdit/colors/caret_color = Color(0.8745098, 0.8745098, 0.8745098, 0.6862745)
+TextEdit/colors/current_line_color = Color(1, 1, 1, 0)
+TextEdit/colors/selection_color = Color(0.5019608, 0.5019608, 0.5019608, 0.4509804)
+TextEdit/constants/caret_width = 12
+TextEdit/constants/line_spacing = -1
+TextEdit/constants/outline_size = 2
+TextEdit/styles/focus = SubResource("StyleBoxEmpty_0x88e")
+TextEdit/styles/normal = SubResource("StyleBoxEmpty_7jkh5")
+TextEdit/styles/read_only = SubResource("StyleBoxEmpty_4jtcb")
+VScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_dlema")
+VScrollBar/styles/scroll = SubResource("StyleBoxFlat_gasbt")
+Window/styles/embedded_border = SubResource("StyleBoxFlat_0x88e")
+
+[sub_resource type="Shader" id="Shader_6pdhr"]
+code = "shader_type canvas_item;
+
+uniform sampler2D screen_texture : hint_screen_texture, filter_linear;
+
+//
+// Overall effect
+//
+uniform float effect_strength : hint_range(0.0, 1.0) = 0.65;
+
+//
+// Horizontal scanlines
+//
+uniform float scanline_size = 4.0;
+uniform float scanline_strength : hint_range(0.0, 1.0) = 0.16;
+
+//
+// Vertical phosphor structure
+//
+uniform float phosphor_size = 12.0;
+uniform float phosphor_strength : hint_range(0.0, 1.0) = 0.055;
+
+//
+// RGB displacement
+//
+uniform float chromatic_shift = 0.45;
+
+//
+// Fine noise
+//
+uniform float noise_strength : hint_range(0.0, 0.1) = 0.008;
+
+
+// ------------------------------------------------------------
+// Small procedural noise
+// ------------------------------------------------------------
+
+float hash(vec2 p) {
+    return fract(
+        sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123
+    );
+}
+
+
+// ------------------------------------------------------------
+// Fragment
+// ------------------------------------------------------------
+
+void fragment() {
+
+    vec2 uv = SCREEN_UV;
+
+    vec2 pixel = 1.0 / vec2(textureSize(screen_texture, 0));
+
+    // --------------------------------------------------------
+    // Chromatic screen sampling
+    // --------------------------------------------------------
+
+    float r = texture(
+        screen_texture,
+        uv + vec2(-chromatic_shift * pixel.x, 0.0)
+    ).r;
+
+    float g = texture(
+        screen_texture,
+        uv
+    ).g;
+
+    float b = texture(
+        screen_texture,
+        uv + vec2(chromatic_shift * pixel.x, 0.0)
+    ).b;
+
+    vec3 screen = vec3(r, g, b);
+
+
+    // --------------------------------------------------------
+    // Screen pixel coordinates
+    // --------------------------------------------------------
+
+    vec2 p = uv / pixel;
+
+
+    // --------------------------------------------------------
+    // Horizontal scanlines
+    // --------------------------------------------------------
+
+    float scan_pos = mod(p.y, scanline_size);
+
+    float scanline =
+        smoothstep(
+            scanline_size * 0.15,
+            scanline_size * 0.50,
+            scan_pos
+        );
+
+    // Darken alternating horizontal lines.
+    float scan_mask =
+        1.0 - scanline_strength * (1.0 - scanline);
+
+
+    // --------------------------------------------------------
+    // Vertical phosphor pattern
+    // --------------------------------------------------------
+
+    float x = mod(p.x, phosphor_size);
+
+    float phosphor_r =
+        smoothstep(0.0, phosphor_size * 0.33, x) *
+        (1.0 - smoothstep(
+            phosphor_size * 0.33,
+            phosphor_size * 0.40,
+            x
+        ));
+
+    float phosphor_g =
+        smoothstep(
+            phosphor_size * 0.33,
+            phosphor_size * 0.40,
+            x
+        ) *
+        (1.0 - smoothstep(
+            phosphor_size * 0.66,
+            phosphor_size * 0.73,
+            x
+        ));
+
+    float phosphor_b =
+        smoothstep(
+            phosphor_size * 0.66,
+            phosphor_size * 0.73,
+            x
+        );
+
+
+    // Very subtle RGB modulation.
+    vec3 phosphor = vec3(
+        phosphor_r,
+        phosphor_g,
+        phosphor_b
+    );
+
+
+    // --------------------------------------------------------
+    // Dark vertical grid
+    // --------------------------------------------------------
+
+    float vertical_line =
+        smoothstep(
+            phosphor_size * 0.90,
+            phosphor_size,
+            x
+        );
+
+
+    vec3 grid_effect =
+        phosphor * phosphor_strength;
+
+    grid_effect -=
+        vertical_line * phosphor_strength * 0.45;
+
+
+    // --------------------------------------------------------
+    // Combine
+    // --------------------------------------------------------
+
+    vec3 result = screen;
+
+    // Scanlines affect everything, including text.
+    result *= scan_mask;
+
+    // Add the extremely subtle RGB phosphor structure.
+    result += grid_effect * result;
+
+
+    // --------------------------------------------------------
+    // Fine texture
+    // --------------------------------------------------------
+
+    float n = hash(floor(p));
+
+    result +=
+        (n - 0.5) *
+        noise_strength;
+
+
+    // --------------------------------------------------------
+    // Blend effect
+    // --------------------------------------------------------
+
+    result = mix(
+        screen,
+        result,
+        effect_strength
+    );
+
+
+    COLOR = vec4(result, 1.0);
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pvttc"]
+shader = SubResource("Shader_6pdhr")
+shader_parameter/effect_strength = 0.65
+shader_parameter/scanline_size = 4.0
+shader_parameter/scanline_strength = 0.16
+shader_parameter/phosphor_size = 12.0
+shader_parameter/phosphor_strength = 0.055
+shader_parameter/chromatic_shift = 0.45
+shader_parameter/noise_strength = 0.008
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pvttc"]
+bg_color = Color(0, 0, 0, 0.34117648)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pvttc"]
+
+[node name="SimpleConsole" type="Control" unique_id=1038064920 node_paths=PackedStringArray("input_component", "log_component", "error_component")]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_4jtcb")
+script = ExtResource("1_0wgy3")
+input_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/InputComponentPanel")
+log_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/Control/LoggerComponentPanel/MarginContainer/RichLogLabel")
+error_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/ErrorList")
+default_theme = ExtResource("2_dyj5x")
+
+[node name="CRTOverlay" type="Panel" parent="." unique_id=1011637646]
+material = SubResource("ShaderMaterial_pvttc")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Background" type="Panel" parent="CRTOverlay" unique_id=919460706]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pvttc")
+
+[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay" unique_id=188025356]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer" unique_id=1522221045]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="HeaderComponentPanel" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=1464135229]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel" unique_id=2049131274]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel/MarginContainer" unique_id=2141693823]
+layout_mode = 2
+
+[node name="HBoxContainerLeft" type="HBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel/MarginContainer/HBoxContainer" unique_id=2115113120]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel/MarginContainer/HBoxContainer/HBoxContainerLeft" unique_id=156693460]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_type_variation = &"Header_Label"
+text = "DCKit://SIMPLE_CONSOLE"
+
+[node name="HBoxContainerRight" type="HBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel/MarginContainer/HBoxContainer" unique_id=1104486456]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="Control" type="Control" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=1383768906]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LoggerComponentPanel" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control" unique_id=482121523]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_pvttc")
+
+[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/LoggerComponentPanel" unique_id=568351659]
+layout_mode = 2
+theme_type_variation = &"LoggerComponentPanel_Margin"
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="RichLogLabel" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/LoggerComponentPanel/MarginContainer" unique_id=1540644517 instance=ExtResource("5_vwtn4")]
+layout_mode = 2
+
+[node name="BottomCompContainer" type="Container" parent="CRTOverlay/MarginContainer/VBoxContainer/Control" unique_id=420197775 node_paths=PackedStringArray("auto_comp", "info_comp")]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_gasbt")
+auto_comp = NodePath("AutoPanelContainer")
+info_comp = NodePath("InfoPanelContainer")
+
+[node name="InfoPanelContainer" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer" unique_id=1230020292]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="Label" type="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer/InfoPanelContainer" unique_id=871180431]
+layout_mode = 2
+text = "info comp"
+
+[node name="AutoPanelContainer" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer" unique_id=1170564465]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="Label" type="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer/AutoPanelContainer" unique_id=1395358317]
+layout_mode = 2
+text = "auto comp"
+
+[node name="Control" type="Control" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer" unique_id=474740710]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=392904884]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="ErrorList" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=1140330670 instance=ExtResource("6_i6iku")]
+modulate = Color(1, 1, 1, 0)
+custom_maximum_size = Vector2(-1, 0)
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="InputComponentPanel" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=283857201 instance=ExtResource("5_v1qrv")]
+layout_mode = 2

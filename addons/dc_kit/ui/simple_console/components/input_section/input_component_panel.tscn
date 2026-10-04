@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://bihuh3740pvx3"]
+
+[ext_resource type="Script" uid="uid://c8k1oc5c0tsfj" path="res://addons/dc_kit/ui/simple_console/components/input_section/input_component_panel.gd" id="1_37qa2"]
+[ext_resource type="PackedScene" uid="uid://sqymq7jcg4j7" path="res://addons/dc_kit/ui/simple_console/components/input_section/execute_btn/execute_btn.tscn" id="1_g5k4r"]
+[ext_resource type="Script" uid="uid://b1glficv4wjxv" path="res://addons/dc_kit/ui/simple_console/components/input_section/text_edit.gd" id="3_7jkh5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6pdhr"]
+bg_color = Color(0.043137256, 0.043137256, 0.043137256, 0.93333334)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3a2tr"]
+bg_color = Color(0.13498849, 0.13498849, 0.13498849, 1)
+border_width_left = 1
+border_width_bottom = 1
+
+[node name="InputComponentPanel" type="PanelContainer" unique_id=283857201 node_paths=PackedStringArray("button", "text_edit")]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_6pdhr")
+script = ExtResource("1_37qa2")
+label_perfix = " CMD"
+button = NodePath("MarginContainer/HBoxContainer/ExecuteBtn_PanelContainer")
+text_edit = NodePath("MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/TextEdit")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=220905979]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=1579906345]
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/HBoxContainer" unique_id=331150238]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_3a2tr")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer/PanelContainer" unique_id=419283469]
+layout_mode = 2
+theme_type_variation = &"HBoxContainer_LineEdit"
+
+[node name="Label" type="Label" parent="MarginContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=1206481238]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.3019608, 0.53333336, 1, 1)
+text = " CMD :~$"
+vertical_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=32537712]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextEdit" type="TextEdit" parent="MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer" unique_id=1249874399]
+layout_mode = 2
+placeholder_text = "Write the Command ..."
+context_menu_enabled = false
+emoji_menu_enabled = false
+scroll_fit_content_height = true
+caret_blink = true
+caret_multiple = false
+script = ExtResource("3_7jkh5")
+
+[node name="ExecuteBtn_PanelContainer" parent="MarginContainer/HBoxContainer" unique_id=1822304569 instance=ExtResource("1_g5k4r")]
+layout_mode = 2

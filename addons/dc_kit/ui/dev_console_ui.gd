@@ -28,7 +28,7 @@ const ViewController := preload("../view_controllers/view_controller.gd")
 		_rebuild_theme()
 
 @export_range(0.5, 3.0, 0.05)
-var font_scale: float = 1.0:
+var font_scale: float = _DCKitSetting.get_ui_scale():
 	set(value):
 		value = max(value, 0.1)
 		if is_equal_approx(font_scale, value):
@@ -51,10 +51,6 @@ var _is_controller_bound := false
 
 
 func _init() -> void:
-	font_scale = _DCKitUtilsNamespace.Setting.get_setting(
-		_DCKitUtilsNamespace.Setting.SETTING_UI_SCALE,
-		1.0,
-	)
 	_rebuild_theme()
 
 
@@ -110,13 +106,8 @@ func setup_ui_controller(controller: ViewController) -> void:
 
 func _rebuild_theme():
 	var pixels := int(font_scale * 18)
-
-	var t_util := _DCKitUINamespace.ThemeUtil.new()
-
-	var font_theme := t_util.get_dckit_theme(pixels, normal_colour, highlighted_colour)
-	if font_theme != null and is_node_ready():
-		theme = font_theme
 #endregion
+
 
 
 func _get_default_toggle_info_panel_sct() -> Shortcut:

@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://sqymq7jcg4j7"]
+
+[ext_resource type="Script" uid="uid://b3fg6x38y7ir0" path="res://addons/dc_kit/ui/simple_console/components/input_section/execute_btn/execute_btn.gd" id="1_hkaxy"]
+[ext_resource type="Texture2D" uid="uid://6k2ri4r72f8i" path="res://addons/dc_kit/assets/images/play.svg" id="1_i1cju"]
+[ext_resource type="Texture2D" uid="uid://b5lj7546kavby" path="res://addons/dc_kit/assets/images/octagon-minus.svg" id="3_r2viy"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v1qrv"]
+
+[node name="ExecuteBtn_PanelContainer" type="PanelContainer" unique_id=1822304569 node_paths=PackedStringArray("hidden_btn", "btn_icon", "btn_label")]
+theme_override_styles/panel = SubResource("StyleBoxFlat_v1qrv")
+script = ExtResource("1_hkaxy")
+btn_icon_exe = ExtResource("1_i1cju")
+btn_icon_abo = ExtResource("3_r2viy")
+hidden_btn = NodePath("Button")
+btn_icon = NodePath("MarginContainer/HBoxContainer/TextureRect")
+btn_label = NodePath("MarginContainer/HBoxContainer/Label")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1074933399]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=1188423056]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=2096482911]
+layout_mode = 2
+texture = ExtResource("1_i1cju")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/HBoxContainer" unique_id=398278668]
+layout_mode = 2
+text = "EXECUTE"
+
+[node name="Button" type="Button" parent="." unique_id=1982256772]
+layout_mode = 2
+focus_mode = 0

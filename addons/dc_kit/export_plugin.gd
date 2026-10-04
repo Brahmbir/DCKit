@@ -15,7 +15,11 @@ const INCLUDE_FILES := [
 	"dc_context.gd",
 ]
 
+const TAG_INCLUDE := "dckit_include"
+const TAG_EXCLUDE := "dckit_exclude"
+
 var _is_debug_export := false
+var _override := "" # "", "include", "exclude"
 
 
 func _get_name() -> String:
@@ -23,10 +27,22 @@ func _get_name() -> String:
 
 
 func _is_enabled(is_debug: bool) -> bool:
-	return is_debug or _DCKitUtilsNamespace.Setting.get_setting(
-			_DCKitUtilsNamespace.Setting.SETTING_ENABLED_IN_RELEASE,
-			false,
-		)
+	match _override:
+		"exclude":
+			return false
+		"include":
+			return true
+	return is_debug or _DCKitSetting.get_enabled_in_release()
+
+func _resolve_override(features: PackedStringArray) -> String:
+	var has_include := false
+	for feature in features:
+		match feature.to_lower():
+			TAG_EXCLUDE:
+				return "exclude"  # exclude always wins, no need to keep scanning
+			TAG_INCLUDE:
+				has_include = true
+	return "include" if has_include else ""
 
 func _export_file(path: String, type: String, features: PackedStringArray) -> void:
 	if not path.contains("addons/dc_kit"):
@@ -56,16 +72,17 @@ func _should_skip_file(path: String, is_debug: bool) -> bool:
 	# No include list defined — nothing else to skip.
 	return false
 
+
 func _export_end() -> void:
 	_is_debug_export = false
+	_override = ""
 
-func _export_begin(_features, is_debug, path, _flags):
+
+func _export_begin(features, is_debug, path, _flags):
 	_is_debug_export = is_debug
-	
-	var source_dir := _DCKitUtilsNamespace.Setting.get_setting(
-		_DCKitUtilsNamespace.Setting.SETTING_BATCH_DIR,
-		"",
-	)
+	_override = _resolve_override(features)
+	 
+	var source_dir := _DCKitSetting.get_batch_directory()
 
 	if not _is_enabled(is_debug):
 		return

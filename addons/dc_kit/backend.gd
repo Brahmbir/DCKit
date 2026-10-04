@@ -6,7 +6,7 @@ const ControlFlowCMD = preload("./basic_command/control_flow_commands.gd")
 
 const ViewController := preload("./view_controllers/view_controller.gd")
 
-const DCKit_UI_PackScene = preload("./ui/dev_console_ui.tscn")
+const DCKit_Host = preload("./ui/dckit_ui_host.tscn")
 
 var _cmd_reg: _DCKitRegistriesNamespace.CommandRegistry = null
 var _ctor_reg: _DCKitRegistriesNamespace.ConstructorRegistry = null
@@ -17,33 +17,47 @@ var _executor: _DCKitExecutorNamespace.Executor = null
 
 var _view_controller = null # ViewController
 
-var _hint := """[i][b][color=gray]Keyboard shortcuts:[/color][/b]
-[color=#6C7086][color=gray]Autocomplete[/color]
-		[b]Ctrl+Space[/b] — toggle autocomplete
-		[b]Up[/b] / [b]Down[/b] — navigate suggestions (when open)
-		[b]Tab[/b] / [b]Enter[/b] — accept highlighted suggestion (when open)
-		[b]Esc[/b] — close autocomplete (when open)
-[color=gray]History[/color]
-		[b]Up[/b] / [b]Down[/b] — navigate history
-		[b]Ctrl+Up[/b] / [b]Ctrl+Down[/b] — navigate prefix-matched history
-[color=gray]Misc[/color]
-		[b]Enter[/b] — submit
-		[b]Ctrl+Shift+Space[/b] — expand/collapse info panel[/i][/color]"""
+var _input_feedback_controller: _DCKitUINamespace.InputFeedbackController = null
 
 
 func _init() -> void:
-	_init_systems()
+	_cmd_reg = _DCKitRegistriesNamespace.CommandRegistry.new()
+	_ctor_reg = _DCKitRegistriesNamespace.ConstructorRegistry.new()
+	_var_store = _DCKitCoreNamespace.VariableStore.new()
+
+	_analyzer = _DCKitAnalyzerNamespace.Analyzer.new(_cmd_reg, _ctor_reg, _var_store)
+
+	var auto = _DCKitCoreNamespace.AutoComplete.new(_cmd_reg, _ctor_reg, _var_store)
+
+	_input_feedback_controller = _DCKitUINamespace.InputFeedbackController.new(_analyzer)
+	_input_feedback_controller.set_completion_provider(auto)
+
+	_executor = _DCKitExecutorNamespace.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
+
+	_register_commands(_cmd_reg)
 
 
-func init_ui() -> Control:
-	var dc_kit_ui := DCKit_UI_PackScene.instantiate()
-	dc_kit_ui.setup_ui_controller(_view_controller)
-	dc_kit_ui.setup_executor_connection(_executor)
+func init_ui() -> Node:
+	var dckit_host := DCKit_Host.instantiate()
 
-	_executor.logger.simple_print(_get_shotcuts_hint())
+	var valid := true
 
-	dc_kit_ui.hide()
-	return dc_kit_ui
+	for method_name in ["hide_console", "get_console"]:
+		if not dckit_host.has_method(method_name):
+			push_error("DCKit_Host is missing required method: %s()" % method_name)
+			valid = false
+
+	if not dckit_host.has_signal("connection_requested"):
+		push_error("DCKit_Host is missing required signal: connection_requested")
+		valid = false
+
+	if not valid:
+		return dckit_host
+
+	dckit_host.ready.connect(dckit_host.hide_console)
+	dckit_host.connect("connection_requested", _on_host_connection_requested)
+
+	return dckit_host
 
 
 #region Public API
@@ -117,23 +131,12 @@ func get_var_keys() -> Array:
 #endregion
 
 
-func _init_systems() -> void:
-	_cmd_reg = _DCKitRegistriesNamespace.CommandRegistry.new()
-	_ctor_reg = _DCKitRegistriesNamespace.ConstructorRegistry.new()
-	_var_store = _DCKitCoreNamespace.VariableStore.new()
-
-	_analyzer = _DCKitAnalyzerNamespace.Analyzer.new(_cmd_reg, _ctor_reg, _var_store)
-
-	_view_controller = ViewController.new(_analyzer)
-	_view_controller.set_autocomplete(_DCKitCoreNamespace.AutoComplete.new(
-			_cmd_reg,
-			_ctor_reg,
-			_var_store,
-		))
-
-	_executor = _DCKitExecutorNamespace.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
-
-	_register_commands(_cmd_reg)
+func _on_host_connection_requested(console: _DCKitUINamespace.ConsoleBase) -> void:
+	if not console:
+		push_warning("console is null in '_on_host_connection_requested' function")
+		return
+	console.connect_executor(_executor)
+	console.connect_feedback_controller(_input_feedback_controller)
 
 
 func _register_defs(defs: Array[DCDefinition]) -> void:
@@ -153,7 +156,3 @@ func _register_commands(_command_reg: _DCKitRegistriesNamespace.CommandRegistry)
 		_register_defs(_var_store.get_command_def_array())
 	if _executor:
 		_register_defs(_executor.get_command_def_array())
-
-
-func _get_shotcuts_hint() -> String:
-	return _hint
