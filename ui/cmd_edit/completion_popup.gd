@@ -16,8 +16,8 @@ const MAX_VISIBLE := 8
 
 var _selected_index := 0
 var _start: int = 0
-var _items: Array = [] # Array[_DCKitCoreNamespace.AutoComplete.CompletionItem]
-var _autocomplete: _DCKitCoreNamespace.AutoComplete = null
+var _items: Array = [] # Array[_DCKitNS.Core.AutoComplete.CompletionItem]
+var _autocomplete: _DCKitNS.Core.AutoComplete = null
 
 @onready var item_list: ItemList = %ItemList
 
@@ -27,7 +27,7 @@ func _ready() -> void:
 	hide_popup()
 
 
-func setup(autocomplete: _DCKitCoreNamespace.AutoComplete) -> void:
+func setup(autocomplete: _DCKitNS.Core.AutoComplete) -> void:
 	_autocomplete = autocomplete
 	_autocomplete.autocomplete_need_update.connect(_on_autocomplete_need_update)
 
@@ -37,18 +37,18 @@ func populate() -> void:
 	_selected_index = 0
 
 	for i in _items.size():
-		var item: _DCKitCoreNamespace.AutoComplete.CompletionItem = _items[i]
+		var item: _DCKitNS.Core.AutoComplete.CompletionItem = _items[i]
 		var idx := item_list.add_item(item.label)
 		match item.kind:
-			_DCKitCoreNamespace.AutoComplete.CompletionItem.Kind.COMMAND:
+			_DCKitNS.Core.AutoComplete.CompletionItem.Kind.COMMAND:
 				item_list.set_item_icon(idx, icon_command)
-			_DCKitCoreNamespace.AutoComplete.CompletionItem.Kind.COMMAND_ALIAS:
+			_DCKitNS.Core.AutoComplete.CompletionItem.Kind.COMMAND_ALIAS:
 				item_list.set_item_icon(idx, icon_command_alias)
-			_DCKitCoreNamespace.AutoComplete.CompletionItem.Kind.VARIABLE:
+			_DCKitNS.Core.AutoComplete.CompletionItem.Kind.VARIABLE:
 				item_list.set_item_icon(idx, icon_variable)
-			_DCKitCoreNamespace.AutoComplete.CompletionItem.Kind.TYPE:
+			_DCKitNS.Core.AutoComplete.CompletionItem.Kind.TYPE:
 				item_list.set_item_icon(idx, icon_type)
-			_DCKitCoreNamespace.AutoComplete.CompletionItem.Kind.VALUE, _:
+			_DCKitNS.Core.AutoComplete.CompletionItem.Kind.VALUE, _:
 				item_list.set_item_icon(idx, icon_text)
 		if not item.detail.is_empty():
 			var regex = RegEx.new()

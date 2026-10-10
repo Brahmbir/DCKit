@@ -18,7 +18,7 @@ const DCBasis = preload("./t_basis.gd")
 const DCProjection = preload("./t_projection.gd")
 
 
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	const CONSTS := {
 		"IDENTITY": Transform3D.IDENTITY,
 		"FLIP_X": Transform3D.FLIP_X,
@@ -98,26 +98,26 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 
 		return DCResult.fail("Transform3D: expected 0, 1, 2, or 4 parts — got %d." % parts.size())
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Transform3D",
 		handler,
 		"A 3D transformation matrix with rotation, scale, and translation.\n"
 		+ "[color=gray]Stores a [b]Basis[/b] (3×3) and a [b]Vector3 origin[/b].[/color]",
 		[
 			sig_zero("Identity — no transformation"),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Existing Transform3D or Projection",
-				[_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(
+				[_DCKitNS.Registries.ConstructorDef.PartHint.new(
 						"value",
 						"<Transform3D | Projection>",
 						"Existing transform or projection",
 					)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Basis + origin",
 				[
 					DCBasis.part_hint_basis(
@@ -127,7 +127,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					DCVector3.part_hint_vector3("origin", "Translation in world space."),
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Three column vectors + origin",
 				[
 					DCVector3.part_hint_vector3("x", "X column — local right direction."),
@@ -136,7 +136,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					DCVector3.part_hint_vector3("origin", "Translation in world space."),
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"From Projection",
 				[
 					DCProjection.part_hint_projection(
@@ -161,9 +161,9 @@ static func extract_transform3d(val: DCResult.Value) -> Variant:
 static func part_hint_transform3d(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace
+		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
 		.new(p_name, "<Transform3D>", p_desc)

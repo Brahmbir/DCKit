@@ -22,20 +22,20 @@ static func val_label(val: DCResult.Value) -> String:
 # Zero-argument signature shared by almost every built-in type.
 static func sig_zero(
 	desc := "Zero / identity value"
-) -> _DCKitRegistriesNamespace.ConstructorDef.TypeSignature:
-	return _DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(desc, [])
+) -> _DCKitNS.Registries.ConstructorDef.TypeSignature:
+	return _DCKitNS.Registries.ConstructorDef.TypeSignature.new(desc, [])
 
 
 # Part hint helpers
 # Named-constant slot — suggestor returns const_names, validator rejects unknowns.
 # Case-insensitive. Skips variable references ($...).
-static func const_part(const_names: Array) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+static func const_part(const_names: Array) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace
+		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
 		.new("name", "<const>", "One of: " + ", ".join(const_names))
-		.validate(_DCKitRegistriesNamespace.ConstructorDef.PartHint.enum_validator(const_names))
+		.validate(_DCKitNS.Registries.ConstructorDef.PartHint.enum_validator(const_names))
 		.suggest(
 			func(_prefix: String) -> Array:
 				return const_names,

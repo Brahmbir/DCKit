@@ -42,7 +42,7 @@ func _exit_tree() -> void:
 
 # PUBLIC API
 # Attach to [param logger]. Safe to call multiple times — swaps loggers cleanly.
-func connect_logger(logger: _DCKitExecutorNamespace.Tracer) -> void:
+func connect_logger(logger: _DCKitNS.Executor.Tracer) -> void:
 	var previous := _get_logger()
 	_detach()
 	_logger_ref = weakref(logger) if logger else null
@@ -56,12 +56,12 @@ func connect_logger(logger: _DCKitExecutorNamespace.Tracer) -> void:
 		_attach()
 
 
-func _get_logger() -> _DCKitExecutorNamespace.Tracer:
+func _get_logger() -> _DCKitNS.Executor.Tracer:
 	return _logger_ref.get_ref() if _logger_ref else null
 
 
 func _attach() -> void:
-	var logger := _get_logger() as _DCKitExecutorNamespace.Tracer
+	var logger := _get_logger() as _DCKitNS.Executor.Tracer
 	if logger == null:
 		return
 	if not logger.entry_added.is_connected(_append_entry):
@@ -97,7 +97,7 @@ func _ensure_label() -> void:
 	add_child(_label)
 
 
-func _append_entry(entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> void:
+func _append_entry(entry: _DCKitNS.Executor.Tracer.LogEntry) -> void:
 	_render_entry(entry)
 	_label.add_text("\n")
 
@@ -107,7 +107,7 @@ func _on_cleared() -> void:
 
 
 # Rendering
-func _render_entry(entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> void:
+func _render_entry(entry: _DCKitNS.Executor.Tracer.LogEntry) -> void:
 	_render_badge(_badge_level(entry))
 	match entry.kind:
 		"SYSTEM":
@@ -141,7 +141,7 @@ func _render_badge(level: String) -> void:
 	_label.pop()
 
 
-func _badge_level(entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> String:
+func _badge_level(entry: _DCKitNS.Executor.Tracer.LogEntry) -> String:
 	match entry.kind:
 		"COMMAND":
 			return "CMD"
@@ -154,9 +154,9 @@ func _badge_level(entry: _DCKitExecutorNamespace.Tracer.LogEntry) -> String:
 	return ""
 
 
-func _replay_all(logger: _DCKitExecutorNamespace.Tracer) -> void:
+func _replay_all(logger: _DCKitNS.Executor.Tracer) -> void:
 	_on_cleared()
 	if logger == null:
 		return
-	for entry: _DCKitExecutorNamespace.Tracer.LogEntry in logger.get_all():
+	for entry: _DCKitNS.Executor.Tracer.LogEntry in logger.get_all():
 		_append_entry(entry)

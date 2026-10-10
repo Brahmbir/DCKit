@@ -131,6 +131,7 @@ TextEdit/constants/outline_size = 2
 TextEdit/styles/focus = SubResource("StyleBoxEmpty_0x88e")
 TextEdit/styles/normal = SubResource("StyleBoxEmpty_7jkh5")
 TextEdit/styles/read_only = SubResource("StyleBoxEmpty_4jtcb")
+ToolNInfo_MarginContainer/base_type = &"MarginContainer"
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
 VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_dlema")

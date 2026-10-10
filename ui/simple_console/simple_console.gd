@@ -16,16 +16,16 @@ extends "../ui_base_class/console_base.gd"
 
 
 func _enter_tree() -> void:
-	var s := _DCKitUINamespace.scales
+	var s := _DCKitNS.UI.scales
 	s.font_changed.connect(_on_scale_changed)
 	s.log_font_changed.connect(_on_scale_changed)
 	s.space_changed.connect(_on_scale_changed)
 
 	resized.connect(
 		func():
-			_DCKitUINamespace.mobile_layout.set_screen_width(size.x),
+			_DCKitNS.UI.mobile_layout.set_screen_width(size.x),
 	)
-	_DCKitUINamespace.mobile_layout.set_screen_width(size.x)
+	_DCKitNS.UI.mobile_layout.set_screen_width(size.x)
 
 
 func _ready() -> void:
@@ -41,7 +41,7 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	var s := _DCKitUINamespace.scales
+	var s := _DCKitNS.UI.scales
 	s.font_changed.disconnect(_on_scale_changed)
 	s.log_font_changed.disconnect(_on_scale_changed)
 	s.space_changed.disconnect(_on_scale_changed)
@@ -59,13 +59,13 @@ func release_focus_on_input():
 		node.release_focus()
 
 
-func connect_cmd_history(history: _DCKitUINamespace.CommandHistory):
+func connect_cmd_history(history: _DCKitNS.UI.CommandHistory):
 	var node := _get_input_node("connect_cmd_history")
 	if node:
-		_DCKitUINamespace.call_from_comp(node, "set_history_obj", [history])
+		_DCKitNS.UI.call_from_comp(node, "set_history_obj", [history])
 
 
-func connect_executor(executor: _DCKitExecutorNamespace.Executor):
+func connect_executor(executor: _DCKitNS.Executor.Executor):
 	if not input_component or not log_component:
 		push_warning(
 			"SimpleConsole.connect_executor: input_component and log_component must both be assigned."
@@ -75,24 +75,38 @@ func connect_executor(executor: _DCKitExecutorNamespace.Executor):
 	input_component.connect_executor(executor)
 
 	log_component.connect_logger(executor.logger)
-	_DCKitUINamespace.set_var_comp(log_component, "COLOR_MAP", LOGGER_COLOR_MAP)
+	_DCKitNS.UI.set_var_comp(log_component, "COLOR_MAP", LOGGER_COLOR_MAP)
 
 
-func connect_feedback_controller(controller: _DCKitUINamespace.InputFeedbackController):
+func connect_feedback_controller(controller: _DCKitNS.UI.InputFeedbackController):
 	if not input_component:
 		push_warning("SimpleConsole.connect_feedback_controller: input_component must be assigned.")
 		return
-
+		
+	if not controller:
+		push_warning("SimpleConsole.connect_feedback_controller: variable `controller` is null.")
+		return
+	
 	controller.diagnostics_view.diagnostics_changed.connect(_on_diagnostics_changed)
-
-	controller
-	controller.signature_help_view.update_posted.connect(
-		func(_s):
-			print("signature_help_view trigger"),
-	)
+	controller.signature_help_view.definition_changed.connect(_on_definition_changed)
+	controller.signature_help_view.active_changed.connect(_on_active_changed)
 
 	input_component.cmd_text_changed.connect(controller.handle_text_changed)
 	input_component.cmd_caret_location_changed.connect(controller.handle_cursor_moved)
+
+
+func _on_definition_changed(info: _DCKitNS.UI.Signature.SignatureInfo) -> void:
+	if not info_component:
+		push_warning("SimpleConsole.connect_feedback_controller: info_component must be assigned.")
+		return
+	info_component.show_info(info)
+
+
+func _on_active_changed(index: int) -> void:
+	if not info_component:
+		push_warning("SimpleConsole.connect_feedback_controller: info_component must be assigned.")
+		return
+	info_component.set_active(index)
 
 
 func _on_scale_changed(_v) -> void:
@@ -120,7 +134,7 @@ func _get_input_node(caller: String) -> Control:
 func _default_theme_changed():
 	var new_theme: Theme = default_theme.duplicate()
 
-	var scales = _DCKitUINamespace.scales
+	var scales = _DCKitNS.UI.scales
 
 	new_theme.default_font_size = scales.em_font(1)
 
@@ -137,6 +151,10 @@ func _default_theme_changed():
 
 	for property in ["margin_bottom", "margin_left", "margin_right", "margin_top"]:
 		new_theme.set_constant(property, "MarginContainer", scales.em_space(1))
+		#new_theme.set_constant(property, "MarginContainer", scales.em_space(1))
+	
+	new_theme.set_constant("margin_bottom", "ToolNInfo_MarginContainer", scales.em_space(0.5))
+	new_theme.set_constant("margin_top", "ToolNInfo_MarginContainer", scales.em_space(4))
 
 	new_theme.set_constant("separation", "HBoxContainer", scales.em_space(.9))
 	new_theme.set_constant("separation", "HBoxContainer_LineEdit", scales.em_font(.5))

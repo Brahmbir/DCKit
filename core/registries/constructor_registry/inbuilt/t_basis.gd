@@ -17,7 +17,7 @@ const DCVector3 = preload("./t_vector3.gd")
 const DCQuaternion = preload("./t_quaternion.gd")
 
 
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	const CONSTS := {
 		"IDENTITY": Basis.IDENTITY,
 		"FLIP_X": Basis.FLIP_X,
@@ -103,26 +103,26 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 
 		return DCResult.fail("Basis: expected 0, 1, 2, or 3 parts — got %d." % parts.size())
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Basis",
 		handler,
 		"A 3×3 rotation and scale matrix.\n"
 		+ "[color=gray]Stores three column vectors: [b]x[/b] (right), [b]y[/b] (up), [b]z[/b] (back).[/color]",
 		[
 			sig_zero("Identity — no rotation or scale"),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Existing Basis or Quaternion",
-				[_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(
+				[_DCKitNS.Registries.ConstructorDef.PartHint.new(
 						"value",
 						"<Basis | Quaternion>",
 						"Existing basis or quaternion",
 					)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Axis + angle (radians)",
 				[
 					DCVector3.part_hint_vector3(
@@ -135,7 +135,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					),
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Three column vectors",
 				[
 					DCVector3.part_hint_vector3("x", "X column — local right direction."),
@@ -143,7 +143,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					DCVector3.part_hint_vector3("z", "Z column — local back direction."),
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"From Quaternion",
 				[
 					DCQuaternion.part_hint_quaternion(
@@ -168,9 +168,9 @@ static func extract_basis(val: DCResult.Value) -> Variant:
 static func part_hint_basis(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(p_name, "<Basis>", p_desc).accepts(
+		_DCKitNS.Registries.ConstructorDef.PartHint.new(p_name, "<Basis>", p_desc).accepts(
 			[TYPE_BASIS]
 		)
 	)

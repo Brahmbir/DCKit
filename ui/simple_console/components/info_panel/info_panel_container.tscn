@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://dn7o3uci4pms3"]
+
+[ext_resource type="Script" uid="uid://b60waa8bda51f" path="res://addons/dc_kit/ui/simple_console/components/info_panel/info_panel_container.gd" id="1_4tjp5"]
+[ext_resource type="Texture2D" uid="uid://b6p1jlgpski2g" path="res://addons/dc_kit/assets/images/arrow-down-right.svg" id="2_4tjp5"]
+
+[node name="InfoMarginContainer" type="MarginContainer" unique_id=218382473 node_paths=PackedStringArray("header_label", "header_texture_rect", "header_button", "content_root", "content_container", "scroll_container")]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -23.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"Info_MarginContainer"
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("1_4tjp5")
+header_label = NodePath("MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/Label")
+header_texture_rect = NodePath("MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/TextureRect")
+header_button = NodePath("MarginContainer/VBoxContainer/PanelContainer/HeaderButton")
+content_root = NodePath("MarginContainer/VBoxContainer/ContentRootContainer")
+content_container = NodePath("MarginContainer/VBoxContainer/ContentRootContainer/ScrollContainer/ContentContainer")
+scroll_container = NodePath("MarginContainer/VBoxContainer/ContentRootContainer/ScrollContainer")
+
+[node name="MarginContainer" type="PanelContainer" parent="." unique_id=1019145210]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_type_variation = &"ErrorList_PanelContainer"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=855075821]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=850924332]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/PanelContainer" unique_id=645071936]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer/MarginContainer" unique_id=982400694]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=592805767]
+layout_mode = 2
+text = "TEST"
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=218195891]
+layout_mode = 2
+texture = ExtResource("2_4tjp5")
+expand_mode = 2
+
+[node name="HeaderButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer" unique_id=178865045]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+
+[node name="ContentRootContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=604270331]
+custom_minimum_size = Vector2(0, 36.175)
+clip_contents = true
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/ContentRootContainer" unique_id=133444044]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ContentContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentRootContainer/ScrollContainer" unique_id=1602090130]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="test" type="Label" parent="MarginContainer/VBoxContainer/ContentRootContainer/ScrollContainer/ContentContainer" unique_id=1204541943]
+layout_mode = 2
+text = "tes"

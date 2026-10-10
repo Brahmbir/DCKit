@@ -88,7 +88,7 @@ func get_command_def_array() -> Array[DCDefinition]:
 	return def_arr
 
 
-func setup_executor_connection(executor: _DCKitExecutorNamespace.Executor) -> void:
+func setup_executor_connection(executor: _DCKitNS.Executor.Executor) -> void:
 	_executor_ref = weakref(executor)
 	_is_executor_bound = false
 
@@ -119,12 +119,12 @@ func _bind_executor():
 		return
 
 	var ref = _executor_ref.get_ref()
-	if (ref == null and not (ref is _DCKitExecutorNamespace.Executor)):
+	if (ref == null and not (ref is _DCKitNS.Executor.Executor)):
 		return
 
 	_is_executor_bound = true
 
-	var executor: _DCKitExecutorNamespace.Executor = ref
+	var executor: _DCKitNS.Executor.Executor = ref
 	_is_controller_bound = true
 
 	_log_view.setup(executor.logger)
@@ -140,9 +140,9 @@ func _bind_executor():
 func _on_command_submitted(raw: String) -> void:
 	_input_comp.set_busy(true)
 	var ref = _executor_ref.get_ref()
-	if (ref == null and not (ref is _DCKitExecutorNamespace.Executor)):
+	if (ref == null and not (ref is _DCKitNS.Executor.Executor)):
 		return
-	(ref as _DCKitExecutorNamespace.Executor).run(raw)
+	(ref as _DCKitNS.Executor.Executor).run(raw)
 
 
 func _on_execution_finished(_raw = null, _result = null) -> void:
@@ -151,9 +151,9 @@ func _on_execution_finished(_raw = null, _result = null) -> void:
 
 func _on_abort_requested() -> void:
 	var ref = _executor_ref.get_ref()
-	if (ref == null and not (ref is _DCKitExecutorNamespace.Executor)):
+	if (ref == null and not (ref is _DCKitNS.Executor.Executor)):
 		return
-	(ref as _DCKitExecutorNamespace.Executor).abort()
+	(ref as _DCKitNS.Executor.Executor).abort()
 #endregion
 
 

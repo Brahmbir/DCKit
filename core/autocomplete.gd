@@ -136,10 +136,10 @@ func _part_items(scope, _prefix: String) -> Array:
 	var seen: Dictionary = { }
 	var prev: Array = _prev_arg_values(scope)
 
-	for sig: _DCKitRegistriesNamespace.ConstructorDef.TypeSignature in def.signatures:
+	for sig: _DCKitNS.Registries.ConstructorDef.TypeSignature in def.signatures:
 		if scope.part_index >= sig.parts.size():
 			continue
-		var part: _DCKitRegistriesNamespace.ConstructorDef.PartHint = sig.parts[scope.part_index]
+		var part: _DCKitNS.Registries.ConstructorDef.PartHint = sig.parts[scope.part_index]
 		if not part.suggestor.is_valid():
 			continue
 		#var suggestions = _call_suggestor(part.suggestor, prev, prefix)
@@ -167,7 +167,7 @@ func _prev_arg_values(scope: DCAnalysisResult.DCScope) -> Array:
 					return _literal_values(node.args, scope.arg_index)
 		# INFO it crash , so dont uncomment (i dont want to to it)
 		#DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
-		#var ctor :_DCKitRegistriesNamespace.ConstructorDef= _find_ctor(_result.ast, scope.type_name)
+		#var ctor :_DCKitNS.Registries.ConstructorDef= _find_ctor(_result.ast, scope.type_name)
 		#if ctor != null:
 		#return _literal_values(ctor.parts, scope.part_index)
 	return []

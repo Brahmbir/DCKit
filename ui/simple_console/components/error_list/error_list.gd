@@ -45,7 +45,7 @@ func _ready() -> void:
 	label.bbcode_enabled = true
 	label.meta_clicked.connect(_on_meta_clicked)
 
-	_DCKitUINamespace.scales.font_changed.connect(_on_font_changed)
+	_DCKitNS.UI.scales.font_changed.connect(_on_font_changed)
 
 	size_flags_vertical = SIZE_SHRINK_BEGIN
 	modulate.a = 0.0
@@ -76,17 +76,17 @@ func transition(expanded: bool) -> void:
 	_tween.set_trans(Tween.TRANS_CUBIC)
 	_tween.tween_property(self, "modulate:a", 1.0 if expanded else 0.0, 0.18)
 	_tween.tween_property(self, "custom_minimum_size:y", expanded_height if expanded else 0.0, 0.18)
-	_tween.tween_property(
-		self,
-		"custom_maximum_size:y",
-		expanded_height + 4 if expanded else 0.0,
-		0.18,
-	)
+	#_tween.tween_property(
+		#self,
+		#"custom_maximum_size:y",
+		#expanded_height + 4 if expanded else 0.0,
+		#0.18,
+	#)
 
 
 func _on_font_changed(_v: float):
-	expanded_height = 4.25 * _DCKitUINamespace.scales.em_font(1)
-	sub_text_font_size = _DCKitUINamespace.scales.em_font(0.5)
+	expanded_height = 4.25 * _DCKitNS.UI.scales.em_font(1)
+	sub_text_font_size = _DCKitNS.UI.scales.em_font(0.5)
 	pass
 
 

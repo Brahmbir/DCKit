@@ -90,7 +90,7 @@ class DCScope:
 	var type_name: String = ""
 	# CONSTRUCTOR: 0-based part index
 	var part_index: int = 0
-	# → DCDefinition |  _DCKitRegistriesNamespace.ConstructorDef | null
+	# → DCDefinition |  _DCKitNS.Registries.ConstructorDef | null
 	var _active_ref: WeakRef = WeakRef.new()
 
 

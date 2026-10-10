@@ -8,31 +8,30 @@ const ViewController := preload("./view_controllers/view_controller.gd")
 
 const DCKit_Host = preload("./ui/dckit_ui_host.tscn")
 
-var _cmd_reg: _DCKitRegistriesNamespace.CommandRegistry = null
-var _ctor_reg: _DCKitRegistriesNamespace.ConstructorRegistry = null
-var _var_store: _DCKitCoreNamespace.VariableStore = null
+var _cmd_reg: _DCKitNS.Registries.CommandRegistry = null
+var _ctor_reg: _DCKitNS.Registries.ConstructorRegistry = null
+var _var_store: _DCKitNS.Core.VariableStore = null
 
-var _analyzer: _DCKitAnalyzerNamespace.Analyzer = null
-var _executor: _DCKitExecutorNamespace.Executor = null
+var _analyzer: _DCKitNS.Analyzer.Analyzer = null
+var _executor: _DCKitNS.Executor.Executor = null
 
-var _view_controller = null # ViewController
 
-var _input_feedback_controller: _DCKitUINamespace.InputFeedbackController = null
+var _input_feedback_controller: _DCKitNS.UI.InputFeedbackController = null
 
 
 func _init() -> void:
-	_cmd_reg = _DCKitRegistriesNamespace.CommandRegistry.new()
-	_ctor_reg = _DCKitRegistriesNamespace.ConstructorRegistry.new()
-	_var_store = _DCKitCoreNamespace.VariableStore.new()
+	_cmd_reg = _DCKitNS.Registries.CommandRegistry.new()
+	_ctor_reg = _DCKitNS.Registries.ConstructorRegistry.new()
+	_var_store = _DCKitNS.Core.VariableStore.new()
 
-	_analyzer = _DCKitAnalyzerNamespace.Analyzer.new(_cmd_reg, _ctor_reg, _var_store)
+	_analyzer = _DCKitNS.Analyzer.Analyzer.new(_cmd_reg, _ctor_reg, _var_store)
 
-	var auto = _DCKitCoreNamespace.AutoComplete.new(_cmd_reg, _ctor_reg, _var_store)
+	var auto = _DCKitNS.Core.AutoComplete.new(_cmd_reg, _ctor_reg, _var_store)
 
-	_input_feedback_controller = _DCKitUINamespace.InputFeedbackController.new(_analyzer)
+	_input_feedback_controller = _DCKitNS.UI.InputFeedbackController.new(_analyzer)
 	_input_feedback_controller.set_completion_provider(auto)
 
-	_executor = _DCKitExecutorNamespace.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
+	_executor = _DCKitNS.Executor.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
 
 	_register_commands(_cmd_reg)
 
@@ -64,8 +63,7 @@ func init_ui() -> Node:
 func analyze(input: String, cursor_pos: int = -1) -> DCAnalysisResult:
 	if input.is_empty():
 		return null
-	_view_controller.on_text_changed(input, cursor_pos)
-	return _view_controller.last_result
+	return _executor._analyzer.analyze(input, cursor_pos)
 
 
 func run(raw_string: String) -> DCResult:
@@ -131,7 +129,7 @@ func get_var_keys() -> Array:
 #endregion
 
 
-func _on_host_connection_requested(console: _DCKitUINamespace.ConsoleBase) -> void:
+func _on_host_connection_requested(console: _DCKitNS.UI.ConsoleBase) -> void:
 	if not console:
 		push_warning("console is null in '_on_host_connection_requested' function")
 		return
@@ -144,7 +142,7 @@ func _register_defs(defs: Array[DCDefinition]) -> void:
 		_cmd_reg.register(def)
 
 
-func _register_commands(_command_reg: _DCKitRegistriesNamespace.CommandRegistry) -> void:
+func _register_commands(_command_reg: _DCKitNS.Registries.CommandRegistry) -> void:
 	if BasicCMD:
 		_register_defs(BasicCMD.get_command_def_array())
 	if ControlFlowCMD:

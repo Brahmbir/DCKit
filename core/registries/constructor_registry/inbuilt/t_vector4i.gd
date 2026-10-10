@@ -13,7 +13,7 @@ extends "./inbuilt_base.gd"
 const DCInt = preload("./t_int.gd")
 
 
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	const CONSTS := {
 		"ZERO": Vector4i.ZERO,
 		"ONE": Vector4i.ONE,
@@ -59,21 +59,21 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 
 		return DCResult.fail("Vector4i: expected 0, 1, or 4 parts — got %d." % parts.size())
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Vector4i",
 		handler,
 		"A 4D vector with [b]x[/b], [b]y[/b], [b]z[/b], and [b]w[/b] int components.",
 		[
 			sig_zero("Zero vector — Vector4i(0, 0, 0, 0)"),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Convert Vector4/Vector4i",
 				[part_hint_vector4i("value", "Existing Vector4i or integer-valued Vector4")],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"XYZW components",
 				[
 					DCInt.part_hint("x", "X component"),
@@ -98,9 +98,9 @@ static func extract_vector4i(val: DCResult.Value) -> Variant:
 static func part_hint_vector4i(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(p_name, "<Vector4i>", p_desc).accepts(
+		_DCKitNS.Registries.ConstructorDef.PartHint.new(p_name, "<Vector4i>", p_desc).accepts(
 			[TYPE_VECTOR4I, TYPE_VECTOR4]
 		)
 	)

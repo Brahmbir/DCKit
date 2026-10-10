@@ -18,7 +18,7 @@ const DCFloat = preload("./t_float.gd")
 const DCInt = preload("./t_int.gd")
 
 
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	const NAMED_COLORS := {
 		"black": Color.BLACK,
 		"white": Color.WHITE,
@@ -135,23 +135,23 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 
 	# ── Part Hints ─────────────────────────────────────────────────────
 	var name_part := (
-		_DCKitRegistriesNamespace
+		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
 		.new("name", "<string>", "CSS color name (e.g. [b]red[/b]) or HTML hex (e.g. [b]#ff4400[/b], [b]#f40[/b])")
 		.accepts([TYPE_STRING, TYPE_COLOR])
 	)
 
-	var channel_part := func(ch: String, label: String) -> _DCKitRegistriesNamespace \
+	var channel_part := func(ch: String, label: String) -> _DCKitNS.Registries \
 			.ConstructorDef \
 			.PartHint:
 		return (
-			_DCKitRegistriesNamespace
+			_DCKitNS.Registries
 			.ConstructorDef
 			.PartHint
 			.new(ch, "<float>", "%s channel — 0.0–1.0 (float) or 0–255 (integer). Auto-detected."
 			% label)
-			.validate(_DCKitRegistriesNamespace.ConstructorDef.PartHint.float_validator())
+			.validate(_DCKitNS.Registries.ConstructorDef.PartHint.float_validator())
 			.accepts([TYPE_FLOAT, TYPE_INT, TYPE_STRING])
 		)
 
@@ -160,7 +160,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 	var bf := channel_part.call("b", "Blue")
 	var af := channel_part.call("a", "Alpha")
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Color",
 		handler,
 		"An RGBA color. Supports named colors, hex codes, float (0.0–1.0), "
@@ -168,23 +168,23 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 		+ "[color=gray]Auto-detection: values > 1.0 → treated as 8-bit.[/color]",
 		[
 			sig_zero("Opaque black — Color(0, 0, 0, 1)"),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Named color or HTML hex",
 				[name_part],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"RGB — float 0.0–1.0",
 				[rf, gf, bf],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"RGBA — float 0.0–1.0",
 				[rf, gf, bf, af],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"RGB — 8-bit 0–255",
 				[rf, gf, bf],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"RGBA — 8-bit 0–255",
 				[rf, gf, bf, af],
 			),
@@ -206,9 +206,9 @@ static func extract_color(val: DCResult.Value) -> Variant:
 static func part_hint_color(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(p_name, "<Color>", p_desc).accepts(
+		_DCKitNS.Registries.ConstructorDef.PartHint.new(p_name, "<Color>", p_desc).accepts(
 			[TYPE_COLOR, TYPE_STRING]
 		)
 	)

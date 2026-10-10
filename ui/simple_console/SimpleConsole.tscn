@@ -6,8 +6,8 @@
 [ext_resource type="FontFile" uid="uid://6gunmtyx1g7e" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf" id="2_vwtn4"]
 [ext_resource type="PackedScene" uid="uid://bihuh3740pvx3" path="res://addons/dc_kit/ui/simple_console/components/input_section/input_component_panel.tscn" id="5_v1qrv"]
 [ext_resource type="PackedScene" uid="uid://bokp0qrlc3y04" path="res://addons/dc_kit/ui/rich_log_label/rich_log_label.tscn" id="5_vwtn4"]
+[ext_resource type="PackedScene" uid="uid://dn7o3uci4pms3" path="res://addons/dc_kit/ui/simple_console/components/info_panel/info_panel_container.tscn" id="6_0x88e"]
 [ext_resource type="PackedScene" uid="uid://chm4u3x5uk6g5" path="res://addons/dc_kit/ui/simple_console/components/error_list/error_list.tscn" id="6_i6iku"]
-[ext_resource type="Script" uid="uid://sjdr1ft0d8ba" path="res://addons/dc_kit/ui/simple_console/utils/info_auto_container.gd" id="7_gasbt"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooera"]
 
@@ -138,6 +138,9 @@ TextEdit/constants/outline_size = 2
 TextEdit/styles/focus = SubResource("StyleBoxEmpty_0x88e")
 TextEdit/styles/normal = SubResource("StyleBoxEmpty_7jkh5")
 TextEdit/styles/read_only = SubResource("StyleBoxEmpty_4jtcb")
+ToolNInfo_MarginContainer/base_type = &"MarginContainer"
+ToolNInfo_MarginContainer/constants/margin_bottom = 8
+ToolNInfo_MarginContainer/constants/margin_top = 64
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
 VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_dlema")
@@ -359,7 +362,7 @@ bg_color = Color(0, 0, 0, 0.34117648)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pvttc"]
 
-[node name="SimpleConsole" type="Control" unique_id=1038064920 node_paths=PackedStringArray("input_component", "log_component", "error_component")]
+[node name="SimpleConsole" type="Control" unique_id=1038064920 node_paths=PackedStringArray("input_component", "log_component", "error_component", "info_component")]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -371,8 +374,12 @@ theme = SubResource("Theme_4jtcb")
 script = ExtResource("1_0wgy3")
 input_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/InputComponentPanel")
 log_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/Control/LoggerComponentPanel/MarginContainer/RichLogLabel")
-error_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/ErrorList")
+error_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/VBoxContainer/ErrorList")
+info_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer")
 default_theme = ExtResource("2_dyj5x")
+editor_ui_font_scale = 1.0
+editor_ui_log_font_scale = 1.0
+editor_ui_space_scale = 1.0
 
 [node name="CRTOverlay" type="Panel" parent="." unique_id=1011637646]
 material = SubResource("ShaderMaterial_pvttc")
@@ -457,47 +464,71 @@ theme_override_constants/margin_bottom = 0
 [node name="RichLogLabel" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/LoggerComponentPanel/MarginContainer" unique_id=1540644517 instance=ExtResource("5_vwtn4")]
 layout_mode = 2
 
-[node name="BottomCompContainer" type="Container" parent="CRTOverlay/MarginContainer/VBoxContainer/Control" unique_id=420197775 node_paths=PackedStringArray("auto_comp", "info_comp")]
-clip_contents = true
+[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control" unique_id=1560966744]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 12
+anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -145.0
 grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("7_gasbt")
-auto_comp = NodePath("AutoPanelContainer")
-info_comp = NodePath("InfoPanelContainer")
+grow_vertical = 0
+mouse_filter = 2
+theme_type_variation = &"ToolNInfo_MarginContainer"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_right = 0
 
-[node name="InfoPanelContainer" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer" unique_id=1230020292]
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer" unique_id=242183285]
+layout_mode = 2
+size_flags_vertical = 8
+mouse_filter = 2
+
+[node name="InfoPanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer" unique_id=1310062042 instance=ExtResource("6_0x88e")]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 size_flags_horizontal = 8
+size_flags_vertical = 8
+mouse_filter = 2
 
-[node name="Label" type="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer/InfoPanelContainer" unique_id=871180431]
-layout_mode = 2
-text = "info comp"
+[node name="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" parent_id_path=PackedInt32Array(1310062042, 982400694) index="0" unique_id=592805767]
+text = ""
 
-[node name="AutoPanelContainer" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer" unique_id=1170564465]
+[node name="TextureRect" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" parent_id_path=PackedInt32Array(1310062042, 982400694) index="1" unique_id=218195891]
+flip_h = true
+flip_v = true
+
+[node name="HeaderButton" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer/PanelContainer" parent_id_path=PackedInt32Array(1310062042, 850924332) index="1" unique_id=178865045]
+mouse_filter = 2
+text = "disabled"
+
+[node name="ContentRootContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer" parent_id_path=PackedInt32Array(1310062042, 855075821) index="1" unique_id=604270331]
+custom_maximum_size = Vector2(-1, 0)
+size_flags_horizontal = 3
+
+[node name="test" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer/ContentRootContainer/ScrollContainer/ContentContainer" parent_id_path=PackedInt32Array(1310062042, 1602090130) index="0" unique_id=1204541943]
+text = "test"
+
+[node name="AutoPanelContainer" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer" unique_id=1170564465]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 0
 
-[node name="Label" type="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer/AutoPanelContainer" unique_id=1395358317]
+[node name="Label" type="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/AutoPanelContainer" unique_id=1395358317]
 layout_mode = 2
 text = "auto comp"
-
-[node name="Control" type="Control" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/BottomCompContainer" unique_id=474740710]
-layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=392904884]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="ErrorList" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=1140330670 instance=ExtResource("6_i6iku")]
-modulate = Color(1, 1, 1, 0)
-custom_maximum_size = Vector2(-1, 0)
-clip_contents = true
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=606003947]
 layout_mode = 2
-size_flags_vertical = 0
+
+[node name="ErrorList" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/VBoxContainer" unique_id=1140330670 instance=ExtResource("6_i6iku")]
+custom_minimum_size = Vector2(0, 0)
+layout_mode = 2
 
 [node name="InputComponentPanel" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=283857201 instance=ExtResource("5_v1qrv")]
 layout_mode = 2
+
+[editable path="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer"]

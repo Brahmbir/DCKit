@@ -33,7 +33,7 @@ const DCVector3 = preload("./t_vector3.gd")
 const DCBasis = preload("./t_basis.gd")
 
 
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	const CONSTS := { "IDENTITY": Quaternion.IDENTITY }
 
 	var const_names: Array = CONSTS.keys()
@@ -122,7 +122,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 
 		return DCResult.fail("Quaternion: expected 0, 1, 2, or 4 parts — got %d." % parts.size())
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Quaternion",
 		handler,
 		"A unit quaternion representing a 3D rotation.\n"
@@ -130,19 +130,19 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 		+ "[b]x² + y² + z² + w² = 1[/b].[/color]",
 		[
 			sig_zero("Identity — no rotation"),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Existing Quaternion or Basis",
-				[_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(
+				[_DCKitNS.Registries.ConstructorDef.PartHint.new(
 						"value",
 						"<Quaternion | Basis>",
 						"Existing quaternion or basis.",
 					)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Axis + angle (radians)",
 				[
 					DCVector3.part_hint_vector3(
@@ -156,7 +156,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					),
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"From Basis",
 				[
 					DCBasis.part_hint_basis(
@@ -165,7 +165,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					)
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Components (x, y, z, w)",
 				[
 					DCFloat.part_hint("x", "X imaginary component."),
@@ -190,9 +190,9 @@ static func extract_quaternion(val: DCResult.Value) -> Variant:
 static func part_hint_quaternion(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace
+		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
 		.new(p_name, "<Quaternion>", p_desc)

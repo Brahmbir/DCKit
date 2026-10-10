@@ -11,7 +11,7 @@ const _DEBOUNCE_SEC: float = 0.1
 
 var executor_ref: WeakRef = weakref(null)
 var _hist_obj_ref: WeakRef = weakref(null)
-var _state: _DCKitUINamespace.State = _DCKitUINamespace.State.EXECUTE
+var _state: _DCKitNS.UI.State = _DCKitNS.UI.State.EXECUTE
 var _last_submit: float = 0.0
 
 @onready var label: Label = $MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Label
@@ -20,34 +20,34 @@ var _last_submit: float = 0.0
 func _enter_tree() -> void:
 	_connect_edit_signals()
 
-	if not _DCKitUINamespace.mobile_layout.changed.is_connected(_on_mobile_changed):
-		_DCKitUINamespace.mobile_layout.changed.connect(_on_mobile_changed)
+	if not _DCKitNS.UI.mobile_layout.changed.is_connected(_on_mobile_changed):
+		_DCKitNS.UI.mobile_layout.changed.connect(_on_mobile_changed)
 
 	if is_instance_valid(button) and not button.pressed.is_connected(_on_button_pressed):
 		button.pressed.connect(_on_button_pressed)
 
 
 func _ready() -> void:
-	set_state(_DCKitUINamespace.State.EXECUTE, true)
+	set_state(_DCKitNS.UI.State.EXECUTE, true)
 	_apply_history_to_input()
-	_on_mobile_changed(_DCKitUINamespace.mobile_layout.mobile) # catch up if spawned late
+	_on_mobile_changed(_DCKitNS.UI.mobile_layout.mobile) # catch up if spawned late
 
 
 func _exit_tree() -> void:
 	_disconnect_edit_signals()
 
-	if _DCKitUINamespace.mobile_layout.changed.is_connected(_on_mobile_changed):
-		_DCKitUINamespace.mobile_layout.changed.disconnect(_on_mobile_changed)
+	if _DCKitNS.UI.mobile_layout.changed.is_connected(_on_mobile_changed):
+		_DCKitNS.UI.mobile_layout.changed.disconnect(_on_mobile_changed)
 
 	if is_instance_valid(button) and button.pressed.is_connected(_on_button_pressed):
 		button.pressed.disconnect(_on_button_pressed)
 
 
-func set_state(s: _DCKitUINamespace.State, focus := false) -> void:
+func set_state(s: _DCKitNS.UI.State, focus := false) -> void:
 	_state = s
 
 	if is_instance_valid(text_edit):
-		text_edit.editable = (s == _DCKitUINamespace.State.EXECUTE)
+		text_edit.editable = (s == _DCKitNS.UI.State.EXECUTE)
 
 	if button and button.has_method("set_state"):
 		button.call("set_state", _state, focus)
@@ -57,7 +57,7 @@ func get_input_node() -> Control:
 	return text_edit
 
 
-func connect_history_obj(hist_obj: _DCKitUINamespace.CommandHistory) -> void:
+func connect_history_obj(hist_obj: _DCKitNS.UI.CommandHistory) -> void:
 	_hist_obj_ref = weakref(hist_obj)
 	_apply_history_to_input()
 
@@ -83,7 +83,7 @@ func _get_label_text(is_mobile: bool) -> String:
 
 
 func _apply_history_to_input() -> void:
-	var hist_obj := _hist_obj_ref.get_ref() as _DCKitUINamespace.CommandHistory
+	var hist_obj := _hist_obj_ref.get_ref() as _DCKitNS.UI.CommandHistory
 	if hist_obj == null or not is_instance_valid(text_edit):
 		return
 
@@ -147,14 +147,14 @@ func _on_text_edit_caret_changed() -> void:
 
 
 func _on_abort() -> void:
-	var executor := executor_ref.get_ref() as _DCKitExecutorNamespace.Executor
+	var executor := executor_ref.get_ref() as _DCKitNS.Executor.Executor
 	if executor and executor.is_running():
 		executor.abort()
 		abort_requested.emit()
 
 
 func _on_submit(raw: String) -> void:
-	if _state == _DCKitUINamespace.State.ABORT:
+	if _state == _DCKitNS.UI.State.ABORT:
 		return
 
 	var now := Time.get_unix_time_from_system()
@@ -167,7 +167,7 @@ func _on_submit(raw: String) -> void:
 
 	_last_submit = now
 
-	var executor := executor_ref.get_ref() as _DCKitExecutorNamespace.Executor
+	var executor := executor_ref.get_ref() as _DCKitNS.Executor.Executor
 	if executor:
 		text_edit.clear()
 		executor.run(text)
@@ -175,7 +175,7 @@ func _on_submit(raw: String) -> void:
 
 
 func _on_button_pressed() -> void:
-	if _state == _DCKitUINamespace.State.ABORT:
+	if _state == _DCKitNS.UI.State.ABORT:
 		_on_abort()
 	else:
 		_on_submit(text_edit.text)
@@ -199,5 +199,5 @@ func _disconnect_executor() -> void:
 func _on_executor_state_changed(_s = null) -> void:
 	var ex = executor_ref.get_ref()
 	set_state(
-		_DCKitUINamespace.State.ABORT if ex and ex.is_running() else _DCKitUINamespace.State.EXECUTE
+		_DCKitNS.UI.State.ABORT if ex and ex.is_running() else _DCKitNS.UI.State.EXECUTE
 	)

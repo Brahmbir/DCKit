@@ -55,26 +55,26 @@ static func extract(val: DCResult.Value) -> Variant:
 
 
 # Part hint factory
-# Returns a  _DCKitRegistriesNamespace.ConstructorDef.PartHint configured for a float slot.
+# Returns a  _DCKitNS.Registries.ConstructorDef.PartHint configured for a float slot.
 # Used by other type files when building their signatures.
 #
 #   var parts = [DCFloat.part_hint("x", "Horizontal axis")]
 static func part_hint(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace
+		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
 		.new(p_name, "<float>", p_desc)
-		.validate(_DCKitRegistriesNamespace.ConstructorDef.PartHint.float_validator())
+		.validate(_DCKitNS.Registries.ConstructorDef.PartHint.float_validator())
 		.accepts([TYPE_FLOAT, TYPE_INT, TYPE_STRING])
 	)
 
 
 # Constructor type definition
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
 		# Zero-arg → 0.0
 		if parts.is_empty():
@@ -89,21 +89,21 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 
 		return DCResult.fail("Float: expected 0 or 1 part — got %d." % parts.size())
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Float",
 		handler,
 		"Converts a value to a [b]float[/b].\n" + "[color=gray]Float()  →  0.0[/color]",
 		[
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new("Zero value", []),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new("Zero value", []),
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Coerce to float",
 				[
 					(
-						_DCKitRegistriesNamespace
+						_DCKitNS.Registries
 						.ConstructorDef
 						.PartHint
 						.new("value", "<float>", "Any numeric or string value to convert.")
-						.validate(_DCKitRegistriesNamespace
+						.validate(_DCKitNS.Registries
 						.ConstructorDef
 						.PartHint
 						.float_validator())
