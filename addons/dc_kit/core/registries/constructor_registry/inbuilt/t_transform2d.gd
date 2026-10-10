@@ -17,7 +17,7 @@ const DCFloat = preload("./t_float.gd")
 const DCVector2 = preload("./t_vector2.gd")
 
 
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	const CONSTS := {
 		"IDENTITY": Transform2D.IDENTITY,
 		"FLIP_X": Transform2D.FLIP_X,
@@ -134,22 +134,22 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 			"Transform2D: expected 0, 1, 2, 3, or 4 parts — got %d." % parts.size()
 		)
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Transform2D",
 		handler,
 		"A 2D transformation matrix with rotation, scale, skew, and translation.\n"
 		+ "[color=gray]Stores three Vector2 columns: [b]x[/b] (right), [b]y[/b] (down), [b]origin[/b] (position).[/color]",
 		[
 			sig_zero("Identity — no transformation"),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Existing Transform2D",
 				[part_hint_transform2d("value", "Existing Transform2D")],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Rotation + position",
 				[
 					DCFloat.part_hint(
@@ -160,7 +160,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					DCVector2.part_hint_vector2("position", "Translation in world space."),
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Rotation, scale, skew, position",
 				[
 					DCFloat.part_hint(
@@ -179,7 +179,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					DCVector2.part_hint_vector2("position", "Translation in world space."),
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Three column vectors",
 				[
 					DCVector2.part_hint_vector2("x", "Right-axis column."),
@@ -200,9 +200,9 @@ static func extract_transform2d(val: DCResult.Value) -> Variant:
 static func part_hint_transform2d(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace
+		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
 		.new(p_name, "<Transform2D>", p_desc)

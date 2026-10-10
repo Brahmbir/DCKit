@@ -16,7 +16,7 @@ const DCVector4 = preload("./t_vector4.gd")
 const DCTransform3D = preload("./t_transform3d.gd")
 
 
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	const CONSTS := { "IDENTITY": Projection.IDENTITY, "ZERO": Projection.ZERO }
 
 	var const_names: Array = CONSTS.keys()
@@ -70,26 +70,26 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 
 		return DCResult.fail("Projection: expected 0, 1, or 4 parts — got %d." % parts.size())
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Projection",
 		handler,
 		"A 4×4 projection matrix — used for camera perspective and orthogonal projections.\n"
 		+ "[color=gray]Stores four column vectors: [b]x[/b], [b]y[/b], [b]z[/b], [b]w[/b].[/color]",
 		[
 			sig_zero("Identity matrix"),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Named constant",
 				[const_part(const_names)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Existing Projection or Transform3D",
-				[_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(
+				[_DCKitNS.Registries.ConstructorDef.PartHint.new(
 						"value",
 						"<Projection | Transform3D>",
 						"Existing projection or transform",
 					)],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"From Transform3D",
 				[
 					DCTransform3D.part_hint_transform3d(
@@ -98,7 +98,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 					)
 				],
 			),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Four column vectors",
 				[
 					DCVector4.part_hint_vector4("x", "First column — maps X basis."),
@@ -126,9 +126,9 @@ static func extract_projection(val: DCResult.Value) -> Variant:
 static func part_hint_projection(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace
+		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
 		.new(p_name, "<Projection>", p_desc)

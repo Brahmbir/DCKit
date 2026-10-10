@@ -13,7 +13,7 @@ var latest_analysis = null # DCAnalysisResult
 
 var diagnostics_view: DiagnosticsView
 var signature_help_view: SignatureHelpView
-var completion_provider: _DCKitCoreNamespace.AutoComplete = null
+var completion_provider: _DCKitNS.Core.AutoComplete = null
 
 var _analyzer_ref: WeakRef
 var _current_text := ""
@@ -27,7 +27,7 @@ func _init(analyzer) -> void:
 	signature_help_view = SignatureHelpView.new()
 
 
-func set_completion_provider(provider: _DCKitCoreNamespace.AutoComplete) -> void:
+func set_completion_provider(provider: _DCKitNS.Core.AutoComplete) -> void:
 	completion_provider = provider
 
 

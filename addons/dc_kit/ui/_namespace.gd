@@ -1,4 +1,4 @@
-class_name _DCKitUINamespace
+extends RefCounted
 
 enum State {
 	EXECUTE = 0,
@@ -12,7 +12,10 @@ const InputComponentBase := preload("./ui_base_class/input_comp_base.gd")
 const LoggerComponentBase := preload("./ui_base_class/logger_comp_base.gd")
 const ErrorComponentBase := preload("./ui_base_class/error_comp_base.gd")
 
+const InfoComponentBase := preload("./ui_base_class/info_panel_base.gd")
+
 const InputFeedbackController := preload("./controllers/input_feedback_controller.gd")
+const Signature = preload("./controllers/signature_info.gd")
 
 static var scales: Scales = null:
 	get ():
@@ -61,11 +64,11 @@ class Scales extends RefCounted:
 	const LOG_FONT_SIZE := 20
 	const SPACE_SIZE := 16
 
-	var font := 1.0:
+	var font := _DCKitSetting.get_default_font_scale():
 		set = set_font
-	var log_font := 1.0:
+	var log_font := _DCKitSetting.get_default_log_font_scale():
 		set = set_log_font
-	var space := 1.0:
+	var space := _DCKitSetting.get_default_space_scale():
 		set = set_space
 
 

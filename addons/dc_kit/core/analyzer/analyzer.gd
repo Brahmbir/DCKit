@@ -1,6 +1,6 @@
 extends RefCounted
 
-const TT := _DCKitAnalyzerNamespace.Lexer.TokenType
+const TT := _DCKitNS.Analyzer.Lexer.TokenType
 
 # Maximum nested argument / fallback depth allowed for one command tree.
 var MAX_ARGUMENT_DEPTH: int = _DCKitSetting.get_max_argument_depth()
@@ -22,7 +22,7 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 	if cursor_pos < 0:
 		cursor_pos = input.length()
 
-	var lex_r := _DCKitAnalyzerNamespace.Lexer.new().lex(input)
+	var lex_r := _DCKitNS.Analyzer.Lexer.new().lex(input)
 	if not lex_r.ok:
 		result.diagnostics.append(
 			_diag(
@@ -38,7 +38,7 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 		return result
 	result.tokens = lex_r.tokens
 
-	var parse_r := _DCKitAnalyzerNamespace.Parser.new().parse_chain(result.tokens)
+	var parse_r := _DCKitNS.Analyzer.Parser.new().parse_chain(result.tokens)
 	if not parse_r.ok:
 		result.diagnostics.append(
 			_diag(
@@ -144,7 +144,7 @@ func _check_node(node, out: Array) -> void:
 	if node == null:
 		return
 
-	if node is _DCKitAnalyzerNamespace.Parser.VariableNode:
+	if node is _DCKitNS.Analyzer.Parser.VariableNode:
 		if not node.is_silent and _var_store != null \
 				and not _var_store.has(node.name):
 			out.append(
@@ -158,7 +158,7 @@ func _check_node(node, out: Array) -> void:
 			)
 		_check_node(node.fallback, out)
 
-	elif node is _DCKitAnalyzerNamespace.Parser.CommandNode:
+	elif node is _DCKitNS.Analyzer.Parser.CommandNode:
 		if _cmd_reg != null:
 			if not _cmd_reg.has(node.name):
 				out.append(
@@ -198,7 +198,7 @@ func _check_node(node, out: Array) -> void:
 		for child in node.args:
 			_check_node(child, out)
 
-	elif node is _DCKitAnalyzerNamespace.Parser.ConstructorNode:
+	elif node is _DCKitNS.Analyzer.Parser.ConstructorNode:
 		if _ctor_reg != null:
 			if not _ctor_reg.knows(node.type_name):
 				out.append(
@@ -211,7 +211,7 @@ func _check_node(node, out: Array) -> void:
 					)
 				)
 			else:
-				var def: _DCKitRegistriesNamespace.ConstructorDef = _ctor_reg.get_def(node.type_name)
+				var def: _DCKitNS.Registries.ConstructorDef = _ctor_reg.get_def(node.type_name)
 				var count: int = node.parts.size()
 				if not def.signatures.is_empty():
 					var matched: bool = def.signatures.any(
@@ -316,13 +316,13 @@ func _check_argument_stack(node, depth: int, out: Array) -> void:
 		)
 		return
 
-	if node is _DCKitAnalyzerNamespace.Parser.VariableNode:
+	if node is _DCKitNS.Analyzer.Parser.VariableNode:
 		_check_argument_stack(node.fallback, depth + 1, out)
 
-	elif node is _DCKitAnalyzerNamespace.Parser.CommandNode:
+	elif node is _DCKitNS.Analyzer.Parser.CommandNode:
 		for child in node.args:
 			_check_argument_stack(child, depth + 1, out)
 
-	elif node is _DCKitAnalyzerNamespace.Parser.ConstructorNode:
+	elif node is _DCKitNS.Analyzer.Parser.ConstructorNode:
 		for child in node.parts:
 			_check_argument_stack(child, depth + 1, out)

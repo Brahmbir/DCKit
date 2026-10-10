@@ -1,4 +1,4 @@
-class_name _DCKitExecutorNamespace
+extends RefCounted
 
 const Executor := preload("./executor.gd")
 const Tracer := preload("./tracer/tracer.gd")
@@ -109,7 +109,7 @@ class Execution:
 	var raw: String
 	var origin: String
 	var abort_root: DCContext # null = this is the outermost run
-	var commands: Array # Array[_DCKitAnalyzerNamespace.Parser.CommandNode]
+	var commands: Array # Array[_DCKitNS.Analyzer.Parser.CommandNode]
 	var results: Array # Array[DCResult]
 	var call_stack: CallStack
 	var chain_index: int = 0 # 1-based, 0 = not started
@@ -148,19 +148,19 @@ class StateTracker extends RefCounted:
 			detail = value
 			publish() # raise = catch up from live data, lower = clear
 
-	var _state := _DCKitExecutorNamespace.ExecutorState.new()
-	var _root: _DCKitExecutorNamespace.Execution = null
+	var _state := _DCKitNS.Executor.ExecutorState.new()
+	var _root: _DCKitNS.Executor.Execution = null
 
 
 	func is_running() -> bool:
 		return _state.running
 
 
-	func snapshot() -> _DCKitExecutorNamespace.ExecutorState:
+	func snapshot() -> _DCKitNS.Executor.ExecutorState:
 		return _state.duplicate()
 
 
-	func begin(exec: _DCKitExecutorNamespace.Execution, raw: String) -> void:
+	func begin(exec: _DCKitNS.Executor.Execution, raw: String) -> void:
 		_root = exec
 		_apply(true, raw)
 

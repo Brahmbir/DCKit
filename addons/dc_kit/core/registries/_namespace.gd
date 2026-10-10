@@ -1,4 +1,4 @@
-class_name _DCKitRegistriesNamespace
+extends RefCounted
 
 const ConstructorDef := preload("./constructor_registry/constructor_def.gd")
 const CommandRegistry := preload("./command_registry/command_registry.gd")

@@ -39,15 +39,15 @@ static func extract(val: DCResult.Value) -> String:
 
 
 # Part hint factory
-# Returns a _DCKitRegistriesNamespace.ConstructorDef.PartHint configured for a string slot.
+# Returns a _DCKitNS.Registries.ConstructorDef.PartHint configured for a string slot.
 # p_suggest — optional callable (prefix: String) -> Array[String] for suggestions.
 static func part_hint(
 	p_name: String,
 	p_desc: String = "",
 	p_suggest: Callable = Callable(),
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	var hint := (
-		_DCKitRegistriesNamespace.ConstructorDef.PartHint.new(p_name, "<string>", p_desc).accepts(
+		_DCKitNS.Registries.ConstructorDef.PartHint.new(p_name, "<string>", p_desc).accepts(
 			[TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL]
 		)
 	)
@@ -59,7 +59,7 @@ static func part_hint(
 
 
 # Constructor type definition
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
 		# Zero-arg → empty string
 		if parts.is_empty():
@@ -78,7 +78,7 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 			joined += extract(parts[i])
 		return joined
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Str",
 		handler,
 		"Converts a value to a [b]string[/b], or joins multiple values with spaces.\n"
@@ -86,12 +86,12 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 		+ "[color=gray]Str(hello)      →  \"hello\"[/color]\n"
 		+ "[color=gray]Str(hello world)  →  \"hello world\"[/color]",
 		[
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new("Empty string", []),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new("Empty string", []),
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Convert to string",
 				[
 					(
-						_DCKitRegistriesNamespace
+						_DCKitNS.Registries
 						.ConstructorDef
 						.PartHint
 						.new("value", "<any>", "Any value — converted to its string representation.")

@@ -2,7 +2,7 @@ extends Node
 
 # Replaces the old, unused _request_connection_updates.
 # Emitted whenever a console is in the tree and ready to be wired up.
-signal connection_requested(console: _DCKitUINamespace.ConsoleBase)
+signal connection_requested(console: _DCKitNS.UI.ConsoleBase)
 
 signal placement_changed(mode: Mode, edge: Edge)
 
@@ -19,21 +19,26 @@ enum Edge {
 
 const WINDOW_MODE_SUPPORTED := false
 
+@export var mode: Mode = Mode.WINDOW
+@export var edge: Edge = Edge.LEFT # remembered while in WINDOW mode
+
+@export_group("Console Scene")
+
 @export var console_scene: PackedScene = preload(
 	"res://addons/dc_kit/ui/simple_console/SimpleConsole.tscn"
 )
 
+@export_group("Dock size")
 # Console's share of the screen. x: left/right dock, y: top/bottom dock.
 @export var default_split_ratio: Vector2 = Vector2(0.45, 0.65)
 @export var min_split_ratio: Vector2 = Vector2(0.30, 0.35)
 
-var mode: Mode = Mode.WINDOW
-var edge: Edge = Edge.LEFT # remembered while in WINDOW mode
+
 
 # State the host owns, so it outlives any one console.
-var cmd_history_obj: _DCKitUINamespace.CommandHistory = _DCKitUINamespace.CommandHistory.new()
+var cmd_history_obj: _DCKitNS.UI.CommandHistory = _DCKitNS.UI.CommandHistory.new()
 
-var _console: _DCKitUINamespace.ConsoleBase = null
+var _console: _DCKitNS.UI.ConsoleBase = null
 var _open := true # independent of mode: whichever host is active follows this
 var _ratio_pending := false # default ratio still owed (it couldn't be measured while closed)
 var _ratio_serial := 0 # bumped on every layout request; stale awaits bail out
@@ -47,8 +52,8 @@ func _ready() -> void:
 	window.close_requested.connect(set_mode.bind(Mode.DOCK))
 	split.resized.connect(_update_min_size)
 
-	_on_mobile_manual_changed(_DCKitUINamespace.mobile_layout.manual)
-	_DCKitUINamespace.mobile_layout.manual_changed.connect(_on_mobile_manual_changed)
+	_on_mobile_manual_changed(_DCKitNS.UI.mobile_layout.manual)
+	_DCKitNS.UI.mobile_layout.manual_changed.connect(_on_mobile_manual_changed)
 
 	var new_console := _instantiate_console(console_scene)
 	if new_console == null:
@@ -63,17 +68,17 @@ func _input(event: InputEvent) -> void:
 
 	if event is InputEventKey and event.pressed and not event.echo \
 			and event.keycode == KEY_F2:
-		_DCKitUINamespace.mobile_layout.set_manual(not _DCKitUINamespace.mobile_layout.manual)
+		_DCKitNS.UI.mobile_layout.set_manual(not _DCKitNS.UI.mobile_layout.manual)
 
 	if event is InputEventKey and event.pressed and not event.echo \
 			and event.keycode == KEY_F3:
-		var m := _DCKitUINamespace.mobile_layout
+		var m := _DCKitNS.UI.mobile_layout
 		var test_width := m.breakpoint_width + 1.0 if m.screen else m.breakpoint_width - 1.0
 		m.set_screen_width(test_width)
 
 
 #region console ownership
-func get_console() -> _DCKitUINamespace.ConsoleBase:
+func get_console() -> _DCKitNS.UI.ConsoleBase:
 	return _console
 
 
@@ -151,12 +156,12 @@ func _on_mobile_manual_changed(is_mobile: bool) -> void:
 	split.touch_dragger_enabled = is_mobile
 
 
-func _instantiate_console(scene: PackedScene) -> _DCKitUINamespace.ConsoleBase:
+func _instantiate_console(scene: PackedScene) -> _DCKitNS.UI.ConsoleBase:
 	if scene == null:
 		push_error("DckitUiHost: no console scene to instantiate.")
 		return null
 	var node := scene.instantiate()
-	var new_console := node as _DCKitUINamespace.ConsoleBase
+	var new_console := node as _DCKitNS.UI.ConsoleBase
 	if new_console == null:
 		push_error(
 			"DckitUiHost: '%s' root must extend ConsoleBase (got %s)."
@@ -169,7 +174,7 @@ func _instantiate_console(scene: PackedScene) -> _DCKitUINamespace.ConsoleBase:
 	return new_console
 
 
-func _install_console(new_console: _DCKitUINamespace.ConsoleBase) -> void:
+func _install_console(new_console: _DCKitNS.UI.ConsoleBase) -> void:
 	if _console:
 		if _open:
 			_console.release_focus_on_input()

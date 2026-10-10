@@ -47,13 +47,13 @@ static func extract(val: DCResult.Value) -> Variant:
 
 
 # Part hint factory
-# Returns a  _DCKitRegistriesNamespace.ConstructorDef.PartHint configured for an integer slot.
+# Returns a  _DCKitNS.Registries.ConstructorDef.PartHint configured for an integer slot.
 static func part_hint(
 	p_name: String,
 	p_desc: String = "",
-) -> _DCKitRegistriesNamespace.ConstructorDef.PartHint:
+) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitRegistriesNamespace
+		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
 		.new(p_name, "<int>", p_desc)
@@ -63,7 +63,7 @@ static func part_hint(
 
 
 # Constructor type definition
-static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
+static func create() -> _DCKitNS.Registries.ConstructorDef:
 	var handler := func(parts: Array) -> Variant:
 		# Zero-arg → 0
 		if parts.is_empty():
@@ -78,18 +78,18 @@ static func create() -> _DCKitRegistriesNamespace.ConstructorDef:
 
 		return DCResult.fail("Int: expected 0 or 1 part — got %d." % parts.size())
 
-	return _DCKitRegistriesNamespace.ConstructorDef.new(
+	return _DCKitNS.Registries.ConstructorDef.new(
 		"Int",
 		handler,
 		"Converts a value to an [b]integer[/b].\n" + "[color=gray]Int() → 0[/color]\n"
 		+ "[color=gray]Floating-point values are truncated toward zero.[/color]",
 		[
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new("Zero value", []),
-			_DCKitRegistriesNamespace.ConstructorDef.TypeSignature.new(
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new("Zero value", []),
+			_DCKitNS.Registries.ConstructorDef.TypeSignature.new(
 				"Coerce to integer",
 				[
 					(
-						_DCKitRegistriesNamespace
+						_DCKitNS.Registries
 						.ConstructorDef
 						.PartHint
 						.new("value", "<int>", "Any integer, float, or numeric string.")

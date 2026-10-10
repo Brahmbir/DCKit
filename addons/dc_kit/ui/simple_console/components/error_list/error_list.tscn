@@ -3,12 +3,15 @@
 [ext_resource type="Script" uid="uid://b6sr41fd5uqaf" path="res://addons/dc_kit/ui/simple_console/components/error_list/error_list.gd" id="1_r5n8t"]
 
 [node name="ErrorList" type="PanelContainer" unique_id=1140330670 node_paths=PackedStringArray("label")]
+modulate = Color(1, 1, 1, 0)
+clip_contents = true
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
+size_flags_vertical = 0
 theme_type_variation = &"ErrorList_PanelContainer"
 script = ExtResource("1_r5n8t")
 label = NodePath("MarginContainer/RichTextLabel")

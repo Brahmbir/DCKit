@@ -23,19 +23,19 @@ signal pressed
 @export var focus_color := Color("454545")
 @export var transition_duration := 0.15
 
-var state: _DCKitUINamespace.State = _DCKitUINamespace.State.EXECUTE
+var state: _DCKitNS.UI.State = _DCKitNS.UI.State.EXECUTE
 
 var state_data := {
-	_DCKitUINamespace.State.EXECUTE: { "text": "EXECUTE", "icon": null },
-	_DCKitUINamespace.State.ABORT: { "text": "ABORT", "icon": null },
+	_DCKitNS.UI.State.EXECUTE: { "text": "EXECUTE", "icon": null },
+	_DCKitNS.UI.State.ABORT: { "text": "ABORT", "icon": null },
 }
 
 var color_tween: Tween
 
 
 func _enter_tree() -> void:
-	if not _DCKitUINamespace.mobile_layout.changed.is_connected(_on_mobile_changed):
-		_DCKitUINamespace.mobile_layout.changed.connect(_on_mobile_changed)
+	if not _DCKitNS.UI.mobile_layout.changed.is_connected(_on_mobile_changed):
+		_DCKitNS.UI.mobile_layout.changed.connect(_on_mobile_changed)
 
 	hidden_btn.pressed.connect(pressed.emit)
 
@@ -50,15 +50,15 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
-	state_data[_DCKitUINamespace.State.EXECUTE]["icon"] = btn_icon_exe
-	state_data[_DCKitUINamespace.State.ABORT]["icon"] = btn_icon_abo
+	state_data[_DCKitNS.UI.State.EXECUTE]["icon"] = btn_icon_exe
+	state_data[_DCKitNS.UI.State.ABORT]["icon"] = btn_icon_abo
 
-	_on_mobile_changed(_DCKitUINamespace.mobile_layout.mobile)
+	_on_mobile_changed(_DCKitNS.UI.mobile_layout.mobile)
 
 
 func _exit_tree() -> void:
-	if _DCKitUINamespace.mobile_layout.changed.is_connected(_on_mobile_changed):
-		_DCKitUINamespace.mobile_layout.changed.disconnect(_on_mobile_changed)
+	if _DCKitNS.UI.mobile_layout.changed.is_connected(_on_mobile_changed):
+		_DCKitNS.UI.mobile_layout.changed.disconnect(_on_mobile_changed)
 
 	hidden_btn.pressed.disconnect(pressed.emit)
 
@@ -70,7 +70,7 @@ func _exit_tree() -> void:
 	hidden_btn.focus_exited.disconnect(_on_button_focus_exited)
 
 
-func set_state(new_state: _DCKitUINamespace.State, focus := false) -> void:
+func set_state(new_state: _DCKitNS.UI.State, focus := false) -> void:
 	if not focus and state == new_state:
 		return
 
@@ -96,9 +96,9 @@ func _apply_state(animate: bool = true) -> void:
 
 func _get_state_color() -> Color:
 	match state:
-		_DCKitUINamespace.State.EXECUTE:
+		_DCKitNS.UI.State.EXECUTE:
 			return execute_color
-		_DCKitUINamespace.State.ABORT:
+		_DCKitNS.UI.State.ABORT:
 			return abort_color
 
 	return Color.WHITE
@@ -106,9 +106,9 @@ func _get_state_color() -> Color:
 
 func _get_hover_color() -> Color:
 	match state:
-		_DCKitUINamespace.State.EXECUTE:
+		_DCKitNS.UI.State.EXECUTE:
 			return execute_hover_color
-		_DCKitUINamespace.State.ABORT:
+		_DCKitNS.UI.State.ABORT:
 			return abort_hover_color
 
 	return Color.WHITE
@@ -116,9 +116,9 @@ func _get_hover_color() -> Color:
 
 func _get_pressed_color() -> Color:
 	match state:
-		_DCKitUINamespace.State.EXECUTE:
+		_DCKitNS.UI.State.EXECUTE:
 			return execute_pressed_color
-		_DCKitUINamespace.State.ABORT:
+		_DCKitNS.UI.State.ABORT:
 			return abort_pressed_color
 
 	return Color.WHITE

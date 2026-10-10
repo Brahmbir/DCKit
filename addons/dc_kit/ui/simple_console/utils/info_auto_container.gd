@@ -24,7 +24,7 @@ extends Container
 
 
 func _ready() -> void:
-	_DCKitUINamespace.mobile_layout.changed.connect(_on_layout_change)
+	_DCKitNS.UI.mobile_layout.changed.connect(_on_layout_change)
 
 func _on_layout_change(is_smaller_screen:bool):
 	stacked = is_smaller_screen

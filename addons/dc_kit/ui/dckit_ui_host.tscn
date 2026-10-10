@@ -4,6 +4,7 @@
 
 [node name="DckitUiHost" type="Node" unique_id=325115929]
 script = ExtResource("1_a8uxx")
+mode = 0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=97658836]
 

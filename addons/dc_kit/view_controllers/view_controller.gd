@@ -10,7 +10,7 @@ var last_result = null # DCAnalysisResult — read by executor on submit
 var error_view_ctl: ErrorView
 var info_view_ctl: InfoView
 
-var autocomplete: _DCKitCoreNamespace.AutoComplete = null
+var autocomplete: _DCKitNS.Core.AutoComplete = null
 var _analyzer := WeakRef.new()
 var _last_input := "" # most recent text — reused by on_cursor_moved for autocomplete context
 
@@ -21,7 +21,7 @@ func _init(analyzer) -> void:
 	info_view_ctl = InfoView.new()
 
 
-func set_autocomplete(_autocomplete: _DCKitCoreNamespace.AutoComplete) -> void:
+func set_autocomplete(_autocomplete: _DCKitNS.Core.AutoComplete) -> void:
 	autocomplete = _autocomplete
 
 

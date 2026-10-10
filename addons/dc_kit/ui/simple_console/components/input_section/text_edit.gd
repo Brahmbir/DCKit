@@ -3,7 +3,7 @@ extends TextEdit
 signal text_submitted(text: String)
 
 ## Owned by the parent UI. Swapping it (or the input) ends any browse session.
-var _history: _DCKitUINamespace.CommandHistory
+var _history: _DCKitNS.UI.CommandHistory
 ## Text we last put into the box ourselves; null once the user edits or submits.
 var _shown: Variant = null
 
@@ -48,7 +48,7 @@ func _drop_data(at_position: Vector2, data: Variant) -> void:
 	insert_text_at_caret(_to_single_line(data as String))
 
 
-func set_history_obj(new_history: _DCKitUINamespace.CommandHistory) -> void:
+func set_history_obj(new_history: _DCKitNS.UI.CommandHistory) -> void:
 	if _history == new_history:
 		return
 	if _history != null:

@@ -36,5 +36,5 @@ func _get_minimum_size() -> Vector2:
 	return result + Vector2(_padding_left + _padding_right, _padding_top + _padding_bottom)
 
 
-func connect_logger(logger: _DCKitExecutorNamespace.Tracer) -> void:
-	_DCKitUINamespace.not_implemented('connect_logger')
+func connect_logger(logger: _DCKitNS.Executor.Tracer) -> void:
+	_DCKitNS.UI.not_implemented('connect_logger')
