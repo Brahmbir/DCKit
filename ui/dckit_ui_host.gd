@@ -1,29 +1,10 @@
-extends Node
+extends "../utils/ui_interface.gd"
 
-# Replaces the old, unused _request_connection_updates.
-# Emitted whenever a console is in the tree and ready to be wired up.
-signal connection_requested(console: _DCKitNS.UI.ConsoleBase)
-
-signal placement_changed(mode: Mode, edge: Edge)
-
-enum Mode {
-	DOCK,
-	WINDOW, # not supported yet
-}
-enum Edge {
-	LEFT,
-	RIGHT,
-	TOP,
-	BOTTOM,
-}
+signal placement_changed(mode: _DCKitSetting.ConsoleMode, edge: _DCKitSetting.WindowEdge)
 
 const WINDOW_MODE_SUPPORTED := false
 
-@export var mode: Mode = Mode.WINDOW
-@export var edge: Edge = Edge.LEFT # remembered while in WINDOW mode
-
 @export_group("Console Scene")
-
 @export var console_scene: PackedScene = preload(
 	"res://addons/dc_kit/ui/simple_console/SimpleConsole.tscn"
 )
@@ -33,10 +14,11 @@ const WINDOW_MODE_SUPPORTED := false
 @export var default_split_ratio: Vector2 = Vector2(0.45, 0.65)
 @export var min_split_ratio: Vector2 = Vector2(0.30, 0.35)
 
-
-
 # State the host owns, so it outlives any one console.
 var cmd_history_obj: _DCKitNS.UI.CommandHistory = _DCKitNS.UI.CommandHistory.new()
+var _mode: _DCKitSetting.ConsoleMode = _DCKitSetting.ConsoleMode.DOCK
+
+var _edge: _DCKitSetting.WindowEdge = _DCKitSetting.WindowEdge.BOTTOM # remembered while in WINDOW mode
 
 var _console: _DCKitNS.UI.ConsoleBase = null
 var _open := true # independent of mode: whichever host is active follows this
@@ -49,11 +31,14 @@ var _ratio_serial := 0 # bumped on every layout request; stale awaits bail out
 
 
 func _ready() -> void:
-	window.close_requested.connect(set_mode.bind(Mode.DOCK))
+	window.close_requested.connect(set_mode.bind(_DCKitSetting.ConsoleMode.DOCK))
 	split.resized.connect(_update_min_size)
 
-	_on_mobile_manual_changed(_DCKitNS.UI.mobile_layout.manual)
+	set_mode(_DCKitSetting.get_console_mode())
+	set_edge(_DCKitSetting.get_window_edge())
+
 	_DCKitNS.UI.mobile_layout.manual_changed.connect(_on_mobile_manual_changed)
+	_on_mobile_manual_changed(_DCKitNS.UI.mobile_layout.manual)
 
 	var new_console := _instantiate_console(console_scene)
 	if new_console == null:
@@ -63,25 +48,11 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo \
-			and event.keycode == KEY_F1:
-		cycle_edge()
-
-	if event is InputEventKey and event.pressed and not event.echo \
 			and event.keycode == KEY_F2:
 		_DCKitNS.UI.mobile_layout.set_manual(not _DCKitNS.UI.mobile_layout.manual)
 
-	if event is InputEventKey and event.pressed and not event.echo \
-			and event.keycode == KEY_F3:
-		var m := _DCKitNS.UI.mobile_layout
-		var test_width := m.breakpoint_width + 1.0 if m.screen else m.breakpoint_width - 1.0
-		m.set_screen_width(test_width)
-
 
 #region console ownership
-func get_console() -> _DCKitNS.UI.ConsoleBase:
-	return _console
-
-
 ## Replaces the console. Returns false and keeps the current one if the scene is invalid.
 func set_console_scene(scene: PackedScene) -> bool:
 	var new_console := _instantiate_console(scene)
@@ -93,39 +64,45 @@ func set_console_scene(scene: PackedScene) -> bool:
 
 
 #region placement API
-func cycle_edge() -> void:
-	set_edge((edge + 1) % Edge.size() as Edge)
-
-
-func set_mode(new_mode: Mode) -> void:
-	if new_mode == mode:
+func set_mode(new_mode: _DCKitSetting.ConsoleMode) -> void:
+	if new_mode == _mode:
 		return
-	if new_mode == Mode.WINDOW and not WINDOW_MODE_SUPPORTED:
+	if new_mode == _DCKitSetting.ConsoleMode.WINDOW and not WINDOW_MODE_SUPPORTED:
 		push_warning(
-			"DckitUiHost: window mode is not supported; staying in %s mode." % Mode.keys()[mode]
+			"DckitUiHost: window mode is not supported; staying in %s mode."
+			% _DCKitSetting.ConsoleMode.keys()[_mode]
 		)
 		return
-	mode = new_mode
+
+	if _console and _open:
+		_console.release_focus_on_input()
+
+	_mode = new_mode
 	_apply()
 
+	if _console and _open:
+		_console.grab_focus_on_input()
 
-func set_edge(new_edge: Edge) -> void:
-	if new_edge == edge:
+
+func set_edge(new_edge: _DCKitSetting.WindowEdge) -> void:
+	if new_edge == _edge:
 		return
-	edge = new_edge
-	if mode == Mode.DOCK:
+	_edge = new_edge
+	if _mode == _DCKitSetting.ConsoleMode.DOCK:
 		_apply()
 	else:
 		# Edge is kept for later, but nothing visible changes.
-		placement_changed.emit(mode, edge)
+		placement_changed.emit(_mode, _edge)
 
 
 func toggle_mode() -> void:
-	if _console and _open:
-		_console.release_focus_on_input()
-	set_mode(Mode.WINDOW if mode == Mode.DOCK else Mode.DOCK)
-	if _console and _open:
-		_console.grab_focus_on_input()
+	set_mode(
+		(
+			_DCKitSetting.ConsoleMode.WINDOW
+			if _mode == _DCKitSetting.ConsoleMode.DOCK
+			else _DCKitSetting.ConsoleMode.DOCK
+		)
+	)
 #endregion
 
 
@@ -200,12 +177,12 @@ func _set_open(open: bool) -> void:
 	if open == _open:
 		return
 	_open = open
-	match mode:
-		Mode.DOCK:
+	match _mode:
+		_DCKitSetting.ConsoleMode.DOCK:
 			split.visible = _open
 			if _open and _ratio_pending:
 				_apply_default_ratio()
-		Mode.WINDOW:
+		_DCKitSetting.ConsoleMode.WINDOW:
 			window.visible = _open
 	if _console:
 		if _open:
@@ -219,19 +196,19 @@ func _set_open(open: bool) -> void:
 func _apply() -> void:
 	if _console == null:
 		return
-	match mode:
-		Mode.DOCK:
+	match _mode:
+		_DCKitSetting.ConsoleMode.DOCK:
 			_place_in_dock()
-		Mode.WINDOW:
+		_DCKitSetting.ConsoleMode.WINDOW:
 			_place_in_window()
-	placement_changed.emit(mode, edge)
+	placement_changed.emit(_mode, _edge)
 
 
 func _place_in_dock() -> void:
 	window.hide()
 	_move_console_to(split)
 
-	split.vertical = edge in [Edge.TOP, Edge.BOTTOM]
+	split.vertical = _edge in [_DCKitSetting.WindowEdge.TOP, _DCKitSetting.WindowEdge.BOTTOM]
 	# Child order decides the side: console first = left/top.
 	split.move_child(_console, 0 if _console_first() else 1)
 	split.visible = _open
@@ -266,7 +243,7 @@ func _move_console_to(new_parent: Node) -> void:
 # The minimum is enforced by the console's custom_minimum_size; the container
 # clamps the offsets to it, so no drag handling is needed.
 func _console_first() -> bool:
-	return edge in [Edge.LEFT, Edge.TOP]
+	return _edge in [_DCKitSetting.WindowEdge.LEFT, _DCKitSetting.WindowEdge.TOP]
 
 
 func _axis(ratio: Vector2) -> float:
@@ -282,7 +259,7 @@ func _console_length() -> float:
 
 
 func _update_min_size() -> void:
-	if mode != Mode.DOCK or _console == null:
+	if _mode != _DCKitSetting.ConsoleMode.DOCK or _console == null:
 		return
 	var min_length := _total() * _axis(min_split_ratio)
 	_console.custom_minimum_size = (
@@ -292,9 +269,12 @@ func _update_min_size() -> void:
 	)
 
 
-# A newer layout request (or a swap, mode change, or hide) invalidates this one.
+# A newer layout request (or a swap, _mode change, or hide) invalidates this one.
 func _layout_stale(serial: int) -> bool:
-	return serial != _ratio_serial or mode != Mode.DOCK or not _open or _console == null
+	return (
+		serial != _ratio_serial or _mode != _DCKitSetting.ConsoleMode.DOCK
+		or not _open or _console == null
+	)
 
 
 func _apply_default_ratio() -> void:

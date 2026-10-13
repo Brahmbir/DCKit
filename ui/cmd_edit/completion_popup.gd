@@ -1,6 +1,9 @@
 class_name CompletionPopup
 extends PanelContainer
 
+signal auto_complete_opened
+signal auto_complete_closed
+
 signal item_accepted(start: int, label: String)
 signal selection_changed(index: int)
 
@@ -86,11 +89,13 @@ func show_popup() -> bool:
 	if not has_items():
 		return false
 	visible = true
+	auto_complete_opened.emit()
 	return true
 
 
 func hide_popup() -> void:
 	visible = false
+	auto_complete_closed.emit()
 
 
 func is_open() -> bool:

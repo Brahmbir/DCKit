@@ -45,7 +45,9 @@ func _ready() -> void:
 	label.bbcode_enabled = true
 	label.meta_clicked.connect(_on_meta_clicked)
 
-	_DCKitNS.UI.scales.font_changed.connect(_on_font_changed)
+	_DCKitNS.UI.mobile_layout.changed.connect(func(_v):_rebuild_text())
+	_DCKitNS.UI.mobile_layout.get_scales().font_changed.connect(_on_font_changed)
+	_on_font_changed()
 
 	size_flags_vertical = SIZE_SHRINK_BEGIN
 	modulate.a = 0.0
@@ -76,17 +78,11 @@ func transition(expanded: bool) -> void:
 	_tween.set_trans(Tween.TRANS_CUBIC)
 	_tween.tween_property(self, "modulate:a", 1.0 if expanded else 0.0, 0.18)
 	_tween.tween_property(self, "custom_minimum_size:y", expanded_height if expanded else 0.0, 0.18)
-	#_tween.tween_property(
-		#self,
-		#"custom_maximum_size:y",
-		#expanded_height + 4 if expanded else 0.0,
-		#0.18,
-	#)
 
 
-func _on_font_changed(_v: float):
-	expanded_height = 4.25 * _DCKitNS.UI.scales.em_font(1)
-	sub_text_font_size = _DCKitNS.UI.scales.em_font(0.5)
+func _on_font_changed(_v: float = 0.0):
+	expanded_height = 5.25 * _DCKitNS.UI.mobile_layout.get_scales().em_font(1)
+	sub_text_font_size = _DCKitNS.UI.mobile_layout.get_scales().em_font(0.65)
 	pass
 
 
@@ -130,7 +126,13 @@ func _rebuild_text() -> void:
 				title,
 			]
 
-		whole_bb += "%s %s [url=%s]%s[/url]%s\n" % [scr_bb, rng_bb, meta, msg, actions_bb]
+		whole_bb += "%s %s [url=%s]%s[/url]%s\n" % [
+			scr_bb,
+			rng_bb if not _DCKitNS.UI.mobile_layout.mobile else "",
+			meta,
+			msg,
+			actions_bb,
+		]
 
 	label.text = whole_bb
 

@@ -5,4 +5,4 @@ signal action_requested(diag, action_index: int)
 
 
 func show_diagnostic(diags: Array) -> void:
-	_DCKitNS.UI.not_implemented("show_diagnostic")
+	_DCKitNS.not_implemented("show_diagnostic")

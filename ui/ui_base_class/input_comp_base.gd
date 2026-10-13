@@ -9,13 +9,17 @@ signal cmd_caret_location_changed(caret_pos: int)
 
 
 func get_input_node() -> Control:
-	_DCKitNS.UI.not_implemented("get_input_node")
+	_DCKitNS.not_implemented("get_input_node")
 	return null
 
 
 func connect_history_obj(hist_obj: _DCKitNS.UI.CommandHistory) -> void:
-	_DCKitNS.UI.not_implemented("connect_history_obj")
+	_DCKitNS.not_implemented("connect_history_obj")
 
 
 func connect_executor(executor) -> void:
-	_DCKitNS.UI.not_implemented("connect_executor")
+	_DCKitNS.not_implemented("connect_executor")
+
+
+func connect_autocomplete_obj(autocomplete_obj: _DCKitNS.Core.AutoComplete) -> void:
+	_DCKitNS.not_implemented("connect_autocomplete_obj")

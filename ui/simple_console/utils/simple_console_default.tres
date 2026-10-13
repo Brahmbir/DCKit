@@ -25,8 +25,24 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dlema"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s3qfw"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hfuff"]
 bg_color = Color(0.17641899, 0.17641914, 0.17641908, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6u0a8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0mlb5"]
+bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dlema"]
+bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3g5tv"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0, 0, 0, 0.14117648)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ooera"]
+corner_detail = 1
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s3qfw"]
 
@@ -40,19 +56,6 @@ base_font = ExtResource("2_ooera")
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7jkh5"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4jtcb"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6u0a8"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0mlb5"]
-bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dlema"]
-bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3g5tv"]
-content_margin_left = 3.0
-content_margin_right = 3.0
-bg_color = Color(0, 0, 0, 0.14117648)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0x88e"]
 content_margin_left = 10.0
@@ -92,14 +95,25 @@ Button/styles/normal = SubResource("StyleBoxEmpty_45o6f")
 Button/styles/normal_mirrored = SubResource("StyleBoxEmpty_er2vm")
 Button/styles/pressed = SubResource("StyleBoxEmpty_34r5h")
 Button/styles/pressed_mirrored = SubResource("StyleBoxEmpty_dlema")
+CMD_MarginContainer/base_type = &"MarginContainer"
 ErrorList_PanelContainer/base_type = &"PanelContainer"
-ErrorList_PanelContainer/styles/panel = SubResource("StyleBoxFlat_s3qfw")
+ErrorList_PanelContainer/styles/panel = SubResource("StyleBoxFlat_hfuff")
 HBoxContainer/constants/separation = 0
 HBoxContainer_LineEdit/constants/separation = 12
-HScrollBar/constants/padding_bottom = 20
-HScrollBar/styles/scroll = SubResource("StyleBoxEmpty_s3qfw")
+HScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
+HScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
+HScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_dlema")
+HScrollBar/styles/scroll = SubResource("StyleBoxFlat_3g5tv")
 Header_Label/base_type = &"Label"
 Header_Label/font_sizes/font_size = 16
+Info_MarginContainer/base_type = &"MarginContainer"
+ItemList/constants/h_separation = 16
+ItemList/constants/icon_margin = 0
+ItemList/constants/outline_size = 2
+ItemList/constants/v_separation = 16
+ItemList/styles/hovered = SubResource("StyleBoxFlat_ooera")
+ItemList/styles/panel = SubResource("StyleBoxEmpty_s3qfw")
+ItemList/styles/selected = null
 LoggerComponentPanel_Margin/base_type = &"MarginContainer"
 LoggerComponentPanel_Margin/constants/margin_right = 8
 Looger_RichTextLabel/base_type = &"RichTextLabel"
@@ -131,7 +145,7 @@ TextEdit/constants/outline_size = 2
 TextEdit/styles/focus = SubResource("StyleBoxEmpty_0x88e")
 TextEdit/styles/normal = SubResource("StyleBoxEmpty_7jkh5")
 TextEdit/styles/read_only = SubResource("StyleBoxEmpty_4jtcb")
-ToolNInfo_MarginContainer/base_type = &"MarginContainer"
+VBoxContainer/constants/separation = 12
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
 VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_dlema")

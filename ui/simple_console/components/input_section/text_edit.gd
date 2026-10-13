@@ -1,4 +1,4 @@
-extends TextEdit
+extends "./text_edit_interface.gd"
 
 signal text_submitted(text: String)
 
@@ -12,27 +12,48 @@ func _enter_tree() -> void:
 	text_changed.connect(_on_user_edited)
 
 
+func _ready() -> void:
+	for child in get_children(true):
+		if child is ScrollBar:
+			for style_name in [
+				"grabber",
+				"grabber_highlight",
+				"grabber_pressed",
+				"scroll",
+				"scroll_focus",
+			]:
+				child.add_theme_stylebox_override(style_name, StyleBoxEmpty.new())
+
+
 func _exit_tree() -> void:
 	text_changed.disconnect(_on_user_edited)
 
 
-func _gui_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or not editable:
 		return
 
 	var ctrl := key.is_command_or_control_pressed()
 
+	if not is_auto_complete_open:
+		return
+
 	match key.keycode:
 		KEY_ENTER, KEY_KP_ENTER:
-			accept_event()
+			get_viewport().set_input_as_handled()
+
 			_submit()
 		KEY_UP:
-			accept_event()
+			if not is_auto_complete_open:
+				return
+			get_viewport().set_input_as_handled()
 			if _history != null:
 				_show(_history.browse_older(text, ctrl))
 		KEY_DOWN:
-			accept_event()
+			if not is_auto_complete_open:
+				return
+			get_viewport().set_input_as_handled()
 			if _history != null:
 				_show(_history.browse_newer(text))
 

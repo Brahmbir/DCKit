@@ -3,7 +3,7 @@ extends RefCounted
 ## diagnostics view, the signature-help view, and the completion provider.
 
 signal analysis_changed(analysis) # DCAnalysisResult
-signal scope_changed(scope)       # DCScope
+signal scope_changed(scope)       # DCAnalysisResult.Scope
 
 const DiagnosticsView = preload("./diagnostics_view.gd")
 const SignatureHelpView = preload("./signature_help_view.gd")

@@ -18,7 +18,6 @@ const SPACE_SIZE = 16
 
 @export var info_component: _DCKitNS.UI.InfoComponentBase
 
-
 @export_category("UI Constants")
 @export var default_theme: Theme:
 	set(value):
@@ -92,13 +91,13 @@ func _property_get_revert(property: StringName) -> Variant:
 func _get(property: StringName) -> Variant:
 	match property:
 		STR_NAME_FONT_SIZE:
-			return _DCKitNS.UI.scales.font
+			return _DCKitNS.UI.mobile_layout.get_scales().font
 
 		STR_NAME_LOG_FONT_SIZE:
-			return _DCKitNS.UI.scales.log_font
+			return _DCKitNS.UI.mobile_layout.get_scales().log_font
 
 		STR_NAME_SPACE_SIZE:
-			return _DCKitNS.UI.scales.space
+			return _DCKitNS.UI.mobile_layout.get_scales().space
 
 	return null
 
@@ -106,37 +105,37 @@ func _get(property: StringName) -> Variant:
 func _set(property: StringName, value: Variant) -> bool:
 	match property:
 		STR_NAME_FONT_SIZE:
-			_DCKitNS.UI.scales.font = value
+			_DCKitNS.UI.mobile_layout.get_scales().font = value
 			return true
 
 		STR_NAME_LOG_FONT_SIZE:
-			_DCKitNS.UI.scales.log_font = value
+			_DCKitNS.UI.mobile_layout.get_scales().log_font = value
 			return true
 
 		STR_NAME_SPACE_SIZE:
-			_DCKitNS.UI.scales.space = value
+			_DCKitNS.UI.mobile_layout.get_scales().space = value
 			return true
 	return false
 
 
 func grab_focus_on_input():
-	_DCKitNS.UI.not_implemented("grab_focus_on_input")
+	_DCKitNS.not_implemented("grab_focus_on_input")
 
 
 func release_focus_on_input():
-	_DCKitNS.UI.not_implemented("release_focus_on_input")
+	_DCKitNS.not_implemented("release_focus_on_input")
 
 
 func connect_executor(executor: _DCKitNS.Executor.Executor):
-	_DCKitNS.UI.not_implemented("connect_executor")
+	_DCKitNS.not_implemented("connect_executor")
 
 
 func connect_feedback_controller(controller: _DCKitNS.UI.InputFeedbackController):
-	_DCKitNS.UI.not_implemented("connect_feedback_controller")
+	_DCKitNS.not_implemented("connect_feedback_controller")
 
 
 func connect_cmd_history(history: _DCKitNS.UI.CommandHistory):
-	_DCKitNS.UI.not_implemented("connect_cmd_history")
+	_DCKitNS.not_implemented("connect_cmd_history")
 
 
 func _queue_theme_rebuild() -> void:
@@ -154,4 +153,4 @@ func _rebuild_theme() -> void:
 
 
 func _default_theme_changed():
-	_DCKitNS.UI.not_implemented("_default_theme_changed")
+	_DCKitNS.not_implemented("_default_theme_changed")

@@ -28,7 +28,7 @@ var _normal_colour := Color.BLACK
 var _sct_toggle_popup: Shortcut = _make_shortcut(KEY_SPACE, true)
 
 @onready var button: Button = %Button
-@onready var masked_icon_panel: MaskedIconPanel = %MaskedIconPanel
+@onready var masked_icon_panel: PanelContainer = %MaskedIconPanel
 @onready var text_edit: TextCmdEdit = %TextEdit
 
 @onready var label: Label = %Label

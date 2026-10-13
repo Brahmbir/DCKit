@@ -2,13 +2,34 @@ extends RefCounted
 
 signal changed ## emitted when entries change (hook persistence/UI here)
 
-var max_size: int = 500
+const FILE_NAME = "command_history.json"
 
-var _entries: Array[String] = []  # oldest-first
-var _matches: Array[String] = []  # current browse list, newest-first
-var _cursor: int = -1             # -1 = draft, 0 = newest match
+var max_size: int = _DCKitSetting.get_history_limit()
+
+var path_dir: String = _DCKitSetting.get_history_directory() # "user://DCKit/"
+
+var path: String:
+	get:
+		return path_dir.path_join(FILE_NAME)
+## Enabling loads from disk, set `path` first.
+var persist: bool = _DCKitSetting.get_history_enabled():
+	set(value):
+		if persist == value:
+			return
+		persist = value
+		if persist:
+			load_from_disk()
+
+var _entries: Array[String] = [] # oldest-first
+var _matches: Array[String] = [] # current browse list, newest-first
+var _cursor: int = -1 # -1 = draft, 0 = newest match
 var _draft: String = ""
 var _by_prefix: bool = false
+
+
+func _init() -> void:
+	if persist:
+		load_from_disk()
 
 
 func push(cmd: String) -> void:
@@ -18,10 +39,11 @@ func push(cmd: String) -> void:
 		return
 	if not _entries.is_empty() and _entries.back() == cmd:
 		return
-	_entries.append(cmd)
 	if _entries.size() > max_size:
 		_entries.remove_at(0)
+	_entries.append(cmd)
 	changed.emit()
+	_save_if_enabled()
 
 
 ## Returns the text to display. Returns current_text unchanged if there's nowhere to go.
@@ -59,6 +81,41 @@ func clear() -> void:
 	_entries.clear()
 	reset_browse()
 	changed.emit()
+	_save_if_enabled()
+
+
+func load_from_disk() -> void:
+	if not FileAccess.file_exists(path):
+		return
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		_disable_persist("can't read %s (error %d)" % [path, FileAccess.get_open_error()])
+		return
+	var data = JSON.parse_string(file.get_as_text())
+	if not data is Array:
+		return
+	var merged: Array[String] = []
+	for item in data:
+		if item is String and not item.is_empty():
+			merged.append(item)
+	merged.append_array(_entries) # in-memory entries are newer than disk
+	if merged.size() > max_size:
+		merged = merged.slice(merged.size() - max_size)
+	_entries.assign(merged)
+	reset_browse()
+	changed.emit()
+
+
+func save_to_disk() -> void:
+	var err := DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	if err != OK:
+		_disable_persist("can't create %s (error %d)" % [path.get_base_dir(), err])
+		return
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		_disable_persist("can't write %s (error %d)" % [path, FileAccess.get_open_error()])
+		return
+	file.store_string(JSON.stringify(_entries))
 
 
 func _start(draft: String, by_prefix: bool) -> void:
@@ -67,6 +124,16 @@ func _start(draft: String, by_prefix: bool) -> void:
 	_cursor = -1
 	_matches = _entries.filter(
 		func(cmd: String) -> bool:
-			return not by_prefix or (cmd.begins_with(draft) and cmd != draft)
+			return not by_prefix or (cmd.begins_with(draft) and cmd != draft),
 	)
 	_matches.reverse()
+
+
+func _disable_persist(reason: String) -> void:
+	push_warning("History: %s, persistence disabled" % reason)
+	persist = false
+
+
+func _save_if_enabled() -> void:
+	if persist:
+		save_to_disk()

@@ -4,28 +4,28 @@ extends RefCounted
 var tokens: Array = []
 var ast: Array = []
 var diagnostics: Array = []
-var scope: DCScope
+var scope: Scope
 
 
 func _init() -> void:
-	scope = DCScope.new()
+	scope = Scope.new()
 
 
 func ok() -> bool:
 	for d in diagnostics:
-		if d.severity == DCDiagnostic.Severity.ERROR:
+		if d.severity == Diagnostic.Severity.ERROR:
 			return false
 	return true
 
 
 func has_warnings() -> bool:
 	for d in diagnostics:
-		if d.severity == DCDiagnostic.Severity.WARNING:
+		if d.severity == Diagnostic.Severity.WARNING:
 			return true
 	return false
 
 
-class DCDiagnostic:
+class Diagnostic:
 	enum Severity {
 		HINT,
 		WARNING,
@@ -74,7 +74,7 @@ class DCDiagnostic:
 		]
 
 
-class DCScope:
+class Scope:
 	enum Kind {
 		EMPTY,
 		COMMAND,
