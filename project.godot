@@ -8,6 +8,12 @@
 
 config_version=5
 
+[addons]
+
+DCKit/cmd_history/enabled=true
+DCKit/window_edge=0
+DCKit/cmd_history/directory="D:/dev/Godot_Game_Dev/DCKit/tmp"
+
 [application]
 
 config/name="DCKit_demo"
@@ -17,8 +23,8 @@ config/icon="uid://b0tp6gb8sl00v"
 
 [autoload]
 
-DCKit="*uid://g1vgmlrh22q"
 UtilScript="*uid://cg2t6sv2q7kvn"
+DCKit="*uid://g1vgmlrh22q"
 
 [display]
 

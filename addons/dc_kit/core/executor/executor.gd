@@ -437,7 +437,7 @@ func _normalise(raw) -> DCResult:
 func _format_errors(diagnostics: Array) -> String:
 	var msgs: Array = []
 	for d in diagnostics:
-		if d.severity == DCAnalysisResult.DCDiagnostic.Severity.ERROR:
+		if d.severity == DCAnalysisResult.Diagnostic.Severity.ERROR:
 			msgs.append(d.message)
 	return "\n".join(msgs) if not msgs.is_empty() else "Analysis failed."
 

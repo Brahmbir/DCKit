@@ -3,18 +3,23 @@ extends "../../../ui_base_class/input_comp_base.gd"
 const DIVIDER_TEXT := " :~$"
 const _DEBOUNCE_SEC: float = 0.1
 
+const _TEXT_EDIT_INTERFACE := preload("./text_edit_interface.gd")
+const _AUTO_COMPLETE_BASE := preload("./auto_suggestion/auto_complete_base.gd")
+const _EXECUTE_BASE := preload("./execute_btn/base.gd")
+
 @export var label_perfix: String
 
 @export_group("nodes")
 @export var button: PanelContainer # has signal `pressed`
 @export var text_edit: TextEdit
+@export var auto_complete_comp: Control
+
+@export var label: Label
 
 var executor_ref: WeakRef = weakref(null)
 var _hist_obj_ref: WeakRef = weakref(null)
 var _state: _DCKitNS.UI.State = _DCKitNS.UI.State.EXECUTE
 var _last_submit: float = 0.0
-
-@onready var label: Label = $MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Label
 
 
 func _enter_tree() -> void:
@@ -26,10 +31,16 @@ func _enter_tree() -> void:
 	if is_instance_valid(button) and not button.pressed.is_connected(_on_button_pressed):
 		button.pressed.connect(_on_button_pressed)
 
+	var auto_complete := auto_complete_comp as _AUTO_COMPLETE_BASE
+	if is_instance_valid(auto_complete):
+		auto_complete.item_accepted.connect(_on_completion_accepted)
+
+		auto_complete.opened.connect(_toggle_history)
+		auto_complete.closed.connect(_toggle_history)
+
 
 func _ready() -> void:
 	set_state(_DCKitNS.UI.State.EXECUTE, true)
-	_apply_history_to_input()
 	_on_mobile_changed(_DCKitNS.UI.mobile_layout.mobile) # catch up if spawned late
 
 
@@ -42,6 +53,13 @@ func _exit_tree() -> void:
 	if is_instance_valid(button) and button.pressed.is_connected(_on_button_pressed):
 		button.pressed.disconnect(_on_button_pressed)
 
+	var auto_complete := auto_complete_comp as _AUTO_COMPLETE_BASE
+	if is_instance_valid(auto_complete):
+		auto_complete.item_accepted.disconnect(_on_completion_accepted)
+
+		auto_complete.opened.disconnect(_toggle_history)
+		auto_complete.closed.disconnect(_toggle_history)
+
 
 func set_state(s: _DCKitNS.UI.State, focus := false) -> void:
 	_state = s
@@ -49,17 +67,33 @@ func set_state(s: _DCKitNS.UI.State, focus := false) -> void:
 	if is_instance_valid(text_edit):
 		text_edit.editable = (s == _DCKitNS.UI.State.EXECUTE)
 
-	if button and button.has_method("set_state"):
-		button.call("set_state", _state, focus)
+	var exe_btn := button as _EXECUTE_BASE
+	if exe_btn:
+		exe_btn.set_state(_state, focus)
 
 
-func get_input_node() -> Control:
+func get_input_node() -> TextEdit:
 	return text_edit
 
 
 func connect_history_obj(hist_obj: _DCKitNS.UI.CommandHistory) -> void:
 	_hist_obj_ref = weakref(hist_obj)
 	_apply_history_to_input()
+
+
+func connect_autocomplete_obj(autocomplete_obj: _DCKitNS.Core.AutoComplete) -> void:
+	if not auto_complete_comp:
+		push_warning("auto_complete_comp is null")
+		return
+
+	var auto_complete := auto_complete_comp as _AUTO_COMPLETE_BASE
+	if not auto_complete:
+		push_warning("auto_complete_comp is not _AUTO_COMPLETE_BASE type")
+		return
+
+	auto_complete.setup(autocomplete_obj)
+
+	auto_complete.selection_changed
 
 
 func connect_executor(executor) -> void:
@@ -70,6 +104,25 @@ func connect_executor(executor) -> void:
 	executor_ref = weakref(executor)
 	executor.state_changed.connect(_on_executor_state_changed)
 	_on_executor_state_changed() # sync right away, so hooking in mid-run is correct
+
+
+func _toggle_history():
+	var auto_complete := auto_complete_comp as _AUTO_COMPLETE_BASE
+	if not is_instance_valid(auto_complete):
+		return
+
+	var my_text_edit = text_edit as _TEXT_EDIT_INTERFACE
+	if my_text_edit:
+		my_text_edit.is_auto_complete_open = auto_complete.is_open()
+
+
+func _on_completion_accepted(start: int, label: String):
+	var caret := text_edit.get_caret_column()
+	if start < caret:
+		text_edit.remove_text(0, start, 0, caret)
+	text_edit.set_caret_column(start)
+	text_edit.insert_text_at_caret(label)
+
 
 
 func _on_mobile_changed(is_mobile: bool) -> void:
@@ -87,11 +140,11 @@ func _apply_history_to_input() -> void:
 	if hist_obj == null or not is_instance_valid(text_edit):
 		return
 
-	if "history" in text_edit:
-		text_edit.history = hist_obj
+	var my_text_edit = text_edit as _TEXT_EDIT_INTERFACE
+	if my_text_edit:
+		my_text_edit.set_history_obj(hist_obj)
 
 
-# --- signals ---
 func _connect_edit_signals() -> void:
 	if not is_instance_valid(text_edit):
 		return
@@ -198,6 +251,4 @@ func _disconnect_executor() -> void:
 
 func _on_executor_state_changed(_s = null) -> void:
 	var ex = executor_ref.get_ref()
-	set_state(
-		_DCKitNS.UI.State.ABORT if ex and ex.is_running() else _DCKitNS.UI.State.EXECUTE
-	)
+	set_state(_DCKitNS.UI.State.ABORT if ex and ex.is_running() else _DCKitNS.UI.State.EXECUTE)

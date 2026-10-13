@@ -2,12 +2,15 @@
 
 [ext_resource type="Script" uid="uid://bjpjj4vktd3hp" path="res://addons/dc_kit/ui/rich_log_label/rich_log_label.gd" id="1_8gsdv"]
 
-[node name="RichLogLabel" type="Container" unique_id=1258050635 node_paths=PackedStringArray("_label")]
+[node name="RichLogLabel" type="MarginContainer" unique_id=1204884103 node_paths=PackedStringArray("_label")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_type_variation = &"LoggerComponentPanel_Margin"
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_bottom = 0
 script = ExtResource("1_8gsdv")
 _label = NodePath("RichTextLabel")
 

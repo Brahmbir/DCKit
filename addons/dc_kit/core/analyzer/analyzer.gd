@@ -29,8 +29,8 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 				lex_r.error.message,
 				lex_r.error.position,
 				1,
-				DCAnalysisResult.DCDiagnostic.Severity.ERROR,
-				DCAnalysisResult.DCDiagnostic.Source.LEXER,
+				DCAnalysisResult.Diagnostic.Severity.ERROR,
+				DCAnalysisResult.Diagnostic.Source.LEXER,
 			)
 		)
 		result.tokens = lex_r.get("tokens", [])
@@ -45,8 +45,8 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 				parse_r.error.message,
 				parse_r.error.position,
 				1,
-				DCAnalysisResult.DCDiagnostic.Severity.ERROR,
-				DCAnalysisResult.DCDiagnostic.Source.PARSER,
+				DCAnalysisResult.Diagnostic.Severity.ERROR,
+				DCAnalysisResult.Diagnostic.Source.PARSER,
 			)
 		)
 	else:
@@ -60,7 +60,7 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 
 
 # SCOPE
-func compute_scope(tokens: Array, cursor_pos: int) -> DCAnalysisResult.DCScope:
+func compute_scope(tokens: Array, cursor_pos: int) -> DCAnalysisResult.Scope:
 	var stack: Array = [_cmd_frame()]
 	var prev = null
 
@@ -103,13 +103,13 @@ func compute_scope(tokens: Array, cursor_pos: int) -> DCAnalysisResult.DCScope:
 					nxt != null and nxt.type == TT.LPAREN
 					and tok.position + tok.value.length() == nxt.position
 				)
-				if f.k == DCAnalysisResult.DCScope.Kind.COMMAND:
+				if f.k == DCAnalysisResult.Scope.Kind.COMMAND:
 					if f.arg == -1:
 						f.name = tok.value
 						f.arg = 0
 					elif not is_ctor:
 						f.arg += 1
-				elif f.k == DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+				elif f.k == DCAnalysisResult.Scope.Kind.CONSTRUCTOR:
 					if not is_ctor:
 						f.part += 1
 			TT.LPAREN:
@@ -122,14 +122,14 @@ func compute_scope(tokens: Array, cursor_pos: int) -> DCAnalysisResult.DCScope:
 				if stack.size() > 1:
 					stack.pop_back()
 					var p = stack.back()
-					if p.k == DCAnalysisResult.DCScope.Kind.COMMAND:
+					if p.k == DCAnalysisResult.Scope.Kind.COMMAND:
 						p.arg += 1
-					elif p.k == DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+					elif p.k == DCAnalysisResult.Scope.Kind.CONSTRUCTOR:
 						p.part += 1
 			TT.VARIABLE, TT.NUMBER, TT.STRING:
-				if f.k == DCAnalysisResult.DCScope.Kind.COMMAND:
+				if f.k == DCAnalysisResult.Scope.Kind.COMMAND:
 					f.arg += 1
-				elif f.k == DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+				elif f.k == DCAnalysisResult.Scope.Kind.CONSTRUCTOR:
 					f.part += 1
 			TT.SEMICOLON:
 				stack = [_cmd_frame()]
@@ -152,8 +152,8 @@ func _check_node(node, out: Array) -> void:
 					"'$%s' is not defined." % node.name,
 					node.start_pos,
 					node.name.length() + 1,
-					DCAnalysisResult.DCDiagnostic.Severity.WARNING,
-					DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
+					DCAnalysisResult.Diagnostic.Severity.WARNING,
+					DCAnalysisResult.Diagnostic.Source.SEMANTIC,
 				)
 			)
 		_check_node(node.fallback, out)
@@ -166,8 +166,8 @@ func _check_node(node, out: Array) -> void:
 						"Unknown command '%s'." % node.name,
 						node.start_pos,
 						node.name.length(),
-						DCAnalysisResult.DCDiagnostic.Severity.ERROR,
-						DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
+						DCAnalysisResult.Diagnostic.Severity.ERROR,
+						DCAnalysisResult.Diagnostic.Source.SEMANTIC,
 					)
 				)
 			else:
@@ -190,8 +190,8 @@ func _check_node(node, out: Array) -> void:
 							msg,
 							node.start_pos,
 							node.name.length(),
-							DCAnalysisResult.DCDiagnostic.Severity.WARNING,
-							DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
+							DCAnalysisResult.Diagnostic.Severity.WARNING,
+							DCAnalysisResult.Diagnostic.Source.SEMANTIC,
 						)
 					)
 		# Argument count is intentionally not validated — handlers are variadic by design.
@@ -206,8 +206,8 @@ func _check_node(node, out: Array) -> void:
 						"Unknown constructor type '%s'." % node.type_name,
 						node.start_pos,
 						node.type_name.length(),
-						DCAnalysisResult.DCDiagnostic.Severity.ERROR,
-						DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
+						DCAnalysisResult.Diagnostic.Severity.ERROR,
+						DCAnalysisResult.Diagnostic.Source.SEMANTIC,
 					)
 				)
 			else:
@@ -224,8 +224,8 @@ func _check_node(node, out: Array) -> void:
 								"'%s' has no signature for %d part(s)." % [node.type_name, count],
 								node.start_pos,
 								node.type_name.length(),
-								DCAnalysisResult.DCDiagnostic.Severity.WARNING,
-								DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
+								DCAnalysisResult.Diagnostic.Severity.WARNING,
+								DCAnalysisResult.Diagnostic.Source.SEMANTIC,
 							)
 						)
 		for child in node.parts:
@@ -234,17 +234,17 @@ func _check_node(node, out: Array) -> void:
 
 # HELPERS
 func _cmd_frame() -> Dictionary:
-	return { k = DCAnalysisResult.DCScope.Kind.COMMAND, name = "", arg = -1, ctor = "", part = 0 }
+	return { k = DCAnalysisResult.Scope.Kind.COMMAND, name = "", arg = -1, ctor = "", part = 0 }
 
 
 func _ctor_frame(type_name: String) -> Dictionary:
-	return { k = DCAnalysisResult.DCScope.Kind.CONSTRUCTOR, name = "", arg = -1, ctor = type_name, part = 0 }
+	return { k = DCAnalysisResult.Scope.Kind.CONSTRUCTOR, name = "", arg = -1, ctor = type_name, part = 0 }
 
 
-func _to_scope(f: Dictionary, tok) -> DCAnalysisResult.DCScope:
-	var s := DCAnalysisResult.DCScope.new()
+func _to_scope(f: Dictionary, tok) -> DCAnalysisResult.Scope:
+	var s := DCAnalysisResult.Scope.new()
 	s.kind = f.k
-	if f.k == DCAnalysisResult.DCScope.Kind.COMMAND:
+	if f.k == DCAnalysisResult.Scope.Kind.COMMAND:
 		if (tok != null and tok.type == TT.IDENTIFIER and f.arg == -1):
 			s.name = tok.value
 		else:
@@ -255,7 +255,7 @@ func _to_scope(f: Dictionary, tok) -> DCAnalysisResult.DCScope:
 			var def = _cmd_reg.get_definition(s.name)
 			if def != null:
 				s._active_ref = weakref(def)
-	elif f.k == DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+	elif f.k == DCAnalysisResult.Scope.Kind.CONSTRUCTOR:
 		s.type_name = f.ctor
 		s.part_index = f.part + (1 if tok != null else 0) # tok != null = cursor is on a part
 		if _ctor_reg != null and not s.type_name.is_empty():
@@ -294,8 +294,8 @@ func _tok_span(tok) -> int:
 			return tok.value.length()
 
 
-func _diag(msg: String, pos: int, len: int, sev: int, src: int) -> DCAnalysisResult.DCDiagnostic:
-	return DCAnalysisResult.DCDiagnostic.new(msg, pos, len, sev, src)
+func _diag(msg: String, pos: int, len: int, sev: int, src: int) -> DCAnalysisResult.Diagnostic:
+	return DCAnalysisResult.Diagnostic.new(msg, pos, len, sev, src)
 
 
 # Depth check for nested command / constructor / fallback trees.
@@ -310,8 +310,8 @@ func _check_argument_stack(node, depth: int, out: Array) -> void:
 				"Argument stack depth exceeds the limit (%d)." % MAX_ARGUMENT_DEPTH,
 				node.start_pos,
 				1,
-				DCAnalysisResult.DCDiagnostic.Severity.ERROR,
-				DCAnalysisResult.DCDiagnostic.Source.SEMANTIC,
+				DCAnalysisResult.Diagnostic.Severity.ERROR,
+				DCAnalysisResult.Diagnostic.Source.SEMANTIC,
 			)
 		)
 		return

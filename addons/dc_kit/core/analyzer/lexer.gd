@@ -70,7 +70,7 @@ func lex(input: String) -> Dictionary:
 		return _with_tokens(_err("Unexpected character '%s'." % c, _pos), tokens)
 
 	tokens.append(Token.new(TokenType.END, "", _pos))
-	return { ok = true, tokens = tokens }
+	return { "ok": true, "tokens": tokens }
 
 
 # READERS
@@ -483,7 +483,7 @@ func _unescape(c: String) -> String:
 
 
 func _err(msg: String, pos: int) -> Dictionary:
-	return { ok = false, error = LexError.new(msg, pos) }
+	return { "ok": false, "error": LexError.new(msg, pos) }
 
 
 # Attaches whatever tokens were successfully read before a lex failure —

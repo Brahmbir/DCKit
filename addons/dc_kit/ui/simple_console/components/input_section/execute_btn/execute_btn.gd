@@ -1,4 +1,4 @@
-extends PanelContainer
+extends "./base.gd"
 
 signal pressed
 

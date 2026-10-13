@@ -1,7 +1,7 @@
 extends RefCounted
 
 signal analysis_updated(result) # DCAnalysisResult
-signal scope_updated(scope) # DCScope
+signal scope_updated(scope) # DCAnalysisResult.Scope
 
 const ErrorView = preload("./error_view.gd")
 const InfoView = preload("./info_view.gd")

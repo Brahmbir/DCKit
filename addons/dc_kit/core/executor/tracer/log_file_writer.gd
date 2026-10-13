@@ -4,7 +4,7 @@ extends RefCounted
 var enabled: bool = true
 
 var _file_path: String = ""
-var _log_dir: String = "user://DCKit/logs/"
+var _log_dir: String = "user://DCKit/logs"
 var _max_files: int = 5
 
 
@@ -43,13 +43,13 @@ func open_session() -> void:
 	files.sort()
 
 	while files.size() >= _max_files:
-		DirAccess.remove_absolute(_log_dir + files.pop_front())
+		DirAccess.remove_absolute(_log_dir.path_join(files.pop_front()))
 
 	var datetime := Time.get_datetime_string_from_system(false, true) \
 			.replace(":", "-") \
 			.replace(" ", "_")
 
-	_file_path = _log_dir + datetime + "_session.log"
+	_file_path = _log_dir.path_join(datetime + "_session.log")
 
 	var file := FileAccess.open(_file_path, FileAccess.WRITE)
 

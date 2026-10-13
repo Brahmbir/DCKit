@@ -1,73 +1,64 @@
 @tool
-extends "../../../ui_base_class/info_panel_base.gd"
+extends "./info_comp_base.gd"
+
+signal panel_shown
+signal panel_hidden
+signal panel_expanded
+signal panel_collapsed
+
+## Editor only: expands the panel in the scene view.
+@export var editor_expanded: bool = false:
+	set(v):
+		editor_expanded = v
+		if Engine.is_editor_hint() and is_node_ready():
+			if v:
+				expand()
+			else:
+				collapse()
 
 @export var opacity_duration: float = 0.15
-@export var fold_unfold_duration: float = 0.13
+@export var fold_unfold_duration: float = 0.2
 
 @export_group("Header Nodes")
 @export var header_label: Label
 @export var header_texture_rect: TextureRect
 @export var header_button: Button
 @export_group("Content Nodes")
-@export var content_root: MarginContainer
+@export var content_root: Control
 @export var content_container: MarginContainer
-## Optional. Subclasses use it for scrolling to the active row.
+# Optional. Subclasses use it for scrolling to the active row.
 @export var scroll_container: ScrollContainer
 
 @export_group("Layout")
 @export var max_content_height: float = 0.0
 
-var _info: _DCKitNS.UI.Signature.SignatureInfo = null
+## Ascending breakpoints in em. The tier is how many the width has passed.
+@export var width_breakpoints_em: PackedFloat32Array = [25.0, 50.0, 60.0, 70.0]
+
+var _editor_view: Control = null
+
+#30.0,
+var _fold_progress: float = 0.0 # 0 = collapsed, 1 = fully open
+#var _info: _DCKitNS.UI.Signature.SignatureInfo = null
 var _collapsed: bool = true
 var _open_h: float = 0.0 # body height currently applied while expanded
 var _fold_signal_pending: bool = false
 var _fold_tween: Tween = null
 var _fade_tween: Tween = null
+var _width_tier: int = -1
 
 
 func _ready() -> void:
-	print_tree()
 	_build()
+	if Engine.is_editor_hint():
+		_build_editor_preview()
+		if editor_expanded:
+			expand()
+		return # skip the hidden/transparent/non-interactive runtime setup
+
 	modulate.a = 0.0
 	visible = false
 	_set_interactable(false)
-
-	# Keep the expanded height correct when the parent is resized.
-	var p := get_parent() as Control
-	if p:
-		p.resized.connect(_refresh_height)
-
-
-# --- public API -------------------------------------------------------------
-func show_info(info: _DCKitNS.UI.Signature.SignatureInfo) -> void:
-	var had_info := _info != null
-	_info = info
-
-	if info == null:
-		_hide_panel()
-		return
-
-	_update_header()
-	_clear_body()
-	var view := _create_view(info)
-	if view != null and content_container:
-		content_container.add_child(view)
-
-	# Wait for layout so sizes are accurate before measuring.
-	if is_inside_tree():
-		await get_tree().process_frame
-	if _info != info:
-		return # replaced or cleared while waiting
-
-	_refresh_height()
-	if not had_info:
-		_show_panel()
-
-
-func set_active(index: int) -> void:
-	if _info == null:
-		return
-	_apply_active(index)
 
 
 func toggle() -> void:
@@ -82,9 +73,8 @@ func expand() -> void:
 		return
 	_collapsed = false
 	_update_header()
-	_open_h = _target_height()
 	_fold_signal_pending = true
-	_tween_clip(_open_h, Tween.EASE_OUT)
+	_tween_fold(1.0, Tween.EASE_OUT)
 
 
 func collapse() -> void:
@@ -93,7 +83,7 @@ func collapse() -> void:
 	_collapsed = true
 	_update_header()
 	_fold_signal_pending = true
-	_tween_clip(0.0, Tween.EASE_IN)
+	_tween_fold(0.0, Tween.EASE_IN)
 
 
 func is_collapsed() -> bool:
@@ -104,21 +94,70 @@ func is_showing() -> bool:
 	return visible
 
 
-# --- subclass hooks ---------------------------------------------------------
-## Build the body for a new definition. The panel owns the result and frees it
-## when the definition changes or the panel finishes hiding.
+func _info_changed(had_info: bool) -> void:
+	var current := info
+	if current == null:
+		_hide_panel()
+		return
+
+	_update_header()
+	_clear_body()
+	var view := _create_view(current)
+	if view != null and content_container:
+		content_container.add_child(view)
+
+	# Wait for layout so sizes are accurate before measuring.
+	if is_inside_tree():
+		await get_tree().process_frame
+	if info != current:
+		return # replaced or cleared while waiting
+
+	_refresh_height()
+	if not had_info:
+		_show_panel()
+
+
+func _tween_fold(to: float, ease_type: Tween.EaseType) -> void:
+	if not content_root:
+		return
+	_fold_tween = _restart(_fold_tween)
+
+	# in _tween_fold, snap in the editor so there are no tweens running there
+	if not sizing_parent or Engine.is_editor_hint():
+		_fold_tween.kill()
+		_set_fold_progress(to)
+		_on_fold_finished()
+		return
+
+	_fold_tween.set_ease(ease_type).set_trans(Tween.TRANS_CUBIC)
+	_fold_tween.tween_method(_set_fold_progress, _fold_progress, to, fold_unfold_duration)
+	_fold_tween.tween_callback(_on_fold_finished)
+
+
 func _create_view(_info_data: _DCKitNS.UI.Signature.SignatureInfo) -> Control:
-	_DCKitNS.UI.not_implemented("_create_view")
+	_DCKitNS.not_implemented("_create_view")
 	return null
 
 
-## The active slot moved within the current definition. Restyle, don't rebuild.
+## Editor only. Subclasses return sample content so the fold can be seen
+## without a SignatureInfo. Return null for an empty body.
+func _create_editor_view() -> Control:
+	return null
+
+
+func _build_editor_preview() -> void:
+	if is_instance_valid(_editor_view):
+		_editor_view.queue_free()
+	_editor_view = _create_editor_view()
+	if _editor_view and content_container:
+		content_container.add_child(_editor_view) # no owner set, so it is never saved
+
+
 func _apply_active(_index: int) -> void:
-	_DCKitNS.UI.not_implemented("_apply_active")
+	_DCKitNS.not_implemented("_apply_active")
 	pass
 
 
-# --- construction -----------------------------------------------------------
 func _build() -> void:
 	if header_button:
 		header_button.pressed.connect(toggle)
@@ -136,14 +175,14 @@ func _build() -> void:
 
 func _update_header() -> void:
 	if header_label:
-		header_label.text = _info.title if _info else ""
+		if Engine.is_editor_hint():
+			header_label.text = "Sample command"
+		else:
+			header_label.text = info.title if info else ""
 
 	if header_texture_rect:
 		header_texture_rect.flip_h = true if _collapsed else false
 		header_texture_rect.flip_v = true if _collapsed else false
-
-	if header_button:
-		header_button.text = "enabled" if _info else "disabled"
 
 
 func _clear_body() -> void:
@@ -156,7 +195,6 @@ func _clear_body() -> void:
 		child.queue_free()
 
 
-# --- height -----------------------------------------------------------------
 func _target_height() -> float:
 	if not content_container:
 		return 0.0
@@ -165,49 +203,20 @@ func _target_height() -> float:
 
 func _available_height() -> float:
 	var cap := INF
-	var p := get_parent() as Control
-	if p and p.size.y > 0.0:
+	if sizing_parent and sizing_parent.size.y > 0.0:
 		var header_h := header_button.get_combined_minimum_size().y if header_button else 0.0
-		cap = maxf(p.size.y - header_h, 0.0)
+		cap = maxf(sizing_parent.size.y - header_h, 0.0)
 	if max_content_height > 0.0:
 		cap = minf(cap, max_content_height)
 	return cap
 
 
-## Re-measures and animates to the new height, only while expanded.
-func _refresh_height() -> void:
-	if _collapsed or _info == null:
-		return
-	var h := _target_height()
-	if is_equal_approx(h, _open_h):
-		return
-	_open_h = h
-	_tween_clip(h, Tween.EASE_OUT)
-
-
-# --- animation --------------------------------------------------------------
 func _restart(old: Tween) -> Tween:
 	if old and old.is_valid():
 		old.kill()
 	return create_tween()
 
 
-func _tween_clip(to: float, ease_type: Tween.EaseType) -> void:
-	if not content_root:
-		return
-	_fold_tween = _restart(_fold_tween)
-	_fold_tween.set_ease(ease_type).set_trans(Tween.TRANS_CUBIC)
-	_fold_tween.tween_property(
-		content_root,
-		"custom_minimum_size:y",
-		to,
-		fold_unfold_duration,
-	)
-	_fold_tween.tween_callback(_on_fold_finished)
-
-
-# Emits only for a real expand/collapse, not for height refreshes. A refresh
-# during an expand re-tweens, and the pending flag still emits at the end.
 func _on_fold_finished() -> void:
 	if not _fold_signal_pending:
 		return
@@ -247,3 +256,20 @@ func _set_interactable(enabled: bool) -> void:
 	mouse_filter = filter
 	if header_button:
 		header_button.mouse_filter = filter
+
+
+func _apply_height() -> void:
+	if not content_root:
+		return
+	content_root.custom_minimum_size.y = _target_height() * _fold_progress
+
+
+func _set_fold_progress(p: float) -> void:
+	_fold_progress = p
+	_apply_height()
+
+
+func _refresh_height() -> void:
+	if info == null and not Engine.is_editor_hint():
+		return
+	_apply_height()

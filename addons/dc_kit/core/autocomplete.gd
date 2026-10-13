@@ -13,6 +13,9 @@ var _result = null # DCAnalysisResult
 var _input := ""
 var _cursor_pos := 0
 
+var _cache_key := ""
+var _cache_items: Array = []
+
 
 func _init(cmd_reg, ctor_reg, var_store) -> void:
 	_cmd_reg = cmd_reg
@@ -20,9 +23,17 @@ func _init(cmd_reg, ctor_reg, var_store) -> void:
 	_var_store = var_store
 
 
+## (a variable set, a command run, the console opened).
+func invalidate() -> void:
+	_cache_key = ""
+	_cache_items = []
+
+
 # Called by the view controller on every analysis/scope update.
 # Stores context only — computation happens lazily in get_completions().
 func update(result, input: String, cursor_pos: int) -> void:
+	if result == _result and input == _input and cursor_pos == _cursor_pos:
+		return
 	_result = result
 	_input = input
 	_cursor_pos = cursor_pos
@@ -36,7 +47,7 @@ func get_completions() -> Dictionary:
 	if _result == null:
 		return { start = _cursor_pos, items = [] }
 
-	var scope: DCAnalysisResult.DCScope = _result.scope
+	var scope: DCAnalysisResult.Scope = _result.scope
 	var prefix := _scan_prefix(_input, _cursor_pos)
 	var start := _cursor_pos - prefix.length()
 
@@ -46,17 +57,25 @@ func get_completions() -> Dictionary:
 
 	var items: Array = []
 	match scope.kind:
-		DCAnalysisResult.DCScope.Kind.COMMAND:
+		DCAnalysisResult.Scope.Kind.COMMAND:
 			if scope.arg_index == -1:
 				items = _command_items(prefix)
 			else:
 				items = _param_items(scope, prefix)
 				items.append_array(_type_items(prefix))
-		DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+		DCAnalysisResult.Scope.Kind.CONSTRUCTOR:
 			items = _part_items(scope, prefix)
 			items.append_array(_type_items(prefix))
 
 	return { start = start, items = items }
+
+
+func _cached(key: String, build: Callable) -> Array:
+	if key == _cache_key:
+		return _cache_items
+	_cache_items = build.call()
+	_cache_key = key
+	return _cache_items
 
 
 # SOURCES
@@ -110,16 +129,9 @@ func _variable_items(prefix: String) -> Array:
 	return out
 
 
-func _param_items(scope, prefix: String) -> Array:
-	var def = scope.get_active()
-	if def == null or scope.arg_index >= def.params.size():
-		return []
-	var param: DCDefinition.Param = def.params[scope.arg_index]
-	if not param.suggestor.is_valid():
-		return []
+func _build_param_items(param: DCDefinition.Param, prev: Array, prefix: String) -> Array:
 	var out: Array = []
-
-	var suggestions = _call_suggestor(param.suggestor, _prev_arg_values(scope), prefix)
+	var suggestions = _call_suggestor(param.suggestor, prev, prefix)
 	if suggestions is not Array:
 		return out
 	for s in suggestions:
@@ -127,14 +139,9 @@ func _param_items(scope, prefix: String) -> Array:
 	return out
 
 
-func _part_items(scope, _prefix: String) -> Array:
-	var def = scope.get_active()
-	if def == null:
-		return []
-
+func _build_part_items(scope, def) -> Array:
 	var out: Array = []
 	var seen: Dictionary = { }
-	var prev: Array = _prev_arg_values(scope)
 
 	for sig: _DCKitNS.Registries.ConstructorDef.TypeSignature in def.signatures:
 		if scope.part_index >= sig.parts.size():
@@ -142,31 +149,30 @@ func _part_items(scope, _prefix: String) -> Array:
 		var part: _DCKitNS.Registries.ConstructorDef.PartHint = sig.parts[scope.part_index]
 		if not part.suggestor.is_valid():
 			continue
-		#var suggestions = _call_suggestor(part.suggestor, prev, prefix)
 		var suggestions = _call_suggestor(part.suggestor)
-
 		if suggestions is not Array:
 			continue
 		for s in suggestions:
-			if seen.has(s):
+			var text := str(s)
+			if seen.has(text):
 				continue
-			seen[s] = true
-			out.append(CompletionItem.new(str(s), CompletionItem.Kind.VALUE))
+			seen[text] = true
+			out.append(CompletionItem.new(text, CompletionItem.Kind.VALUE))
 
 	return out
 
 
 # HELPERS
-func _prev_arg_values(scope: DCAnalysisResult.DCScope) -> Array:
+func _prev_arg_values(scope: DCAnalysisResult.Scope) -> Array:
 	if _result == null or _result.ast.is_empty():
 		return []
 	match scope.kind:
-		DCAnalysisResult.DCScope.Kind.COMMAND:
+		DCAnalysisResult.Scope.Kind.COMMAND:
 			for node in _result.ast:
 				if "args" in node and "name" in node and node.name == scope.name:
 					return _literal_values(node.args, scope.arg_index)
 		# INFO it crash , so dont uncomment (i dont want to to it)
-		#DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+		#DCAnalysisResult.Scope.Kind.CONSTRUCTOR:
 		#var ctor :_DCKitNS.Registries.ConstructorDef= _find_ctor(_result.ast, scope.type_name)
 		#if ctor != null:
 		#return _literal_values(ctor.parts, scope.part_index)
@@ -211,19 +217,26 @@ func _scan_prefix(input: String, cursor_pos: int) -> String:
 	cursor_pos = clampi(cursor_pos, 0, input.length())
 	var start := cursor_pos
 	while start > 0:
-		if _is_prefix_char(input[start - 1]):
+		if _is_prefix_code(input.unicode_at(start - 1)):
 			start -= 1
 		else:
 			break
 	return input.substr(start, cursor_pos - start)
 
 
-func _is_prefix_char(c: String) -> bool:
-	var n := c.unicode_at(0)
-	return (n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) \
-			or c in ["_", ".", "$", "?", "{"]
+#func _is_prefix_char(c: String) -> bool:
+#var n := c.unicode_at(0)
+#return (n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) \
+#or c in ["_", ".", "$", "?", "{"]
+func _is_prefix_code(n: int) -> bool:
+	return (
+			(n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) \
+				or n == 95
+		or n == 46 or n == 36 or n == 63 or n == 123
+	)
 
 
+# in _scan_prefix: _is_prefix_code(input.unicode_at(start - 1))
 func _call_suggestor(suggestor: Callable, prev: Array = [], prefix: String = ""):
 	match suggestor.get_argument_count():
 		0:
@@ -232,6 +245,39 @@ func _call_suggestor(suggestor: Callable, prev: Array = [], prefix: String = "")
 			return suggestor.call(prev)
 		_:
 			return suggestor.call(prev, prefix)
+
+
+func _part_items(scope, _prefix: String) -> Array:
+	var def = scope.get_active()
+	if def == null:
+		return []
+	var key := "part:%s:%d" % [def.name, scope.part_index]
+	return _cached(
+		key,
+		func():
+			return _build_part_items(scope, def),
+	)
+
+
+func _param_items(scope, prefix: String) -> Array:
+	var def = scope.get_active()
+	if def == null or scope.arg_index >= def.params.size():
+		return []
+	var param: DCDefinition.Param = def.params[scope.arg_index]
+	if not param.suggestor.is_valid():
+		return []
+
+	var prev := _prev_arg_values(scope)
+	# A 2-arg suggestor sees the prefix, so its result changes per keystroke.
+	if param.suggestor.get_argument_count() >= 2:
+		return _build_param_items(param, prev, prefix)
+
+	var key := "param:%s:%d:%s" % [def.name, scope.arg_index, str(prev)]
+	return _cached(
+		key,
+		func():
+			return _build_param_items(param, prev, prefix),
+	)
 
 
 class CompletionItem:

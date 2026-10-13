@@ -3,14 +3,12 @@ extends Node
 signal console_opened # Emitted when the console UI becomes visible.
 signal console_closed # Emitted when the console UI is hidden.
 
+const BackendInterface = preload("./utils/backend_interface.gd")
+
 const DCBackend_Class_Path = "res://addons/dc_kit/backend.gd"
 
-#INFO commit after editing the addon (dc_kit) files
-#const DCBackend = preload(DCBackend_Class_Path)
-#var _backend: DCBackend = null
-var _backend = null
-
-var _dc_kit_ui: Node = null
+var _backend: BackendInterface = null
+var _dc_kit_ui: BackendInterface.UI_HOST_INTERFACE = null
 
 
 func _init() -> void:
@@ -21,12 +19,12 @@ func _init() -> void:
 		return
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-	var DCBackend = load(DCBackend_Class_Path)
-	if DCBackend == null:
+	var backend_impl = load(DCBackend_Class_Path)
+	if backend_impl == null:
 		push_error("DC: failed to load backend script at '%s'." % DCBackend_Class_Path)
 		return
 
-	_backend = DCBackend.new()
+	_backend = backend_impl.new() as BackendInterface
 	if _backend == null:
 		push_error("DC: backend instantiation returned null.")
 
@@ -45,19 +43,19 @@ func has_backend() -> bool:
 
 #region Public API
 func analyze(input: String, cursor_pos: int = -1) -> DCAnalysisResult:
-	if _guard("analyze"):
+	if _guard():
 		return null
 	return _backend.analyze(input, cursor_pos)
 
 
 func run(raw_string: String) -> DCResult:
-	if _guard("run"):
+	if _guard():
 		return DCResult.fail("Console disabled")
 	return await _backend.run(raw_string) as DCResult
 
 
 func abort() -> void:
-	if _guard("abort"):
+	if _guard():
 		return
 	_backend.abort()
 
@@ -68,61 +66,61 @@ func register(
 	description: String = "",
 	params: Array = [],
 ) -> bool:
-	if _guard("register"):
+	if _guard():
 		return false
 	return _backend.register(p_name, handler, description, params)
 
 
 func register_def(def: DCDefinition) -> bool:
-	if _guard("register_def"):
+	if _guard():
 		return false
 	return _backend.register_def(def)
 
 
 func unregister(p_name: String) -> bool:
-	if _guard("unregister"):
+	if _guard():
 		return false
 	return _backend.unregister(p_name)
 
 
 func lock_command(p_name: String) -> void:
-	if _guard("lock_command"):
+	if _guard():
 		return
 	_backend.lock_command(p_name)
 
 
 func unlock_command(p_name: String) -> void:
-	if _guard("unlock_command"):
+	if _guard():
 		return
 	_backend.unlock_command(p_name)
 
 
 func get_var(key: String, fallback: String = "") -> String:
-	if _guard("get_var"):
+	if _guard():
 		return fallback
 	return _backend.get_var(key, fallback)
 
 
 func set_var(key: String, value: String) -> bool:
-	if _guard("set_var"):
+	if _guard():
 		return false
 	return _backend.set_var(key, value)
 
 
 func has_var(key: String) -> bool:
-	if _guard("has_var"):
+	if _guard():
 		return false
 	return _backend.has_var(key)
 
 
 func delete_var(key: String) -> bool:
-	if _guard("delete_var"):
+	if _guard():
 		return false
 	return _backend.delete_var(key)
 
 
 func get_var_keys() -> Array:
-	if _guard("get_var_keys"):
+	if _guard():
 		return []
 	return _backend.get_var_keys()
 #endregion
@@ -133,10 +131,7 @@ func show_console() -> void:
 	if not _dc_kit_ui:
 		return
 
-	if not _dc_kit_ui.has_method("show_console"):
-		return
 	_dc_kit_ui.show_console()
-
 	console_opened.emit()
 
 
@@ -144,8 +139,6 @@ func hide_console() -> void:
 	if not _dc_kit_ui:
 		return
 
-	if not _dc_kit_ui.has_method("hide_console"):
-		return
 	_dc_kit_ui.hide_console()
 
 	console_closed.emit()
@@ -155,8 +148,6 @@ func toggle_console() -> void:
 	if not _dc_kit_ui:
 		return
 
-	if not _dc_kit_ui.has_method("toggle_console"):
-		return
 	_dc_kit_ui.toggle_console()
 
 	if is_console_open():
@@ -169,20 +160,13 @@ func is_console_open() -> bool:
 	if not _dc_kit_ui:
 		return false
 
-	if not _dc_kit_ui.has_method("is_console_open"):
-		return false
-
 	return _dc_kit_ui.is_console_open() as bool
 #endregion
 
 
-func _guard(method_name: String, backend_required: bool = true) -> bool:
+func _guard(backend_required: bool = true) -> bool:
 	if backend_required and not has_backend():
-		push_error("DCKit: '%s' called with no backend — aborting." % method_name)
-		return true
-
-	if not _backend.has_method(method_name):
-		push_error("DCKit: '%s' method dosen't in backend — aborting." % method_name)
+		push_error("DCKit: method called with no backend — aborting.")
 		return true
 	return false
 

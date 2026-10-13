@@ -13,7 +13,7 @@ var _cached_def = null
 var _cached_info: _DCKitNS.UI.Signature.SignatureInfo = null
 
 
-func update(scope: DCAnalysisResult.DCScope) -> void:
+func update(scope: DCAnalysisResult.Scope) -> void:
 	var def = null
 	if scope != null and scope.has_method("get_active"):
 		def = scope.get_active()
@@ -23,9 +23,9 @@ func update(scope: DCAnalysisResult.DCScope) -> void:
 
 	var index: int
 	match scope.kind:
-		DCAnalysisResult.DCScope.Kind.COMMAND:
+		DCAnalysisResult.Scope.Kind.COMMAND:
 			index = scope.arg_index
-		DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+		DCAnalysisResult.Scope.Kind.CONSTRUCTOR:
 			index = scope.part_index
 		_:
 			_clear()
@@ -48,9 +48,9 @@ func update(scope: DCAnalysisResult.DCScope) -> void:
 		active_changed.emit(index)
 
 
-func _build_info(def, kind: DCAnalysisResult.DCScope.Kind) -> _DCKitNS.UI.Signature.SignatureInfo:
+func _build_info(def, kind: DCAnalysisResult.Scope.Kind) -> _DCKitNS.UI.Signature.SignatureInfo:
 	match kind:
-		DCAnalysisResult.DCScope.Kind.COMMAND:
+		DCAnalysisResult.Scope.Kind.COMMAND:
 			var c := _DCKitNS.UI.Signature.CommandInfo.new()
 			c.title = def.name
 			c.description = def.description
@@ -68,7 +68,7 @@ func _build_info(def, kind: DCAnalysisResult.DCScope.Kind) -> _DCKitNS.UI.Signat
 				pi.is_rest = p.is_rest
 				c.params.append(pi)
 			return c
-		DCAnalysisResult.DCScope.Kind.CONSTRUCTOR:
+		DCAnalysisResult.Scope.Kind.CONSTRUCTOR:
 			var k := _DCKitNS.UI.Signature.ConstructorInfo.new()
 			k.title = def.name
 			k.description = def.description

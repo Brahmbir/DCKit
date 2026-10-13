@@ -1,4 +1,4 @@
-extends RefCounted
+extends "./utils/backend_interface.gd"
 
 const BatchRunner = preload("./basic_command/batch_runner.gd")
 const BasicCMD = preload("./basic_command/basic_commands.gd")
@@ -14,7 +14,6 @@ var _var_store: _DCKitNS.Core.VariableStore = null
 
 var _analyzer: _DCKitNS.Analyzer.Analyzer = null
 var _executor: _DCKitNS.Executor.Executor = null
-
 
 var _input_feedback_controller: _DCKitNS.UI.InputFeedbackController = null
 
@@ -36,25 +35,17 @@ func _init() -> void:
 	_register_commands(_cmd_reg)
 
 
-func init_ui() -> Node:
-	var dckit_host := DCKit_Host.instantiate()
+func init_ui() -> UI_HOST_INTERFACE:
+	var dckit_host := DCKit_Host.instantiate() as UI_HOST_INTERFACE
 
 	var valid := true
 
-	for method_name in ["hide_console", "get_console"]:
-		if not dckit_host.has_method(method_name):
-			push_error("DCKit_Host is missing required method: %s()" % method_name)
-			valid = false
-
-	if not dckit_host.has_signal("connection_requested"):
-		push_error("DCKit_Host is missing required signal: connection_requested")
-		valid = false
-
-	if not valid:
-		return dckit_host
+	if not dckit_host:
+		push_error("DCKit_Host is `null`")
+		return null
 
 	dckit_host.ready.connect(dckit_host.hide_console)
-	dckit_host.connect("connection_requested", _on_host_connection_requested)
+	dckit_host.connection_requested.connect(_on_host_connection_requested)
 
 	return dckit_host
 

@@ -6,7 +6,7 @@
 [ext_resource type="FontFile" uid="uid://6gunmtyx1g7e" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf" id="2_vwtn4"]
 [ext_resource type="PackedScene" uid="uid://bihuh3740pvx3" path="res://addons/dc_kit/ui/simple_console/components/input_section/input_component_panel.tscn" id="5_v1qrv"]
 [ext_resource type="PackedScene" uid="uid://bokp0qrlc3y04" path="res://addons/dc_kit/ui/rich_log_label/rich_log_label.tscn" id="5_vwtn4"]
-[ext_resource type="PackedScene" uid="uid://dn7o3uci4pms3" path="res://addons/dc_kit/ui/simple_console/components/info_panel/info_panel_container.tscn" id="6_0x88e"]
+[ext_resource type="PackedScene" uid="uid://bsxhrm41boutj" path="res://addons/dc_kit/ui/simple_console/components/info_panel/info_panel_container.tscn" id="6_0x88e"]
 [ext_resource type="PackedScene" uid="uid://chm4u3x5uk6g5" path="res://addons/dc_kit/ui/simple_console/components/error_list/error_list.tscn" id="6_i6iku"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooera"]
@@ -31,8 +31,24 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dlema"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s3qfw"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hfuff"]
 bg_color = Color(0.17641899, 0.17641914, 0.17641908, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6u0a8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0mlb5"]
+bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dlema"]
+bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3g5tv"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0, 0, 0, 0.14117648)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ooera"]
+corner_detail = 1
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s3qfw"]
 
@@ -47,17 +63,11 @@ base_font = ExtResource("2_0x88e")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4jtcb"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6u0a8"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0mlb5"]
-bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dlema"]
-bg_color = Color(0.88235295, 0.88235295, 0.88235295, 1)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gasbt"]
 content_margin_left = 4.0
+content_margin_top = 3.0
 content_margin_right = 4.0
+content_margin_bottom = 3.0
 bg_color = Color(0, 0, 0, 0.14117648)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0x88e"]
@@ -99,14 +109,28 @@ Button/styles/normal = SubResource("StyleBoxEmpty_45o6f")
 Button/styles/normal_mirrored = SubResource("StyleBoxEmpty_er2vm")
 Button/styles/pressed = SubResource("StyleBoxEmpty_34r5h")
 Button/styles/pressed_mirrored = SubResource("StyleBoxEmpty_dlema")
+CMD_MarginContainer/base_type = &"MarginContainer"
+CMD_MarginContainer/constants/margin_top = 8
 ErrorList_PanelContainer/base_type = &"PanelContainer"
-ErrorList_PanelContainer/styles/panel = SubResource("StyleBoxFlat_s3qfw")
+ErrorList_PanelContainer/styles/panel = SubResource("StyleBoxFlat_hfuff")
 HBoxContainer/constants/separation = 14
 HBoxContainer_LineEdit/constants/separation = 12
-HScrollBar/constants/padding_bottom = 20
-HScrollBar/styles/scroll = SubResource("StyleBoxEmpty_s3qfw")
+HScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
+HScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
+HScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_dlema")
+HScrollBar/styles/scroll = SubResource("StyleBoxFlat_3g5tv")
 Header_Label/base_type = &"Label"
 Header_Label/font_sizes/font_size = 19
+Info_MarginContainer/base_type = &"MarginContainer"
+Info_MarginContainer/constants/margin_top = 8
+ItemList/constants/h_separation = 16
+ItemList/constants/icon_margin = 0
+ItemList/constants/outline_size = 2
+ItemList/constants/scrollbar_v_separation = 0
+ItemList/constants/v_separation = 16
+ItemList/styles/hovered = SubResource("StyleBoxFlat_ooera")
+ItemList/styles/panel = SubResource("StyleBoxEmpty_s3qfw")
+ItemList/styles/selected = null
 LoggerComponentPanel_Margin/base_type = &"MarginContainer"
 LoggerComponentPanel_Margin/constants/margin_right = 8
 Looger_RichTextLabel/base_type = &"RichTextLabel"
@@ -138,9 +162,7 @@ TextEdit/constants/outline_size = 2
 TextEdit/styles/focus = SubResource("StyleBoxEmpty_0x88e")
 TextEdit/styles/normal = SubResource("StyleBoxEmpty_7jkh5")
 TextEdit/styles/read_only = SubResource("StyleBoxEmpty_4jtcb")
-ToolNInfo_MarginContainer/base_type = &"MarginContainer"
-ToolNInfo_MarginContainer/constants/margin_bottom = 8
-ToolNInfo_MarginContainer/constants/margin_top = 64
+VBoxContainer/constants/separation = 14
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
 VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_dlema")
@@ -362,8 +384,17 @@ bg_color = Color(0, 0, 0, 0.34117648)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pvttc"]
 
+[sub_resource type="InputEventKey" id="InputEventKey_xq4su"]
+command_or_control_autoremap = true
+shift_pressed = true
+keycode = 32
+
+[sub_resource type="Shortcut" id="Shortcut_rvqqf"]
+events = [SubResource("InputEventKey_xq4su")]
+
 [node name="SimpleConsole" type="Control" unique_id=1038064920 node_paths=PackedStringArray("input_component", "log_component", "error_component", "info_component")]
 process_mode = 3
+clip_contents = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -372,10 +403,10 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = SubResource("Theme_4jtcb")
 script = ExtResource("1_0wgy3")
-input_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/InputComponentPanel")
-log_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/Control/LoggerComponentPanel/MarginContainer/RichLogLabel")
-error_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/VBoxContainer/ErrorList")
-info_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer")
+input_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer/VBoxContainer/InputComponentPanel")
+log_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/MarginContainer/LoggerComponentPanel/RichLogLabel")
+error_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer/VBoxContainer/ErrorList")
+info_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/InfoPanelContainer")
 default_theme = ExtResource("2_dyj5x")
 editor_ui_font_scale = 1.0
 editor_ui_log_font_scale = 1.0
@@ -441,94 +472,50 @@ layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
 
-[node name="Control" type="Control" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=1383768906]
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=1272229247]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 0
 
-[node name="LoggerComponentPanel" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control" unique_id=482121523]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=1419785639]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="LoggerComponentPanel" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/MarginContainer" unique_id=482121523]
+layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxEmpty_pvttc")
 
-[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/LoggerComponentPanel" unique_id=568351659]
-layout_mode = 2
-theme_type_variation = &"LoggerComponentPanel_Margin"
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_bottom = 0
-
-[node name="RichLogLabel" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/LoggerComponentPanel/MarginContainer" unique_id=1540644517 instance=ExtResource("5_vwtn4")]
+[node name="RichLogLabel" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/MarginContainer/LoggerComponentPanel" unique_id=1540644517 instance=ExtResource("5_vwtn4")]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control" unique_id=1560966744]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -145.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-theme_type_variation = &"ToolNInfo_MarginContainer"
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_right = 0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer" unique_id=242183285]
+[node name="InfoPanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=257336466 node_paths=PackedStringArray("shortcut_context") instance=ExtResource("6_0x88e")]
 layout_mode = 2
-size_flags_vertical = 8
-mouse_filter = 2
+shortcut_context = NodePath("../../VBoxContainer2/MarginContainer/VBoxContainer/InputComponentPanel")
+toggle_shortcut = SubResource("Shortcut_rvqqf")
 
-[node name="InfoPanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer" unique_id=1310062042 instance=ExtResource("6_0x88e")]
-modulate = Color(1, 1, 1, 0)
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 8
-mouse_filter = 2
-
-[node name="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" parent_id_path=PackedInt32Array(1310062042, 982400694) index="0" unique_id=592805767]
-text = ""
-
-[node name="TextureRect" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" parent_id_path=PackedInt32Array(1310062042, 982400694) index="1" unique_id=218195891]
-flip_h = true
-flip_v = true
-
-[node name="HeaderButton" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer/PanelContainer" parent_id_path=PackedInt32Array(1310062042, 850924332) index="1" unique_id=178865045]
-mouse_filter = 2
-text = "disabled"
-
-[node name="ContentRootContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer" parent_id_path=PackedInt32Array(1310062042, 855075821) index="1" unique_id=604270331]
-custom_maximum_size = Vector2(-1, 0)
-size_flags_horizontal = 3
-
-[node name="test" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer/MarginContainer/VBoxContainer/ContentRootContainer/ScrollContainer/ContentContainer" parent_id_path=PackedInt32Array(1310062042, 1602090130) index="0" unique_id=1204541943]
-text = "test"
-
-[node name="AutoPanelContainer" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer" unique_id=1170564465]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 0
-
-[node name="Label" type="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/AutoPanelContainer" unique_id=1395358317]
-layout_mode = 2
-text = "auto comp"
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=392904884]
+[node name="VBoxContainer2" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=871267161]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=606003947]
+[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2" unique_id=1754807055]
 layout_mode = 2
+theme_type_variation = &"CMD_MarginContainer"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
-[node name="ErrorList" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/VBoxContainer" unique_id=1140330670 instance=ExtResource("6_i6iku")]
-custom_minimum_size = Vector2(0, 0)
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer" unique_id=392904884]
 layout_mode = 2
+theme_override_constants/separation = 0
 
-[node name="InputComponentPanel" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=283857201 instance=ExtResource("5_v1qrv")]
+[node name="ErrorList" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer/VBoxContainer" unique_id=1140330670 instance=ExtResource("6_i6iku")]
 layout_mode = 2
+size_flags_horizontal = 3
 
-[editable path="CRTOverlay/MarginContainer/VBoxContainer/Control/MarginContainer/VBoxContainer/InfoPanelContainer"]
+[node name="InputComponentPanel" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer/VBoxContainer" unique_id=283857201 instance=ExtResource("5_v1qrv")]
+layout_mode = 2
