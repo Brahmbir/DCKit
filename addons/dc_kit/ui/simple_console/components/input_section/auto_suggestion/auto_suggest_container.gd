@@ -1,17 +1,9 @@
 extends "./auto_complete_base.gd"
 
-enum Layout {
-	HorizontalBar,
-	PopUp,
-}
-
 const MAX_VISIBLE := 8
 const _DETAIL_TAGS := "\\[.+?\\]"
 
-@export var layout := Layout.HorizontalBar:
-	set = set_layout
-
-@export var toggle_shortcut: Shortcut = _DCKitNS.UI.make_shortcut(KEY_SPACE, true)
+@export var toggle_shortcut: Shortcut = null
 
 @export_group("nodes")
 @export var item_list: ItemList
@@ -30,17 +22,25 @@ var _tag_regex := RegEx.create_from_string(_DETAIL_TAGS)
 
 
 func _ready() -> void:
+	if toggle_shortcut == null:
+		toggle_shortcut = _DCKitNS.UI.make_shortcut(KEY_SPACE, true)
+
+	hide_popup()
 	item_list.item_activated.connect(_on_item_activated)
+	#item_list.item_selected.connect(_on_item_activated)
 
-	_DCKitNS.UI.mobile_layout.get_scales().font_changed.connect(
-		func():
-			if item_list:
-				var px = _DCKitNS.UI.mobile_layout.get_scales().em_font(1)
-				item_list.fixed_icon_size = Vector2i(px, px),
-	)
+	#item_list.item_clicked.connect(
+	#func(idx, _p, _mbi):
+	#_on_item_activated(idx),
+	#)
+	item_list.item_selected
 
-	#_DCKitNS.UI.mobile_layout.changed.connect(_on_layout_change)
-	#_on_layout_change()
+	_DCKitNS.UI.mobile_layout.get_scales().font_changed.connect(_on_scale_change)
+	_DCKitNS.UI.mobile_layout.get_scales().space_changed.connect(_on_scale_change)
+
+	_on_scale_change()
+
+
 
 
 func _notification(what: int) -> void:
@@ -58,15 +58,6 @@ func _get_minimum_size() -> Vector2:
 	return s
 
 
-# Layout
-func set_layout(new_val: Layout) -> void:
-	if new_val == layout:
-		return
-	layout = new_val
-	if is_node_ready():
-		_apply_layout()
-
-
 ## PopUp only. Pins the popup's bottom-left to a global rect (e.g. the input line).
 func place_above(anchor: Rect2) -> void:
 	if layout != Layout.PopUp:
@@ -81,15 +72,13 @@ func populate() -> void:
 	_selected_index = 0
 
 	for item: _DCKitNS.Core.AutoComplete.CompletionItem in _items:
-		var idx := item_list.add_item(item.label, _icon_for(item.kind), false)
-		#if not item.detail.is_empty():
-		#item_list.set_item_tooltip(idx, _tag_regex.sub(item.detail, "", true))
+		var idx := item_list.add_item(item.label, _icon_for(item.kind))
 
 	if layout == Layout.PopUp:
 		_fit_popup_height()
 
 	if has_items():
-		item_list.select(0)
+		item_list.select(_selected_index)
 		selection_changed.emit(_selected_index)
 
 
@@ -110,6 +99,11 @@ func show_popup() -> bool:
 	if not has_items():
 		return false
 	visible = true
+
+	_selected_index = clampi(_selected_index, 0, item_list.item_count - 1)
+	item_list.select(_selected_index)
+	item_list.ensure_current_is_visible()
+
 	opened.emit()
 	return true
 
@@ -130,6 +124,7 @@ func navigate(delta: int) -> void:
 	_selected_index = clampi(_selected_index + delta, 0, item_list.item_count - 1)
 	item_list.select(_selected_index)
 	item_list.ensure_current_is_visible()
+
 	selection_changed.emit(_selected_index)
 
 
@@ -149,67 +144,66 @@ func accept() -> void:
 	item_accepted.emit(_start, item.label)
 
 
-func _on_layout_change(_v := false):
-	var is_small = true if _DCKitNS.UI.mobile_layout.screen else false
-	set_layout(Layout.HorizontalBar if is_small else Layout.PopUp)
-
-
-func _shortcut_input(event: InputEvent) -> void:
+func input_handler(event: InputEvent) -> bool:
 	if _DCKitNS.UI.shortcut_pressed(event, toggle_shortcut):
 		if is_open():
 			hide_popup()
 		elif show_popup():
 			pass
 		get_viewport().set_input_as_handled()
-		return
+		return true
 
 	if not is_open():
-		return
+		return false
 
 	match event.keycode:
 		KEY_UP:
-			print(event)
-
 			navigate(-1)
 			get_viewport().set_input_as_handled()
+			return true
 		KEY_DOWN:
-			print(event)
-
 			navigate(1)
 			get_viewport().set_input_as_handled()
+			return true
 		KEY_TAB:
-			print(event)
 			if not event.echo:
 				if event.shift_pressed:
 					navigate(-1)
 				else:
 					accept()
-			get_viewport().set_input_as_handled()
+				get_viewport().set_input_as_handled()
+				return true
 		KEY_ENTER, KEY_KP_ENTER:
-			print(event)
 			if not event.echo:
 				accept()
-			get_viewport().set_input_as_handled()
+				get_viewport().set_input_as_handled()
+				return true
 		KEY_ESCAPE:
-			print(event)
 			if not event.echo:
 				hide_popup()
-			get_viewport().set_input_as_handled()
+				get_viewport().set_input_as_handled()
+				return true
+
+	return false
 
 
-func _apply_layout() -> void:
+func _on_scale_change():
+	if item_list:
+		var space = _DCKitNS.UI.mobile_layout.get_scales().em_space(1)
+		item_list.add_theme_constant_override("icon_margin", space)
+
+		var px = _DCKitNS.UI.mobile_layout.get_scales().em_font(1.15)
+		item_list.fixed_icon_size = Vector2i(px, px)
+
+
+
+func _apply_layout_to_child() -> void:
 	var popup := layout == Layout.PopUp
-	# top_level children are skipped by the bottom container's _flow(),
-	# so a popup neither gets laid out nor counted in its height.
-	top_level = popup
-	custom_minimum_size.y = 0.0
 	if popup:
 		item_list.max_columns = 1
 		_fit_popup_height()
 	else:
 		item_list.max_columns = 0
-	update_minimum_size()
-	queue_sort()
 
 
 func _fit_popup_height() -> void:

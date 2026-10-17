@@ -24,67 +24,66 @@ grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_6pdhr")
 script = ExtResource("1_37qa2")
 label_perfix = " CMD"
-button = NodePath("VBoxContainer/MarginContainer/HBoxContainer/ExecuteBtn_PanelContainer")
-text_edit = NodePath("VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/TextEdit")
-auto_complete_comp = NodePath("VBoxContainer/MarginContainer2")
-label = NodePath("VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/Label")
+button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/ExecuteBtn_PanelContainer")
+text_edit = NodePath("MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/TextEdit")
+auto_complete_comp = NodePath("MarginContainer/VBoxContainer/MarginContainer2")
+label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/Label")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=333176527]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=220905979]
 layout_mode = 2
-theme_override_constants/separation = 0
 
-[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer" unique_id=703763698 node_paths=PackedStringArray("shortcut_context", "item_list")]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=518905148]
+layout_mode = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=703763698 node_paths=PackedStringArray("item_list")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-shortcut_context = NodePath("../MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/TextEdit")
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_bottom = 0
 script = ExtResource("2_7jkh5")
 item_list = NodePath("ItemList")
+layout = 1
 
-[node name="ItemList" type="ItemList" parent="VBoxContainer/MarginContainer2" unique_id=740209880]
+[node name="ItemList" type="ItemList" parent="MarginContainer/VBoxContainer/MarginContainer2" unique_id=740209880]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 allow_search = false
 auto_height = true
 wraparound_items = false
-item_count = 2
+item_count = 4
 max_columns = 0
 fixed_icon_size = Vector2i(16, 16)
-item_0/text = "test1"
-item_0/selectable = false
-item_1/text = "test 2"
-item_1/selectable = false
+item_0/text = "jahsxvdf aEWAERRWE WE WEW EWQ EW E"
+item_1/text = "sad WEQW EWQE WQEQW EWQE WQE WQE WQEWQ E"
+item_2/text = "WQE WEWQKJNEWQNIUENBWQKBEIUBNWQBEKJBJNBK JWQNE"
+item_3/text = "QWE QWUJEIKJHBWQKHJ EBKJHWQ BKE JHB"
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=220905979]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1579906345]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer" unique_id=1579906345]
-layout_mode = 2
-
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/MarginContainer/HBoxContainer" unique_id=331150238]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=331150238]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_3a2tr")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer/HBoxContainer/PanelContainer" unique_id=419283469]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer" unique_id=419283469]
 layout_mode = 2
 theme_type_variation = &"HBoxContainer_LineEdit"
 
-[node name="Label" type="Label" parent="VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=1206481238]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=1206481238]
 layout_mode = 2
 size_flags_vertical = 1
 theme_override_colors/font_color = Color(0.3019608, 0.53333336, 1, 1)
 text = " CMD :~$"
 vertical_alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=32537712]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer" unique_id=32537712]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TextEdit" type="TextEdit" parent="VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer" unique_id=1249874399]
+[node name="TextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer" unique_id=1249874399]
 layout_mode = 2
 placeholder_text = "Write the Command ..."
 context_menu_enabled = false
@@ -94,5 +93,5 @@ caret_blink = true
 caret_multiple = false
 script = ExtResource("3_7jkh5")
 
-[node name="ExecuteBtn_PanelContainer" parent="VBoxContainer/MarginContainer/HBoxContainer" unique_id=1822304569 instance=ExtResource("1_g5k4r")]
+[node name="ExecuteBtn_PanelContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1822304569 instance=ExtResource("1_g5k4r")]
 layout_mode = 2

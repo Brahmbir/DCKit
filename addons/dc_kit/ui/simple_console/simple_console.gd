@@ -105,6 +105,8 @@ func connect_feedback_controller(controller: _DCKitNS.UI.InputFeedbackController
 	input_component.cmd_text_changed.connect(controller.handle_text_changed)
 	input_component.cmd_caret_location_changed.connect(controller.handle_cursor_moved)
 	
+	controller.handle_text_changed("",0) # 
+	
 
 
 func _on_definition_changed(info: _DCKitNS.UI.Signature.SignatureInfo) -> void:
