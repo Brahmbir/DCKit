@@ -4,8 +4,6 @@ const BatchRunner = preload("./basic_command/batch_runner.gd")
 const BasicCMD = preload("./basic_command/basic_commands.gd")
 const ControlFlowCMD = preload("./basic_command/control_flow_commands.gd")
 
-const ViewController := preload("./view_controllers/view_controller.gd")
-
 const DCKit_Host = preload("./ui/dckit_ui_host.tscn")
 
 var _cmd_reg: _DCKitNS.Registries.CommandRegistry = null

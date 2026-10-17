@@ -192,6 +192,11 @@ func _on_text_edit_changed() -> void:
 
 
 func _on_text_edit_caret_changed() -> void:
+	var auto_complete := auto_complete_comp as _AUTO_COMPLETE_BASE
+	if is_instance_valid(auto_complete):
+		var left_space = text_edit.global_position.x
+		auto_complete.move_to_caret(left_space + text_edit.get_caret_draw_pos().x)
+
 	cmd_caret_location_changed.emit(text_edit.get_caret_column())
 
 

@@ -45,6 +45,9 @@ func populate() -> void:
 
 	if layout == Layout.PopUp:
 		_fit_popup_height()
+		_fit_popup_width()
+		
+
 
 	if has_items():
 		item_list.select(_selected_index)
@@ -176,10 +179,11 @@ func _apply_layout_to_child() -> void:
 	else:
 		item_list.auto_height = true
 		item_list.auto_width = false
-
+		item_list.fixed_column_width = 0
+	
 		item_list.max_columns = 0
 		item_list.custom_minimum_size = Vector2.ZERO
-	
+
 	item_list.ensure_current_is_visible()
 
 
@@ -200,7 +204,12 @@ func _fit_popup_width() -> void:
 	var panel := item_list.get_theme_stylebox("panel")
 	w += item_list.fixed_icon_size.x + item_list.get_theme_constant("icon_margin")
 	w += panel.get_margin(SIDE_LEFT) + panel.get_margin(SIDE_RIGHT) if panel else 0.0
-	item_list.custom_minimum_size.x = w
+
+	var min_w = _DCKitNS.UI.mobile_layout.get_scales().em_font(10)
+	var max_w = _DCKitNS.UI.mobile_layout.get_scales().em_font(20)
+	
+	item_list.fixed_column_width = clampf(w, min_w, max_w)
+	item_list.custom_minimum_size.x = minf(w, min_w)
 
 
 func _icon_for(kind) -> Texture2D:

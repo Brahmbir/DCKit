@@ -47,6 +47,25 @@ func set_popup_x(x: float) -> void:
 	_popup_x = x
 	queue_sort()
 
+## Pass the caret's global x; the popup's left edge follows it, kept inside the parent rect.
+func move_to_caret(global_x: float) -> void:
+	var bounds := _bounds_rect()
+	var w := minf(_popup_width(), bounds.size.x)
+	var gx := clampf(global_x, bounds.position.x, bounds.end.x - w)
+	set_popup_x(gx - global_position.x)
+
+
+func _bounds_rect() -> Rect2:
+	var p := get_parent() as Control
+	return p.get_global_rect() if p else get_global_rect()
+
+
+func _popup_width() -> float:
+	var w := 0.0
+	for child in get_children():
+		if child is Control and child.visible:
+			w = maxf(w, child.get_combined_minimum_size().x)
+	return w
 
 # Layout
 func set_layout(new_val: Layout) -> void:

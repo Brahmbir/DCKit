@@ -25,6 +25,7 @@ config/icon="uid://b0tp6gb8sl00v"
 
 UtilScript="*uid://cg2t6sv2q7kvn"
 DCKit="*uid://g1vgmlrh22q"
+StressTestingDcKitAutocomplete="*uid://cq3c2sihusnun"
 
 [display]
 

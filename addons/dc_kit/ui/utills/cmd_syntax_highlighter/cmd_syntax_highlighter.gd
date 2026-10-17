@@ -9,7 +9,7 @@ enum ColorScheme {
 
 const TT := _DCKitNS.Analyzer.Lexer.TokenType
 
-@export var palette := ColorScheme.TOKYO_NIGHT
+@export var palette := ColorScheme.NORD
 
 var color_dict := {
 	ColorScheme.TOKYO_NIGHT: {
