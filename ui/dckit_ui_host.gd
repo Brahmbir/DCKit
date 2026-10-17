@@ -1,4 +1,4 @@
-extends "../utils/ui_interface.gd"
+extends "./dckit_host_interface.gd"
 
 signal placement_changed(mode: _DCKitSetting.ConsoleMode, edge: _DCKitSetting.WindowEdge)
 
@@ -25,13 +25,18 @@ var _open := true # independent of mode: whichever host is active follows this
 var _ratio_pending := false # default ratio still owed (it couldn't be measured while closed)
 var _ratio_serial := 0 # bumped on every layout request; stale awaits bail out
 
+var _connection_request_callback: Callable
+
 @onready var split: SplitContainer = $CanvasLayer/SplitContainer
 @onready var window: Window = $Window
 @onready var container_for_window: MarginContainer = $Window/MarginContainer
+@onready var canvas_layer: CanvasLayer = $CanvasLayer
 
 
 func _ready() -> void:
-	window.close_requested.connect(set_mode.bind(_DCKitSetting.ConsoleMode.DOCK))
+	canvas_layer.layer = _DCKitSetting.get_default_canvas_layer()
+	window.close_requested.connect(hide_console)
+
 	split.resized.connect(_update_min_size)
 
 	set_mode(_DCKitSetting.get_console_mode())
@@ -46,10 +51,45 @@ func _ready() -> void:
 	_install_console(new_console)
 
 
-func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo \
-			and event.keycode == KEY_F2:
-		_DCKitNS.UI.mobile_layout.set_manual(not _DCKitNS.UI.mobile_layout.manual)
+func configure(config: Dictionary) -> void:
+	for key in config:
+		var value = config[key]
+		match key:
+			"mode":
+				var parsed = _parse_enum(_DCKitSetting.ConsoleMode, key, value)
+				if parsed != null:
+					set_mode(parsed)
+			"edge":
+				var parsed = _parse_enum(_DCKitSetting.WindowEdge, key, value)
+				if parsed != null:
+					set_edge(parsed)
+			"canvas_layer":
+				if value is float or value is int:
+					canvas_layer.layer = value
+				else:
+					_warn_bad_value(key, "int", value)
+			"is_mobile":
+				if value is bool:
+					_DCKitNS.UI.mobile_layout.set_manual(value)
+				else:
+					_warn_bad_value(key, "bool", value)
+			"font_size":
+				if value is float or value is int:
+					_DCKitNS.UI.mobile_layout.get_scales().font = clampf(value, 0.5, 3.0)
+				else:
+					_warn_bad_value(key, "float", value)
+			"space_size":
+				if value is float or value is int:
+					_DCKitNS.UI.mobile_layout.get_scales().space = clampf(value, 0.5, 3.0)
+				else:
+					_warn_bad_value(key, "float", value)
+			"logger_font_size":
+				if value is float or value is int:
+					_DCKitNS.UI.mobile_layout.get_scales().log_font = clampf(value, 0.5, 3.0)
+				else:
+					_warn_bad_value(key, "float", value)
+			_:
+				push_warning("Dckit: unknown config key '%s' — skipped." % key)
 
 
 #region console ownership
@@ -63,6 +103,11 @@ func set_console_scene(scene: PackedScene) -> bool:
 	return true
 
 
+func get_console_node() -> _DCKitNS.UI.ConsoleBase:
+	return _console
+#endregion
+
+
 #region placement API
 func set_mode(new_mode: _DCKitSetting.ConsoleMode) -> void:
 	if new_mode == _mode:
@@ -72,7 +117,8 @@ func set_mode(new_mode: _DCKitSetting.ConsoleMode) -> void:
 			"DckitUiHost: window mode is not supported; staying in %s mode."
 			% _DCKitSetting.ConsoleMode.keys()[_mode]
 		)
-		return
+		if not OS.has_feature('dev'):
+			return
 
 	if _console and _open:
 		_console.release_focus_on_input()
@@ -129,10 +175,39 @@ func request_connections() -> void:
 #endregion
 
 
+func set_connection_request_callback(callback: Callable):
+	if callback.is_valid():
+		_connection_request_callback = callback
+	return
+
+
+#region configure helper logic
+func _parse_enum(enum_dict: Dictionary, key: String, value) -> Variant:
+	if not value is String:
+		_warn_bad_value(key, "String", value)
+		return null
+	var name := (value as String).to_upper()
+	if not enum_dict.has(name):
+		push_warning(
+			"Dckit: '%s' is not a valid value for '%s' (expected one of %s) — skipped."
+			% [value, key, enum_dict.keys()]
+		)
+		return null
+	return enum_dict[name]
+
+
+func _warn_bad_value(key: String, expected: String, value) -> void:
+	push_warning(
+		"Dckit: '%s' expects %s, got %s — skipped." % [key, expected, type_string(typeof(value))]
+	)
+#endregion
+
+
 func _on_mobile_manual_changed(is_mobile: bool) -> void:
 	split.touch_dragger_enabled = is_mobile
 
 
+#region console
 func _instantiate_console(scene: PackedScene) -> _DCKitNS.UI.ConsoleBase:
 	if scene == null:
 		push_error("DckitUiHost: no console scene to instantiate.")
@@ -170,7 +245,11 @@ func _update_connections() -> void:
 	if _console == null:
 		return
 	_console.connect_cmd_history(cmd_history_obj)
-	connection_requested.emit(_console)
+	_console.ui_close_requested.connect(hide_console)
+
+	if not _connection_request_callback.is_valid():
+		push_error("_connection_request_callback is not valid")
+	_connection_request_callback.call()
 
 
 func _set_open(open: bool) -> void:
@@ -189,6 +268,8 @@ func _set_open(open: bool) -> void:
 			_console.grab_focus_on_input()
 		else:
 			_console.release_focus_on_input()
+
+	console_visibility_changed.emit(_open)
 #endregion
 
 
@@ -235,13 +316,7 @@ func _move_console_to(new_parent: Node) -> void:
 #endregion
 
 
-# --- split sizing -----------------------------------------------------------
-# split_offsets[0] moves the divider away from its default position, and the
-# default position depends on the children's expand flags. So we don't assume
-# where it is: reset to 0, measure the console's size there, then offset by the
-# difference to the size we want.
-# The minimum is enforced by the console's custom_minimum_size; the container
-# clamps the offsets to it, so no drag handling is needed.
+#region split sizing
 func _console_first() -> bool:
 	return _edge in [_DCKitSetting.WindowEdge.LEFT, _DCKitSetting.WindowEdge.TOP]
 
@@ -295,3 +370,4 @@ func _apply_default_ratio() -> void:
 	# The offset moves the divider towards the second child, so it grows a
 	# first-placed console and shrinks a second-placed one.
 	split.split_offsets = PackedInt32Array([int(delta if _console_first() else -delta)])
+#endregion

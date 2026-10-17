@@ -7,12 +7,13 @@ enum State {
 
 const CommandHistory := preload("./utills/command_history.gd")
 
-const ConsoleBase := preload("./ui_base_class/console_base.gd")
-const InputComponentBase := preload("./ui_base_class/input_comp_base.gd")
+const HeaderComponentBase := preload("./ui_base_class/header_comp_base.gd")
 const LoggerComponentBase := preload("./ui_base_class/logger_comp_base.gd")
-const ErrorComponentBase := preload("./ui_base_class/error_comp_base.gd")
-
 const InfoComponentBase := preload("./ui_base_class/info_panel_base.gd")
+const ErrorComponentBase := preload("./ui_base_class/error_comp_base.gd")
+const InputComponentBase := preload("./ui_base_class/input_comp_base.gd")
+
+const ConsoleBase := preload("./ui_base_class/console_base.gd")
 
 const InputFeedbackController := preload("./controllers/input_feedback_controller.gd")
 const Signature = preload("./controllers/signature_info.gd")
@@ -27,8 +28,10 @@ static var mobile_layout: MobileLayout = null:
 
 
 static func shortcut_pressed(event: InputEvent, shortcut: Shortcut) -> bool:
-	return (event is InputEventKey and event.pressed
-	and shortcut.matches_event(event) and not event.echo)
+	return (
+		event is InputEventKey and event.pressed
+		and shortcut.matches_event(event) and not event.echo
+	)
 
 
 static func make_shortcut(key: Key, ctrl := false, shift := false, alt := false) -> Shortcut:

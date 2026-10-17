@@ -25,6 +25,7 @@ const SETTING_PATH = "addons/DCKit/"
 # setting path
 const CONSOLE_MODE = "console_mode"
 const WINDOW_EDGE = "window_edge"
+const DEFAULT_CANVAS_LAYER = "default_canvas_layer"
 
 const BATCH_DIR = "batch_directory"
 
@@ -75,6 +76,8 @@ static func register_dckit_settings():
 		PROPERTY_HINT_ENUM,
 		_enum_hint_string(WindowEdge),
 	)
+
+	declare_setting(DEFAULT_CANVAS_LAYER, 9999, TYPE_INT)
 
 	declare_setting(BATCH_DIR, "res://batch_file", TYPE_STRING, PROPERTY_HINT_GLOBAL_DIR)
 
@@ -152,6 +155,10 @@ static func get_console_mode() -> ConsoleMode:
 
 static func get_window_edge() -> WindowEdge:
 	return clampi(get_setting(WINDOW_EDGE, WindowEdge.BOTTOM), 0, WindowEdge.size() - 1)
+
+
+static func get_default_canvas_layer() -> int:
+	return get_setting(DEFAULT_CANVAS_LAYER, 9999)
 #endregion
 
 

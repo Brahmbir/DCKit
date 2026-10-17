@@ -1,7 +1,7 @@
 extends RefCounted
 
-
 const UI_HOST_INTERFACE = preload("./ui_interface.gd")
+
 
 func init_ui() -> UI_HOST_INTERFACE:
 	return null

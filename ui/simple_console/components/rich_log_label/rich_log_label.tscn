@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bokp0qrlc3y04"]
 
-[ext_resource type="Script" uid="uid://bjpjj4vktd3hp" path="res://addons/dc_kit/ui/rich_log_label/rich_log_label.gd" id="1_8gsdv"]
+[ext_resource type="Script" uid="uid://bjpjj4vktd3hp" path="res://addons/dc_kit/ui/simple_console/components/rich_log_label/rich_log_label.gd" id="1_8gsdv"]
 
 [node name="RichLogLabel" type="MarginContainer" unique_id=1204884103 node_paths=PackedStringArray("_label")]
 anchors_preset = 15

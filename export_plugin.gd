@@ -4,8 +4,8 @@ extends EditorExportPlugin
 const IGNORE_FILES := ["fonts/OFL.txt"]
 
 const INCLUDE_FILES := [
-	# "plugin.cfg",
-	# "plugin.gd",
+	"ui_interface.gd",
+	"backend_interface.gd",
 	"dckit_autoload.gd",
 	"dc_analysis_result.gd",
 	"dc_result.gd",
@@ -34,15 +34,17 @@ func _is_enabled(is_debug: bool) -> bool:
 			return true
 	return is_debug or _DCKitSetting.get_enabled_in_release()
 
+
 func _resolve_override(features: PackedStringArray) -> String:
 	var has_include := false
 	for feature in features:
 		match feature.to_lower():
 			TAG_EXCLUDE:
-				return "exclude"  # exclude always wins, no need to keep scanning
+				return "exclude" # exclude always wins, no need to keep scanning
 			TAG_INCLUDE:
 				has_include = true
 	return "include" if has_include else ""
+
 
 func _export_file(path: String, type: String, features: PackedStringArray) -> void:
 	if not path.contains("addons/dc_kit"):
@@ -81,7 +83,7 @@ func _export_end() -> void:
 func _export_begin(features, is_debug, path, _flags):
 	_is_debug_export = is_debug
 	_override = _resolve_override(features)
-	 
+
 	var source_dir := _DCKitSetting.get_batch_directory()
 
 	if not _is_enabled(is_debug):

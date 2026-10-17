@@ -1,22 +1,17 @@
 @tool
 extends Control
 
-const STR_NAME_SIZE_GROUP = &"editor_ui_"
-
-const STR_NAME_FONT_SIZE = STR_NAME_SIZE_GROUP + &"font_scale"
-const STR_NAME_LOG_FONT_SIZE = STR_NAME_SIZE_GROUP + &"log_font_scale"
-const STR_NAME_SPACE_SIZE = STR_NAME_SIZE_GROUP + &"space_scale"
-
-const FONT_SIZE = 24
-const LOG_FONT_SIZE = 20
-const SPACE_SIZE = 16
+signal ui_close_requested
 
 @export_category("components")
+@export var header_component: _DCKitNS.UI.HeaderComponentBase
+
 @export var input_component: _DCKitNS.UI.InputComponentBase
 @export var log_component: _DCKitNS.UI.LoggerComponentBase
 @export var error_component: _DCKitNS.UI.ErrorComponentBase
 
 @export var info_component: _DCKitNS.UI.InfoComponentBase
+
 
 @export_category("UI Constants")
 @export var default_theme: Theme:
@@ -35,87 +30,6 @@ func _init() -> void:
 
 func _ready() -> void:
 	_queue_theme_rebuild() # always, even if no scale differed from its default
-
-
-func _get_property_list() -> Array[Dictionary]:
-	return [
-		{
-			"name": "UI Scales",
-			"type": TYPE_NIL,
-			"usage": PROPERTY_USAGE_GROUP,
-			"hint": PROPERTY_HINT_NONE,
-			"hint_string": STR_NAME_SIZE_GROUP,
-		},
-		{
-			"name": STR_NAME_FONT_SIZE,
-			"type": TYPE_FLOAT,
-			"hint": PROPERTY_HINT_RANGE,
-			"hint_string": "0.5,3.0,0.05",
-			"usage": PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_STORAGE,
-		},
-		{
-			"name": STR_NAME_LOG_FONT_SIZE,
-			"type": TYPE_FLOAT,
-			"hint": PROPERTY_HINT_RANGE,
-			"hint_string": "0.5,3.0,0.05",
-			"usage": PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_STORAGE,
-		},
-		{
-			"name": STR_NAME_SPACE_SIZE,
-			"type": TYPE_FLOAT,
-			"hint": PROPERTY_HINT_RANGE,
-			"hint_string": "0.5,3.0,0.05",
-			"usage": PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_STORAGE,
-		},
-	]
-
-
-func _property_can_revert(property: StringName) -> bool:
-	return property in [STR_NAME_FONT_SIZE, STR_NAME_LOG_FONT_SIZE, STR_NAME_SPACE_SIZE]
-
-
-func _property_get_revert(property: StringName) -> Variant:
-	match property:
-		STR_NAME_FONT_SIZE:
-			return _DCKitSetting.get_default_font_scale()
-
-		STR_NAME_LOG_FONT_SIZE:
-			return _DCKitSetting.get_default_log_font_scale()
-
-		STR_NAME_SPACE_SIZE:
-			return _DCKitSetting.get_default_space_scale()
-
-	return null
-
-
-func _get(property: StringName) -> Variant:
-	match property:
-		STR_NAME_FONT_SIZE:
-			return _DCKitNS.UI.mobile_layout.get_scales().font
-
-		STR_NAME_LOG_FONT_SIZE:
-			return _DCKitNS.UI.mobile_layout.get_scales().log_font
-
-		STR_NAME_SPACE_SIZE:
-			return _DCKitNS.UI.mobile_layout.get_scales().space
-
-	return null
-
-
-func _set(property: StringName, value: Variant) -> bool:
-	match property:
-		STR_NAME_FONT_SIZE:
-			_DCKitNS.UI.mobile_layout.get_scales().font = value
-			return true
-
-		STR_NAME_LOG_FONT_SIZE:
-			_DCKitNS.UI.mobile_layout.get_scales().log_font = value
-			return true
-
-		STR_NAME_SPACE_SIZE:
-			_DCKitNS.UI.mobile_layout.get_scales().space = value
-			return true
-	return false
 
 
 func grab_focus_on_input():
