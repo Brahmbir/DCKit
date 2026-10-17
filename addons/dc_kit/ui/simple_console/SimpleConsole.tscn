@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://di6fuf24actgn" path="res://addons/dc_kit/ui/simple_console/simple_console.gd" id="1_0wgy3"]
 [ext_resource type="FontFile" uid="uid://0bs703x6reir" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-Italic-VariableFont_wght.ttf" id="2_0x88e"]
-[ext_resource type="Theme" uid="uid://bed2ko8wcdjjh" path="res://addons/dc_kit/ui/simple_console/utils/simple_console_default.tres" id="2_dyj5x"]
 [ext_resource type="FontFile" uid="uid://6gunmtyx1g7e" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf" id="2_vwtn4"]
+[ext_resource type="PackedScene" uid="uid://bb4iiog4ixxsc" path="res://addons/dc_kit/ui/simple_console/components/header_bar/header_component.tscn" id="5_gasbt"]
 [ext_resource type="PackedScene" uid="uid://bihuh3740pvx3" path="res://addons/dc_kit/ui/simple_console/components/input_section/input_component_panel.tscn" id="5_v1qrv"]
-[ext_resource type="PackedScene" uid="uid://bokp0qrlc3y04" path="res://addons/dc_kit/ui/rich_log_label/rich_log_label.tscn" id="5_vwtn4"]
+[ext_resource type="PackedScene" uid="uid://bokp0qrlc3y04" path="res://addons/dc_kit/ui/simple_console/components/rich_log_label/rich_log_label.tscn" id="5_vwtn4"]
 [ext_resource type="PackedScene" uid="uid://bsxhrm41boutj" path="res://addons/dc_kit/ui/simple_console/components/info_panel/info_panel_container.tscn" id="6_0x88e"]
 [ext_resource type="PackedScene" uid="uid://chm4u3x5uk6g5" path="res://addons/dc_kit/ui/simple_console/components/error_list/error_list.tscn" id="6_i6iku"]
 
@@ -51,6 +51,7 @@ content_margin_bottom = 3.0
 bg_color = Color(0, 0, 0, 0.14117648)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ooera"]
+bg_color = Color(0.28974146, 0.2897415, 0.2897414, 1)
 corner_detail = 1
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s3qfw"]
@@ -384,11 +385,23 @@ shader_parameter/scanline_size = 4.0
 shader_parameter/scanline_strength = 0.16
 shader_parameter/phosphor_size = 12.0
 shader_parameter/phosphor_strength = 0.055
-shader_parameter/chromatic_shift = 0.45
+shader_parameter/chromatic_shift = 0.85
 shader_parameter/noise_strength = 0.008
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pvttc"]
 bg_color = Color(0, 0, 0, 0.34117648)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4jtcb"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0.6039216)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pvttc"]
 
@@ -411,14 +424,10 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = SubResource("Theme_4jtcb")
 script = ExtResource("1_0wgy3")
-input_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer/VBoxContainer/InputComponentPanel")
-log_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/MarginContainer/LoggerComponentPanel/RichLogLabel")
-error_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer/VBoxContainer/ErrorList")
-info_component = NodePath("CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/InfoPanelContainer")
-default_theme = ExtResource("2_dyj5x")
-editor_ui_font_scale = 1.0
-editor_ui_log_font_scale = 1.0
-editor_ui_space_scale = 1.0
+input_component = NodePath("CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer/InputComponentPanel")
+log_component = NodePath("CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/VBoxContainer/MarginContainer/LoggerComponentPanel/RichLogLabel")
+error_component = NodePath("CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer/ErrorList")
+info_component = NodePath("CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/VBoxContainer/InfoPanelContainer")
 
 [node name="CRTOverlay" type="Panel" parent="." unique_id=1011637646]
 material = SubResource("ShaderMaterial_pvttc")
@@ -452,40 +461,24 @@ theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer" unique_id=1522221045]
+[node name="PanelContainer" type="PanelContainer" parent="CRTOverlay/MarginContainer" unique_id=720670149]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_4jtcb")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/PanelContainer" unique_id=1522221045]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="HeaderComponentPanel" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=1464135229]
+[node name="HeaderComponentPanel" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer" unique_id=482206471 instance=ExtResource("5_gasbt")]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel" unique_id=2049131274]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel/MarginContainer" unique_id=2141693823]
-layout_mode = 2
-
-[node name="HBoxContainerLeft" type="HBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel/MarginContainer/HBoxContainer" unique_id=2115113120]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Label" type="Label" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel/MarginContainer/HBoxContainer/HBoxContainerLeft" unique_id=156693460]
-layout_mode = 2
-size_flags_horizontal = 0
-theme_type_variation = &"Header_Label"
-text = "DCKit://SIMPLE_CONSOLE"
-
-[node name="HBoxContainerRight" type="HBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/HeaderComponentPanel/MarginContainer/HBoxContainer" unique_id=1104486456]
-layout_mode = 2
-size_flags_horizontal = 3
-alignment = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=1272229247]
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer" unique_id=1272229247]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=1419785639]
+[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=1419785639]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/margin_left = 0
@@ -493,37 +486,33 @@ theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="LoggerComponentPanel" type="PanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/MarginContainer" unique_id=482121523]
+[node name="LoggerComponentPanel" type="PanelContainer" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/VBoxContainer/MarginContainer" unique_id=482121523]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxEmpty_pvttc")
 
-[node name="RichLogLabel" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer/MarginContainer/LoggerComponentPanel" unique_id=1540644517 instance=ExtResource("5_vwtn4")]
+[node name="RichLogLabel" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/VBoxContainer/MarginContainer/LoggerComponentPanel" unique_id=1540644517 instance=ExtResource("5_vwtn4")]
 layout_mode = 2
 
-[node name="InfoPanelContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer" unique_id=257336466 node_paths=PackedStringArray("shortcut_context") instance=ExtResource("6_0x88e")]
+[node name="InfoPanelContainer" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=257336466 node_paths=PackedStringArray("shortcut_context") instance=ExtResource("6_0x88e")]
 layout_mode = 2
-shortcut_context = NodePath("../../VBoxContainer2/MarginContainer/VBoxContainer/InputComponentPanel")
+shortcut_context = NodePath("../../MarginContainer/VBoxContainer/InputComponentPanel")
 toggle_shortcut = SubResource("Shortcut_rvqqf")
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer" unique_id=871267161]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2" unique_id=1754807055]
+[node name="MarginContainer" type="MarginContainer" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer" unique_id=1754807055]
 layout_mode = 2
 theme_type_variation = &"CMD_MarginContainer"
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer" unique_id=392904884]
+[node name="VBoxContainer" type="VBoxContainer" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/MarginContainer" unique_id=392904884]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="ErrorList" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer/VBoxContainer" unique_id=1140330670 instance=ExtResource("6_i6iku")]
+[node name="ErrorList" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer" unique_id=1140330670 instance=ExtResource("6_i6iku")]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="InputComponentPanel" parent="CRTOverlay/MarginContainer/VBoxContainer/VBoxContainer2/MarginContainer/VBoxContainer" unique_id=283857201 instance=ExtResource("5_v1qrv")]
+[node name="InputComponentPanel" parent="CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer" unique_id=283857201 instance=ExtResource("5_v1qrv")]
 layout_mode = 2

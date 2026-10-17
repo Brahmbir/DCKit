@@ -45,6 +45,7 @@ content_margin_bottom = 3.0
 bg_color = Color(0, 0, 0, 0.14117648)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ooera"]
+bg_color = Color(0.28974146, 0.2897415, 0.2897414, 1)
 corner_detail = 1
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s3qfw"]

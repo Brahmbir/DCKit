@@ -4,6 +4,7 @@ const BatchRunner = preload("./basic_command/batch_runner.gd")
 const BasicCMD = preload("./basic_command/basic_commands.gd")
 const ControlFlowCMD = preload("./basic_command/control_flow_commands.gd")
 
+const UI_HOST_PRIVATE_INTERFACE = preload("./ui/dckit_host_interface.gd")
 const DCKit_Host = preload("./ui/dckit_ui_host.tscn")
 
 var _cmd_reg: _DCKitNS.Registries.CommandRegistry = null
@@ -14,6 +15,8 @@ var _analyzer: _DCKitNS.Analyzer.Analyzer = null
 var _executor: _DCKitNS.Executor.Executor = null
 
 var _input_feedback_controller: _DCKitNS.UI.InputFeedbackController = null
+
+var _dckit_host_ref := WeakRef.new()
 
 
 func _init() -> void:
@@ -35,6 +38,7 @@ func _init() -> void:
 
 func init_ui() -> UI_HOST_INTERFACE:
 	var dckit_host := DCKit_Host.instantiate() as UI_HOST_INTERFACE
+	_dckit_host_ref = weakref(dckit_host)
 
 	var valid := true
 
@@ -43,7 +47,7 @@ func init_ui() -> UI_HOST_INTERFACE:
 		return null
 
 	dckit_host.ready.connect(dckit_host.hide_console)
-	dckit_host.connection_requested.connect(_on_host_connection_requested)
+	dckit_host.set_connection_request_callback(_on_host_connection_requested)
 
 	return dckit_host
 
@@ -118,7 +122,12 @@ func get_var_keys() -> Array:
 #endregion
 
 
-func _on_host_connection_requested(console: _DCKitNS.UI.ConsoleBase) -> void:
+func _on_host_connection_requested() -> void:
+	var dckit_host = _dckit_host_ref.get_ref() as UI_HOST_PRIVATE_INTERFACE
+	if not dckit_host:
+		push_warning("dckit_host is null in '_on_host_connection_requested' function")
+		return
+	var console = dckit_host.get_console_node()
 	if not console:
 		push_warning("console is null in '_on_host_connection_requested' function")
 		return

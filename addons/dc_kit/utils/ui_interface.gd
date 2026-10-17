@@ -2,21 +2,14 @@ extends Node
 
 # Replaces the old, unused _request_connection_updates.
 # Emitted whenever a console is in the tree and ready to be wired up.
-signal connection_requested(console: _DCKitNS.UI.ConsoleBase)
+signal console_visibility_changed(is_open: bool)
+
 
 func set_console_scene(scene: PackedScene) -> bool:
 	return false
 
 
-func set_mode(new_mode: _DCKitSetting.ConsoleMode) -> void:
-	return
-
-
-func set_edge(new_edge: _DCKitSetting.WindowEdge) -> void:
-	return
-
-
-func toggle_mode() -> void:
+func set_connection_request_callback(callback: Callable):
 	return
 
 
@@ -37,4 +30,8 @@ func is_console_open() -> bool:
 
 
 func request_connections() -> void:
+	return
+
+
+func configure(config: Dictionary) -> void:
 	return

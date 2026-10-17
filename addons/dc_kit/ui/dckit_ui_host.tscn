@@ -6,6 +6,7 @@
 script = ExtResource("1_a8uxx")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=97658836]
+layer = 9999
 
 [node name="SplitContainer" type="SplitContainer" parent="CanvasLayer" unique_id=1262113173]
 anchors_preset = 15
@@ -36,7 +37,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.16470589, 0.16470589, 0.16470589, 1)
+color = Color(0.38928655, 0.38928664, 0.3892865, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="Window" unique_id=2001646928]
 anchors_preset = 15
