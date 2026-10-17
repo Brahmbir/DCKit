@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://sqymq7jcg4j7" path="res://addons/dc_kit/ui/simple_console/components/input_section/execute_btn/execute_btn.tscn" id="1_g5k4r"]
 [ext_resource type="Script" uid="uid://bwggb0x5pnbui" path="res://addons/dc_kit/ui/simple_console/components/input_section/auto_suggestion/auto_suggest_container.gd" id="2_7jkh5"]
 [ext_resource type="Script" uid="uid://b1glficv4wjxv" path="res://addons/dc_kit/ui/simple_console/components/input_section/text_edit.gd" id="3_7jkh5"]
+[ext_resource type="SyntaxHighlighter" uid="uid://c0uerobqlpf7s" path="res://addons/dc_kit/ui/utills/cmd_syntax_highlighter/cmd_syntax_highlighter.tres" id="3_twl5e"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3a2tr"]
 bg_color = Color(0.13498849, 0.13498849, 0.13498849, 1)
@@ -52,14 +53,11 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 allow_search = false
 auto_height = true
+text_overrun_behavior = 5
 wraparound_items = false
-item_count = 4
 max_columns = 0
+fixed_column_width = 134
 fixed_icon_size = Vector2i(16, 16)
-item_0/text = "jahsxvdf aEWAERRWE WE WEW EWQ EW E"
-item_1/text = "sad WEQW EWQE WQEQW EWQE WQE WQE WQEWQ E"
-item_2/text = "WQE WEWQKJNEWQNIUENBWQKBEIUBNWQBEKJBJNBK JWQNE"
-item_3/text = "QWE QWUJEIKJHBWQKHJ EBKJHWQ BKE JHB"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1579906345]
 layout_mode = 2
@@ -92,6 +90,7 @@ emoji_menu_enabled = false
 scroll_fit_content_height = true
 caret_blink = true
 caret_multiple = false
+syntax_highlighter = ExtResource("3_twl5e")
 script = ExtResource("3_7jkh5")
 
 [node name="ExecuteBtn_PanelContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1822304569 instance=ExtResource("1_g5k4r")]

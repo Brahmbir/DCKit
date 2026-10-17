@@ -43,6 +43,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Sample command"
+text_overrun_behavior = 5
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=218195891]
 layout_mode = 2

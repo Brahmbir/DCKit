@@ -1,0 +1,6 @@
+[gd_resource type="SyntaxHighlighter" format=3 uid="uid://c0uerobqlpf7s"]
+
+[ext_resource type="Script" uid="uid://bdfxvxngvuaqt" path="res://addons/dc_kit/ui/utills/cmd_syntax_highlighter/cmd_syntax_highlighter.gd" id="1_phkwk"]
+
+[resource]
+script = ExtResource("1_phkwk")

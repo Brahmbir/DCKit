@@ -94,29 +94,29 @@ class Value extends RefCounted:
 
 
 	## Returns the value as a float, or null if it can't be coerced.
-	func as_float() -> Variant:
+	func as_float() -> float:
 		if raw is float:
 			return raw
 		if raw is int:
 			return float(raw)
 		if raw is String:
 			var s := (raw as String).strip_edges()
-			return float(s) if s.is_valid_float() else null
-		return null
+			return float(s) if s.is_valid_float() else NAN
+		return NAN
 
 
 	## Returns the value as an int, or null if it can't be coerced.
-	func as_int() -> Variant:
+	func as_int() -> int:
 		if raw is int:
 			return raw
 		if raw is String:
 			var s := (raw as String).strip_edges()
-			return int(s) if s.is_valid_int() else null
-		return null
+			return int(s) if s.is_valid_int() else NAN
+		return NAN
 
 
 	## Returns the value as a bool, or null if it can't be coerced.
-	func as_bool() -> Variant:
+	func as_bool() -> bool:
 		if raw is bool:
 			return raw
 		if raw is int:
@@ -127,7 +127,7 @@ class Value extends RefCounted:
 					return true
 				"false", "no", "0":
 					return false
-		return null
+		return false
 
 
 	func _to_string() -> String:
