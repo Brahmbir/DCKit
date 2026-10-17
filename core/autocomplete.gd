@@ -242,9 +242,9 @@ func _call_suggestor(suggestor: Callable, prev: Array = [], prefix: String = "")
 		0:
 			return suggestor.call()
 		1:
-			return suggestor.call(prev)
+			return suggestor.call(prefix)
 		_:
-			return suggestor.call(prev, prefix)
+			return suggestor.call(prefix, prev)
 
 
 func _part_items(scope, _prefix: String) -> Array:

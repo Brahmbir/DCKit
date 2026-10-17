@@ -41,6 +41,13 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	set_state(_DCKitNS.UI.State.EXECUTE, true)
+
+	var auto_complete := auto_complete_comp as _AUTO_COMPLETE_BASE
+	var my_text_edit = text_edit as _TEXT_EDIT_INTERFACE
+
+	if is_instance_valid(auto_complete) and is_instance_valid(my_text_edit):
+		my_text_edit.set_auto_complete_ref(auto_complete)
+
 	_on_mobile_changed(_DCKitNS.UI.mobile_layout.mobile) # catch up if spawned late
 
 
@@ -93,8 +100,6 @@ func connect_autocomplete_obj(autocomplete_obj: _DCKitNS.Core.AutoComplete) -> v
 
 	auto_complete.setup(autocomplete_obj)
 
-	auto_complete.selection_changed
-
 
 func connect_executor(executor) -> void:
 	_disconnect_executor()
@@ -111,10 +116,6 @@ func _toggle_history():
 	if not is_instance_valid(auto_complete):
 		return
 
-	var my_text_edit = text_edit as _TEXT_EDIT_INTERFACE
-	if my_text_edit:
-		my_text_edit.is_auto_complete_open = auto_complete.is_open()
-
 
 func _on_completion_accepted(start: int, label: String):
 	var caret := text_edit.get_caret_column()
@@ -122,7 +123,6 @@ func _on_completion_accepted(start: int, label: String):
 		text_edit.remove_text(0, start, 0, caret)
 	text_edit.set_caret_column(start)
 	text_edit.insert_text_at_caret(label)
-
 
 
 func _on_mobile_changed(is_mobile: bool) -> void:
@@ -146,49 +146,45 @@ func _apply_history_to_input() -> void:
 
 
 func _connect_edit_signals() -> void:
-	if not is_instance_valid(text_edit):
+	var my_text_edit = text_edit as _TEXT_EDIT_INTERFACE
+	if not is_instance_valid(my_text_edit):
 		return
 
-	if (
-		text_edit.has_signal(&"text_submitted")
-		and not text_edit.is_connected(&"text_submitted", _on_submit)
-	):
-		text_edit.connect(&"text_submitted", _on_submit)
+	if not my_text_edit.text_submitted.is_connected(_on_submit):
+		my_text_edit.text_submitted.connect(_on_submit)
 
-	if not text_edit.text_set.is_connected(_on_text_edit_changed):
-		text_edit.text_set.connect(_on_text_edit_changed)
-	if not text_edit.text_changed.is_connected(_on_text_edit_changed):
-		text_edit.text_changed.connect(_on_text_edit_changed)
+	if not my_text_edit.text_set.is_connected(_on_text_edit_changed):
+		my_text_edit.text_set.connect(_on_text_edit_changed)
+	if not my_text_edit.text_changed.is_connected(_on_text_edit_changed):
+		my_text_edit.text_changed.connect(_on_text_edit_changed)
 
-	if not text_edit.caret_changed.is_connected(_on_text_edit_caret_changed):
-		text_edit.caret_changed.connect(_on_text_edit_caret_changed)
-	if not text_edit.focus_entered.is_connected(_on_focus_entered):
-		text_edit.focus_entered.connect(_on_focus_entered)
-	if not text_edit.focus_exited.is_connected(_on_focus_exited):
-		text_edit.focus_exited.connect(_on_focus_exited)
+	if not my_text_edit.caret_changed.is_connected(_on_text_edit_caret_changed):
+		my_text_edit.caret_changed.connect(_on_text_edit_caret_changed)
+	if not my_text_edit.focus_entered.is_connected(_on_focus_entered):
+		my_text_edit.focus_entered.connect(_on_focus_entered)
+	if not my_text_edit.focus_exited.is_connected(_on_focus_exited):
+		my_text_edit.focus_exited.connect(_on_focus_exited)
 
 
 func _disconnect_edit_signals() -> void:
-	if not is_instance_valid(text_edit):
+	var my_text_edit = text_edit as _TEXT_EDIT_INTERFACE
+	if not is_instance_valid(my_text_edit):
 		return
 
-	if (
-		text_edit.has_signal(&"text_submitted")
-		and text_edit.is_connected(&"text_submitted", _on_submit)
-	):
-		text_edit.disconnect(&"text_submitted", _on_submit)
+	if my_text_edit.text_submitted.is_connected(_on_submit):
+		my_text_edit.text_submitted.disconnect(_on_submit)
 
-	if text_edit.text_set.is_connected(_on_text_edit_changed):
-		text_edit.text_set.disconnect(_on_text_edit_changed)
-	if text_edit.text_changed.is_connected(_on_text_edit_changed):
-		text_edit.text_changed.disconnect(_on_text_edit_changed)
+	if my_text_edit.text_set.is_connected(_on_text_edit_changed):
+		my_text_edit.text_set.disconnect(_on_text_edit_changed)
+	if my_text_edit.text_changed.is_connected(_on_text_edit_changed):
+		my_text_edit.text_changed.disconnect(_on_text_edit_changed)
 
-	if text_edit.caret_changed.is_connected(_on_text_edit_caret_changed):
-		text_edit.caret_changed.disconnect(_on_text_edit_caret_changed)
-	if text_edit.focus_entered.is_connected(_on_focus_entered):
-		text_edit.focus_entered.disconnect(_on_focus_entered)
-	if text_edit.focus_exited.is_connected(_on_focus_exited):
-		text_edit.focus_exited.disconnect(_on_focus_exited)
+	if my_text_edit.caret_changed.is_connected(_on_text_edit_caret_changed):
+		my_text_edit.caret_changed.disconnect(_on_text_edit_caret_changed)
+	if my_text_edit.focus_entered.is_connected(_on_focus_entered):
+		my_text_edit.focus_entered.disconnect(_on_focus_entered)
+	if my_text_edit.focus_exited.is_connected(_on_focus_exited):
+		my_text_edit.focus_exited.disconnect(_on_focus_exited)
 
 
 func _on_text_edit_changed() -> void:

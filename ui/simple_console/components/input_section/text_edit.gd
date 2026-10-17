@@ -1,6 +1,6 @@
 extends "./text_edit_interface.gd"
 
-signal text_submitted(text: String)
+
 
 ## Owned by the parent UI. Swapping it (or the input) ends any browse session.
 var _history: _DCKitNS.UI.CommandHistory
@@ -31,28 +31,22 @@ func _exit_tree() -> void:
 
 func _input(event: InputEvent) -> void:
 	var key := event as InputEventKey
-	if key == null or not key.pressed or not editable:
+	if key == null or not key.pressed or not editable or not has_focus():
+		return
+
+	if _is_event_handle_by_auto_complete(event):
 		return
 
 	var ctrl := key.is_command_or_control_pressed()
-
-	if not is_auto_complete_open:
-		return
-
 	match key.keycode:
 		KEY_ENTER, KEY_KP_ENTER:
 			get_viewport().set_input_as_handled()
-
 			_submit()
 		KEY_UP:
-			if not is_auto_complete_open:
-				return
 			get_viewport().set_input_as_handled()
 			if _history != null:
 				_show(_history.browse_older(text, ctrl))
 		KEY_DOWN:
-			if not is_auto_complete_open:
-				return
 			get_viewport().set_input_as_handled()
 			if _history != null:
 				_show(_history.browse_newer(text))
