@@ -1,4 +1,4 @@
-extends MarginContainer
+extends Container
 
 signal opened
 signal closed
@@ -14,11 +14,38 @@ enum Layout {
 @export var layout := Layout.HorizontalBar:
 	set = set_layout
 
+var _popup_x := 0.0
+
 var _autocomplete: _DCKitNS.Core.AutoComplete = null
 
 
 func _init() -> void:
 	_DCKitNS.UI.mobile_layout.changed.connect(_on_layout_change)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_SORT_CHILDREN:
+		_sort_children()
+
+
+func _get_minimum_size() -> Vector2:
+	var result := Vector2.ZERO
+	for child in get_children():
+		if not (child is Control) or not child.visible:
+			continue
+		var child_min: Vector2 = child.get_combined_minimum_size()
+		result.x = maxf(result.x, child_min.x)
+		# Popup reserves no height, so the bottom container ignores it.
+		if layout != Layout.PopUp:
+			result.x = maxf(result.x, child_min.x)
+			result.y = maxf(result.y, child_min.y)
+	return result
+
+
+## PopUp only. x is in the slot's local space; clamped so the popup stays inside the row.
+func set_popup_x(x: float) -> void:
+	_popup_x = x
+	queue_sort()
 
 
 # Layout
@@ -53,10 +80,7 @@ func _on_autocomplete_need_update() -> void:
 
 
 func _apply_layout() -> void:
-	var popup := layout == Layout.PopUp
-	# top_level children are skipped by the bottom container's _flow(),
-	# so a popup neither gets laid out nor counted in its height.
-	top_level = popup
+	# No top_level: the popup stays in the tree and lips out of a 0-height slot.
 	custom_minimum_size.y = 0.0
 	_apply_layout_to_child()
 	update_minimum_size()
@@ -65,3 +89,16 @@ func _apply_layout() -> void:
 
 func _apply_layout_to_child() -> void:
 	pass
+
+
+func _sort_children() -> void:
+	for child in get_children():
+		if not (child is Control) or not child.visible:
+			continue
+		if layout == Layout.PopUp:
+			var cm: Vector2 = child.get_combined_minimum_size()
+			var w := minf(cm.x, size.x)
+			var x := clampf(_popup_x, 0.0, maxf(size.x - w, 0.0))
+			fit_child_in_rect(child, Rect2(x, -cm.y, w, cm.y))
+		else:
+			fit_child_in_rect(child, Rect2(Vector2.ZERO, size))

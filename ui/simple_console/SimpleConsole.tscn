@@ -9,6 +9,9 @@
 [ext_resource type="PackedScene" uid="uid://bsxhrm41boutj" path="res://addons/dc_kit/ui/simple_console/components/info_panel/info_panel_container.tscn" id="6_0x88e"]
 [ext_resource type="PackedScene" uid="uid://chm4u3x5uk6g5" path="res://addons/dc_kit/ui/simple_console/components/error_list/error_list.tscn" id="6_i6iku"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6pdhr"]
+bg_color = Color(0.043137256, 0.043137256, 0.043137256, 0.93333334)
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooera"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2v68d"]
@@ -55,8 +58,6 @@ corner_detail = 1
 [sub_resource type="FontVariation" id="FontVariation_ooera"]
 base_font = ExtResource("2_0x88e")
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0jfm5"]
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0x88e"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7jkh5"]
@@ -97,6 +98,8 @@ base_font = ExtResource("2_vwtn4")
 [sub_resource type="Theme" id="Theme_4jtcb"]
 default_font = SubResource("FontVariation_l7cum")
 default_font_size = 24
+Black_PanelContainer/base_type = &"PanelContainer"
+Black_PanelContainer/styles/panel = SubResource("StyleBoxFlat_6pdhr")
 Button/constants/icon_max_width = 21
 Button/styles/disabled = SubResource("StyleBoxEmpty_ooera")
 Button/styles/disabled_mirrored = SubResource("StyleBoxEmpty_2v68d")
@@ -111,7 +114,7 @@ Button/styles/pressed = SubResource("StyleBoxEmpty_34r5h")
 Button/styles/pressed_mirrored = SubResource("StyleBoxEmpty_dlema")
 CMD_MarginContainer/base_type = &"MarginContainer"
 CMD_MarginContainer/constants/margin_top = 8
-ErrorList_PanelContainer/base_type = &"PanelContainer"
+ErrorList_PanelContainer/base_type = &"Black_PanelContainer"
 ErrorList_PanelContainer/styles/panel = SubResource("StyleBoxFlat_hfuff")
 HBoxContainer/constants/separation = 14
 HBoxContainer_LineEdit/constants/separation = 12
@@ -151,7 +154,6 @@ MarginContainer/constants/margin_bottom = 16
 MarginContainer/constants/margin_left = 16
 MarginContainer/constants/margin_right = 16
 MarginContainer/constants/margin_top = 16
-PanelContainer/styles/panel = SubResource("StyleBoxEmpty_0jfm5")
 RichTextLabel/font_sizes/bold_font_size = 18
 RichTextLabel/font_sizes/bold_italics_font_size = 18
 RichTextLabel/font_sizes/italics_font_size = 18
