@@ -1,6 +1,6 @@
 extends "./auto_complete_base.gd"
 
-const MAX_VISIBLE := 8
+const MAX_EM_FONT := 10
 const _DETAIL_TAGS := "\\[.+?\\]"
 
 @export var toggle_shortcut: Shortcut = null
@@ -27,43 +27,12 @@ func _ready() -> void:
 
 	hide_popup()
 	item_list.item_activated.connect(_on_item_activated)
-	#item_list.item_selected.connect(_on_item_activated)
-
-	#item_list.item_clicked.connect(
-	#func(idx, _p, _mbi):
-	#_on_item_activated(idx),
-	#)
-	item_list.item_selected
 
 	_DCKitNS.UI.mobile_layout.get_scales().font_changed.connect(_on_scale_change)
 	_DCKitNS.UI.mobile_layout.get_scales().space_changed.connect(_on_scale_change)
 
 	_on_scale_change()
-
-
-
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_SORT_CHILDREN:
-		for c in get_children():
-			if c is Control and c.visible:
-				fit_child_in_rect(c, Rect2(Vector2.ZERO, size))
-
-
-func _get_minimum_size() -> Vector2:
-	var s := Vector2.ZERO
-	for c in get_children():
-		if c is Control and c.visible:
-			s = s.max(c.get_combined_minimum_size())
-	return s
-
-
-## PopUp only. Pins the popup's bottom-left to a global rect (e.g. the input line).
-func place_above(anchor: Rect2) -> void:
-	if layout != Layout.PopUp:
-		return
-	size.x = anchor.size.x
-	global_position = anchor.position - Vector2(0.0, size.y)
+	_apply_layout_to_child()
 
 
 # Data
@@ -91,7 +60,7 @@ func expected_height(count: int = -1) -> float:
 		count = item_list.item_count
 	if count == 0:
 		return 0.0
-	return _item_height() * mini(count, MAX_VISIBLE) + _frame_margin()
+	return _item_height() * count + _frame_margin()
 
 
 # Show / hide
@@ -196,20 +165,42 @@ func _on_scale_change():
 		item_list.fixed_icon_size = Vector2i(px, px)
 
 
-
 func _apply_layout_to_child() -> void:
-	var popup := layout == Layout.PopUp
-	if popup:
+	if layout == Layout.PopUp:
+		item_list.auto_height = false
+		item_list.auto_width = true
+
 		item_list.max_columns = 1
 		_fit_popup_height()
+		_fit_popup_width()
 	else:
+		item_list.auto_height = true
+		item_list.auto_width = false
+
 		item_list.max_columns = 0
+		item_list.custom_minimum_size = Vector2.ZERO
+	
+	item_list.ensure_current_is_visible()
+
+
+func _max_popup_height() -> float:
+	return _DCKitNS.UI.mobile_layout.get_scales().em_font(MAX_EM_FONT)
 
 
 func _fit_popup_height() -> void:
-	var h := expected_height()
-	custom_minimum_size.y = h
-	size.y = h
+	item_list.custom_minimum_size.y = minf(expected_height(), _max_popup_height())
+
+
+func _fit_popup_width() -> void:
+	var font := item_list.get_theme_font("font")
+	var font_size := item_list.get_theme_font_size("font_size")
+	var w := 0.0
+	for item in _items:
+		w = maxf(w, font.get_string_size(item.label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+	var panel := item_list.get_theme_stylebox("panel")
+	w += item_list.fixed_icon_size.x + item_list.get_theme_constant("icon_margin")
+	w += panel.get_margin(SIDE_LEFT) + panel.get_margin(SIDE_RIGHT) if panel else 0.0
+	item_list.custom_minimum_size.x = w
 
 
 func _icon_for(kind) -> Texture2D:
