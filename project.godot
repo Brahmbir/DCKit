@@ -12,20 +12,20 @@ config_version=5
 
 DCKit/cmd_history/enabled=true
 DCKit/cmd_history/directory="D:/dev/Godot_Game_Dev/DCKit/tmp"
+DCKit/console_mode=1
 DCKit/window_edge=0
 
 [application]
 
 config/name="DCKit_demo"
 run/main_scene="uid://qv7uw2xl7r64"
-config/features=PackedStringArray("4.7", "Forward Plus")
+config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="uid://b0tp6gb8sl00v"
 
 [autoload]
 
 UtilScript="*uid://cg2t6sv2q7kvn"
 DCKit="*uid://g1vgmlrh22q"
-StressTestingDcKitAutocomplete="*uid://cq3c2sihusnun"
 
 [display]
 
