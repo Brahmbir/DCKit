@@ -54,11 +54,16 @@ DCKit.hide_console()
 DCKit.is_console_open()  # bool
 ```
 
-Connect to `console_opened` / `console_closed` if game code needs to react — e.g. pausing input or the game itself while the console is up:
+Connect to `console_visibility_changed(is_open: bool)` if game code needs to react — e.g. pausing input or the game itself while the console is up:
 
 ```gdscript
-DCKit.console_opened.connect(func(): get_tree().paused = true)
-DCKit.console_closed.connect(func(): get_tree().paused = false)
+func _ready() -> void:
+	DCKit.console_visibility_changed.connect(_on_console_visibility_changed)
+
+
+func _on_console_visibility_changed(is_open: bool) -> void:
+	pause.process_mode = Node.PROCESS_MODE_DISABLED if is_open else Node.PROCESS_MODE_INHERIT
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if is_open else Input.MOUSE_MODE_CAPTURED
 ```
 
 ### Toggling from an `_input()` handler
@@ -67,13 +72,13 @@ The demo project binds the console to the backtick key like this:
 
 ```gdscript
 func _input(event: InputEvent) -> void:
-    if event is InputEventKey and event.pressed and event.keycode == KEY_QUOTELEFT:
-        DCKit.toggle_console()
-        if DCKit.is_console_open():
-            pause.process_mode = Node.PROCESS_MODE_DISABLED
-        else:
-            pause.process_mode = Node.PROCESS_MODE_INHERIT
-        get_viewport().set_input_as_handled()
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+
+	if event.keycode == KEY_QUOTELEFT:
+		DCKit.toggle_console()
+		get_viewport().set_input_as_handled()
+		return
 ```
 
 > ⚠️ **Note — this is demo code, not a prescribed pattern.**
