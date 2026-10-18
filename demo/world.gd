@@ -84,27 +84,46 @@ func _next_value(info: Dictionary, backwards: bool) -> Variant:
 
 
 func _on_console_visibility_changed(is_open: bool) -> void:
-	pause.process_mode = (Node.PROCESS_MODE_DISABLED if is_open else Node.PROCESS_MODE_INHERIT)
-
+	pause.process_mode = Node.PROCESS_MODE_DISABLED if is_open else Node.PROCESS_MODE_INHERIT
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if is_open else Input.MOUSE_MODE_CAPTURED
 
 func _update_sun() -> void:
 	# Sun height (-1 to 1)
 	var sun_height := directional_light.global_basis.z.y
 
-	# Light intensity
-	directional_light.light_energy = clamp(sun_height * 2.0, 0.0, 1.5)
+	# Calculate target light energy
+	var target_energy: float = clamp(sun_height * 2.0, 0.0, 1.5)
 
-	# Change light color
+	# Define lighting colors
+	var day_color := Color(1.0, 0.98, 0.92)
+	var sunset_color := Color(1.0, 0.65, 0.35)
+	var night_color := Color(0.45, 0.55, 0.8)
+
+	# Blend colors smoothly based on sun height
+	var target_color: Color
+
 	if sun_height > 0.2:
-		# Day
-		directional_light.light_color = Color(1.0, 0.98, 0.92)
+		# Sunset -> Day
+		var t := smoothstep(0.2, 0.6, sun_height)
+		target_color = sunset_color.lerp(day_color, t)
 	elif sun_height > -0.1:
-		# Sunrise/Sunset
-		directional_light.light_color = Color(1.0, 0.65, 0.35)
+		# Night -> Sunset
+		var t := smoothstep(-0.1, 0.2, sun_height)
+		target_color = night_color.lerp(sunset_color, t)
 	else:
-		# Night (moonlight)
-		directional_light.light_color = Color(0.45, 0.55, 0.8)
-		directional_light.light_energy = 0.08
+		target_color = night_color
+
+	# Smoothly interpolate toward target values
+	var delta := get_process_delta_time()
+	var blend_speed := 2.0
+	var weight := 1.0 - exp(-blend_speed * delta)
+
+	directional_light.light_color = directional_light.light_color.lerp(target_color, weight)
+	directional_light.light_energy = lerp(
+		directional_light.light_energy,
+		target_energy if sun_height > -0.1 else 0.08,
+		weight
+	)
 
 
 func _get_dckit_def() -> Array[DCDefinition]:

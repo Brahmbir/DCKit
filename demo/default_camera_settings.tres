@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CameraSettings" format=3 uid="uid://bbit57ahte7so"]
+
+[ext_resource type="Script" uid="uid://o45wduk1jgfw" path="res://demo/utils/camera_settings.gd" id="1_un51j"]
+
+[resource]
+script = ExtResource("1_un51j")
+follow_lag = 0.03
