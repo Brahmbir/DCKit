@@ -3,8 +3,14 @@
 [ext_resource type="Texture2D" uid="uid://dfsg1xbxc7n3y" path="res://addons/dc_kit/assets/images/x.svg" id="1_28a3q"]
 [ext_resource type="Script" uid="uid://b8liing5pmno" path="res://addons/dc_kit/ui/simple_console/components/header_bar/header_component.gd" id="1_kl5kx"]
 
-[node name="HeaderComponentPanel" type="PanelContainer" unique_id=482206471]
+[node name="HeaderComponentPanel" type="PanelContainer" unique_id=482206471 node_paths=PackedStringArray("label", "button")]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 104.0
+grow_horizontal = 2
 script = ExtResource("1_kl5kx")
+label = NodePath("MarginContainer/HBoxContainer/HBoxContainerLeft/Label")
+button = NodePath("MarginContainer/HBoxContainer/HBoxContainerRight/HBoxContainer/Button")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=970922898]
 layout_mode = 2
@@ -27,8 +33,16 @@ layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
 
-[node name="Button" type="Button" parent="MarginContainer/HBoxContainer/HBoxContainerRight" unique_id=584766764]
+[node name="ConfigBtnsContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer/HBoxContainerRight" unique_id=1392201733]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer/HBoxContainerRight" unique_id=18756987]
+layout_mode = 2
+
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/HBoxContainer/HBoxContainerRight/HBoxContainer" unique_id=2014064486]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="MarginContainer/HBoxContainer/HBoxContainerRight/HBoxContainer" unique_id=584766764]
 layout_mode = 2
 icon = ExtResource("1_28a3q")
-flat = true
 icon_alignment = 1
