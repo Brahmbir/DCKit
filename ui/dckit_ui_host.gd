@@ -197,6 +197,18 @@ func _build_schema() -> void:
 			"set": func(v):
 				canvas_layer.layer = v,
 		},
+		"bg_color": {
+			"type": "color",
+			"get": func():
+				return _console.get_bg_color(),
+			"set": func(v):
+				if v is String or v is StringName:
+					if not Color.html_is_valid(v):
+						return
+					v = Color.html(v)
+				if v is Color:
+					_console.set_bg_color(v),
+		},
 		"is_mobile": {
 			"type": "bool",
 			"get": func():
@@ -357,11 +369,11 @@ func _place_in_dock() -> void:
 	_move_console_to(split)
 
 	split.vertical = _edge in [_DCKitSetting.WindowEdge.TOP, _DCKitSetting.WindowEdge.BOTTOM]
-	
+
 	var index := 0 if _console_first() else 1
 	# Child order decides the side: console first = left/top.
 	split.move_child(_console, mini(index, split.get_child_count() - 1))
-	
+
 	split.visible = _open
 	_update_min_size()
 	_ratio_pending = true

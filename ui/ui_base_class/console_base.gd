@@ -26,8 +26,18 @@ var _theme_rebuild_queued := false
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
+
 func set_title_bar_visibility(visibility: bool):
 	_DCKitNS.not_implemented("set_title_bar_visibility")
+
+
+func set_bg_color(color: Color):
+	_DCKitNS.not_implemented("set_bg_color")
+
+
+func get_bg_color() -> Color:
+	_DCKitNS.not_implemented("get_bg_color")
+	return Color.TRANSPARENT
 
 
 func grab_focus_on_input():

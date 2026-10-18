@@ -13,6 +13,7 @@ extends "../ui_base_class/console_base.gd"
 	"muted": Color("858aa0"),
 	"plain": Color("CDD6F4"),
 }
+@export var color_rect: ColorRect
 
 
 func _enter_tree() -> void:
@@ -62,6 +63,17 @@ func _exit_tree() -> void:
 func set_title_bar_visibility(visibility: bool):
 	if header_component:
 		header_component.set_title_bar_visibility(visibility)
+
+
+func set_bg_color(color: Color):
+	if color_rect:
+		color_rect.color = color
+
+
+func get_bg_color() -> Color:
+	if color_rect:
+		return color_rect.color
+	return Color.TRANSPARENT
 
 
 func grab_focus_on_input():
