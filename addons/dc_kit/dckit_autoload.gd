@@ -44,6 +44,10 @@ func configure_ui(config: Dictionary) -> void:
 		return
 	_dc_kit_ui.configure(config)
 
+func get_ui_config() -> Dictionary:
+	if not _dc_kit_ui:
+		return {}
+	return _dc_kit_ui.get_configure()
 
 func has_backend() -> bool:
 	return _backend != null

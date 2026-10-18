@@ -1,4 +1,4 @@
-extends "../ui_base_class/logger_comp_base.gd"
+extends "../../../ui_base_class/logger_comp_base.gd"
 
 @export var _label: RichTextLabel
 

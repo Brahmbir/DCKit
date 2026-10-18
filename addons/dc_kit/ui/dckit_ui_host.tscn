@@ -23,11 +23,14 @@ layout_mode = 2
 mouse_filter = 2
 
 [node name="Window" type="Window" parent="." unique_id=732133751]
+handle_input_locally = false
 oversampling_override = 1.0
 title = "DC_KIT"
 initial_position = 2
 size = Vector2i(720, 480)
+transient = true
 always_on_top = true
+minimize_disabled = true
 min_size = Vector2i(150, 0)
 keep_title_visible = true
 

@@ -159,13 +159,17 @@ func input_handler(event: InputEvent) -> bool:
 	return false
 
 
-func _on_scale_change():
+func _on_scale_change(_v:=1):
 	if item_list:
 		var space = _DCKitNS.UI.mobile_layout.get_scales().em_space(1)
 		item_list.add_theme_constant_override("icon_margin", space)
 
 		var px = _DCKitNS.UI.mobile_layout.get_scales().em_font(1.15)
 		item_list.fixed_icon_size = Vector2i(px, px)
+		
+		if layout == Layout.PopUp:
+			_fit_popup_height()
+			_fit_popup_width()
 
 
 func _apply_layout_to_child() -> void:

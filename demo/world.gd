@@ -1,11 +1,17 @@
 @tool
 extends Node3D
 
+# F2 is skipped because DckitUiHost already uses it for is_mobile.
+const FKEYS := [KEY_F1, KEY_F2, KEY_F3, KEY_F4]
+const STEP_FRACTION := 0.1 # of a float setting's min..max range
+
 @export var day_length: float = 60.0 # Seconds for a full day
 
 var time := 0.0
 
 var day_night_enabled := true
+
+var _key_to_setting := { } # keycode -> config key
 
 @onready var directional_light: DirectionalLight3D = $DirectionalLight3D
 @onready var pause: Node3D = $Pause
@@ -16,6 +22,14 @@ func _ready() -> void:
 
 	for cmd: DCDefinition in _get_dckit_def():
 		DCKit.register_def(cmd)
+
+	var i := 0
+	for setting in ['is_mobile', 'font_size', 'space_size', 'logger_font_size']:
+		if i >= FKEYS.size():
+			break
+		_key_to_setting[FKEYS[i]] = setting
+		print("%s -> %s" % [OS.get_keycode_string(FKEYS[i]), setting])
+		i += 1
 
 
 func _process(delta: float) -> void:
@@ -31,9 +45,42 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_QUOTELEFT:
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+
+	if event.keycode == KEY_QUOTELEFT:
 		DCKit.toggle_console()
 		get_viewport().set_input_as_handled()
+		return
+
+	var setting: String = _key_to_setting.get(event.keycode, "")
+	if setting.is_empty():
+		return
+	# Read the live value each press, so changes made elsewhere (F2, closing the window) don't drift.
+	var info = DCKit.get_ui_config().get(setting)
+	if info == null:
+		return
+
+	DCKit.configure_ui({ setting: _next_value(info, event.ctrl_pressed) })
+	get_viewport().set_input_as_handled()
+
+
+func _next_value(info: Dictionary, backwards: bool) -> Variant:
+	var dir := -1 if backwards else 1
+	match info["type"]:
+		"enum":
+			var options: Array = info["options"]
+			return options[posmod(options.find(info["value"]) + dir, options.size())]
+		"bool":
+			return not info["value"]
+		_:
+			var step := 1.0
+			if info["type"] == "float" and info.has("min") and info.has("max"):
+				step = (info["max"] - info["min"]) * STEP_FRACTION
+			var v = info["value"] + dir * step
+			if info["type"] == "float":
+				return snappedf(v, 0.01)
+			return int(v)
 
 
 func _on_console_visibility_changed(is_open: bool) -> void:

@@ -12,7 +12,6 @@ config_version=5
 
 DCKit/cmd_history/enabled=true
 DCKit/cmd_history/directory="D:/dev/Godot_Game_Dev/DCKit/tmp"
-DCKit/console_mode=1
 
 [application]
 

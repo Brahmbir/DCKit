@@ -21,25 +21,24 @@ func _enter_tree() -> void:
 	s.log_font_changed.connect(_on_scale_changed)
 	s.space_changed.connect(_on_scale_changed)
 
-	resized.connect(
-		func():
-			_DCKitNS.UI.mobile_layout.set_screen_width(size.x),
-	)
-	_DCKitNS.UI.mobile_layout.set_screen_width(size.x)
+	if header_component:
+		header_component.ui_close_requested.connect(ui_close_requested.emit)
+	resized.connect(_on_resize)
+	_on_resize()
 
 
 func _ready() -> void:
 	_queue_theme_rebuild()
-	
+
 	if not input_component:
 		push_warning("SimpleConsole.connect_executor: input_component must be assigned.")
 		return
-		
-	if info_component :
+
+	if info_component:
 		info_component.shortcut_context = input_component
 		pass
-	
-	if error_component :
+
+	if error_component:
 		var move_caret_func: Callable = input_component.get_input_node().set_caret_column
 		error_component.item_pressed.connect(
 			func(pos, _l):
@@ -53,6 +52,16 @@ func _exit_tree() -> void:
 	s.font_changed.disconnect(_on_scale_changed)
 	s.log_font_changed.disconnect(_on_scale_changed)
 	s.space_changed.disconnect(_on_scale_changed)
+
+	if resized.is_connected(_on_resize):
+		resized.disconnect(_on_resize)
+	if header_component:
+		header_component.ui_close_requested.disconnect(ui_close_requested.emit)
+
+
+func set_title_bar_visibility(visibility: bool):
+	if header_component:
+		header_component.set_title_bar_visibility(visibility)
 
 
 func grab_focus_on_input():
@@ -99,14 +108,17 @@ func connect_feedback_controller(controller: _DCKitNS.UI.InputFeedbackController
 	controller.diagnostics_view.diagnostics_changed.connect(_on_diagnostics_changed)
 	controller.signature_help_view.definition_changed.connect(_on_definition_changed)
 	controller.signature_help_view.active_changed.connect(_on_active_changed)
-	
+
 	input_component.connect_autocomplete_obj(controller.completion_provider)
-	
+
 	input_component.cmd_text_changed.connect(controller.handle_text_changed)
 	input_component.cmd_caret_location_changed.connect(controller.handle_cursor_moved)
-	
-	controller.handle_text_changed("",0) # 
-	
+
+	controller.handle_text_changed("", 0) #
+
+
+func _on_resize():
+	_DCKitNS.UI.mobile_layout.set_screen_width(size.x)
 
 
 func _on_definition_changed(info: _DCKitNS.UI.Signature.SignatureInfo) -> void:
@@ -171,12 +183,11 @@ func _default_theme_changed():
 
 	new_theme.set_constant("separation", "HBoxContainer", scales.em_space(.9))
 	new_theme.set_constant("separation", "VBoxContainer", scales.em_space(.9))
-	
+
 	new_theme.set_constant("h_separation", "ItemList", scales.em_space(1))
 	new_theme.set_constant("v_separation", "ItemList", scales.em_space(1))
 	new_theme.set_constant("scrollbar_v_separation", "ItemList", scales.em_space(0))
-	
-	
+
 	new_theme.set_constant("separation", "HBoxContainer_LineEdit", scales.em_font(.5))
 
 	var new_scroll_VScrollBar := new_theme.get_stylebox("scroll", "VScrollBar").duplicate()

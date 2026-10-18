@@ -35,3 +35,6 @@ func request_connections() -> void:
 
 func configure(config: Dictionary) -> void:
 	return
+
+func get_configure() ->  Dictionary:
+	return {}

@@ -20,7 +20,6 @@ size_flags_horizontal = 3
 focus_mode = 2
 theme_type_variation = &"Looger_RichTextLabel"
 bbcode_enabled = true
-text = "zXZXzXasXzxzXZxZxZxzX"
 scroll_following = true
 vertical_alignment = 2
 selection_enabled = true

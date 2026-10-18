@@ -12,7 +12,6 @@ signal ui_close_requested
 
 @export var info_component: _DCKitNS.UI.InfoComponentBase
 
-
 @export_category("UI Constants")
 @export var default_theme: Theme:
 	set(value):
@@ -27,9 +26,8 @@ var _theme_rebuild_queued := false
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-
-func _ready() -> void:
-	_queue_theme_rebuild() # always, even if no scale differed from its default
+func set_title_bar_visibility(visibility: bool):
+	_DCKitNS.not_implemented("set_title_bar_visibility")
 
 
 func grab_focus_on_input():

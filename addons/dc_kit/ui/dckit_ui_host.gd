@@ -2,7 +2,7 @@ extends "./dckit_host_interface.gd"
 
 signal placement_changed(mode: _DCKitSetting.ConsoleMode, edge: _DCKitSetting.WindowEdge)
 
-const WINDOW_MODE_SUPPORTED := false
+const WINDOW_MODE_SUPPORTED := true
 
 @export_group("Console Scene")
 @export var console_scene: PackedScene = preload(
@@ -27,6 +27,8 @@ var _ratio_serial := 0 # bumped on every layout request; stale awaits bail out
 
 var _connection_request_callback: Callable
 
+var _schema := { }
+
 @onready var split: SplitContainer = $CanvasLayer/SplitContainer
 @onready var window: Window = $Window
 @onready var container_for_window: MarginContainer = $Window/MarginContainer
@@ -45,6 +47,8 @@ func _ready() -> void:
 	_DCKitNS.UI.mobile_layout.manual_changed.connect(_on_mobile_manual_changed)
 	_on_mobile_manual_changed(_DCKitNS.UI.mobile_layout.manual)
 
+	_build_schema()
+
 	var new_console := _instantiate_console(console_scene)
 	if new_console == null:
 		return
@@ -53,43 +57,34 @@ func _ready() -> void:
 
 func configure(config: Dictionary) -> void:
 	for key in config:
-		var value = config[key]
-		match key:
-			"mode":
-				var parsed = _parse_enum(_DCKitSetting.ConsoleMode, key, value)
-				if parsed != null:
-					set_mode(parsed)
-			"edge":
-				var parsed = _parse_enum(_DCKitSetting.WindowEdge, key, value)
-				if parsed != null:
-					set_edge(parsed)
-			"canvas_layer":
-				if value is float or value is int:
-					canvas_layer.layer = value
-				else:
-					_warn_bad_value(key, "int", value)
-			"is_mobile":
-				if value is bool:
-					_DCKitNS.UI.mobile_layout.set_manual(value)
-				else:
-					_warn_bad_value(key, "bool", value)
-			"font_size":
-				if value is float or value is int:
-					_DCKitNS.UI.mobile_layout.get_scales().font = clampf(value, 0.5, 3.0)
-				else:
-					_warn_bad_value(key, "float", value)
-			"space_size":
-				if value is float or value is int:
-					_DCKitNS.UI.mobile_layout.get_scales().space = clampf(value, 0.5, 3.0)
-				else:
-					_warn_bad_value(key, "float", value)
-			"logger_font_size":
-				if value is float or value is int:
-					_DCKitNS.UI.mobile_layout.get_scales().log_font = clampf(value, 0.5, 3.0)
-				else:
-					_warn_bad_value(key, "float", value)
-			_:
-				push_warning("Dckit: unknown config key '%s' — skipped." % key)
+		if not _schema.has(key):
+			push_warning("Dckit: unknown config key '%s' — skipped." % key)
+			continue
+		var entry: Dictionary = _schema[key]
+		var parsed = _validate(key, entry, config[key])
+		if parsed != null: # null means invalid; false and 0 are valid results
+			entry["set"].call(parsed)
+
+
+func get_configure() -> Dictionary:
+	var result := { }
+	for key in _schema:
+		var entry: Dictionary = _schema[key]
+		var current = entry["get"].call()
+		var info := { "type": entry["type"] }
+		if entry["type"] == "enum":
+			info["value"] = String(entry["enum"].find_key(current)).to_lower()
+			info["options"] = entry["enum"].keys().map(
+				func(k):
+					return String(k).to_lower(),
+			)
+		else:
+			info["value"] = current
+		for bound in ["min", "max"]:
+			if entry.has(bound):
+				info[bound] = entry[bound]
+		result[key] = info
+	return result
 
 
 #region console ownership
@@ -175,10 +170,82 @@ func request_connections() -> void:
 #endregion
 
 
-func set_connection_request_callback(callback: Callable):
+func set_connection_request_callback(callback: Callable) -> void:
 	if callback.is_valid():
 		_connection_request_callback = callback
-	return
+
+
+func _build_schema() -> void:
+	var scales := _DCKitNS.UI.mobile_layout.get_scales()
+	_schema = {
+		"mode": _enum_entry(
+			_DCKitSetting.ConsoleMode,
+			func():
+				return _mode,
+			set_mode,
+		),
+		"edge": _enum_entry(
+			_DCKitSetting.WindowEdge,
+			func():
+				return _edge,
+			set_edge,
+		),
+		"canvas_layer": {
+			"type": "int",
+			"get": func():
+				return canvas_layer.layer,
+			"set": func(v):
+				canvas_layer.layer = v,
+		},
+		"is_mobile": {
+			"type": "bool",
+			"get": func():
+				return _DCKitNS.UI.mobile_layout.manual,
+			"set": func(v):
+				_DCKitNS.UI.mobile_layout.set_manual(v),
+		},
+		"font_size": _scale_entry(
+			func():
+				return scales.font,
+			scales.set_font,
+		),
+		"space_size": _scale_entry(
+			func():
+				return scales.space,
+			scales.set_space,
+		),
+		"logger_font_size": _scale_entry(
+			func():
+				return scales.log_font,
+			scales.set_log_font,
+		),
+	}
+
+
+func _enum_entry(enum_dict: Dictionary, getter: Callable, setter: Callable) -> Dictionary:
+	return { "type": "enum", "enum": enum_dict, "get": getter, "set": setter }
+
+
+func _scale_entry(getter: Callable, setter: Callable) -> Dictionary:
+	return { "type": "float", "min": 0.5, "max": 3.0, "get": getter, "set": setter }
+
+
+# Returns the cleaned value (enum int, clamped number), or null after warning.
+func _validate(key: String, entry: Dictionary, value) -> Variant:
+	match entry["type"]:
+		"enum":
+			return _parse_enum(entry["enum"], key, value)
+		"bool":
+			if value is bool:
+				return value
+			_warn_bad_value(key, "bool", value)
+		"int", "float":
+			if not (value is int or value is float):
+				_warn_bad_value(key, entry["type"], value)
+				return null
+			var num := clampf(float(value), entry.get("min", -INF), entry.get("max", INF))
+			return int(num) if entry["type"] == "int" else num
+	return null
 
 
 #region configure helper logic
@@ -186,14 +253,14 @@ func _parse_enum(enum_dict: Dictionary, key: String, value) -> Variant:
 	if not value is String:
 		_warn_bad_value(key, "String", value)
 		return null
-	var name := (value as String).to_upper()
-	if not enum_dict.has(name):
+	var key_name := (value as String).to_upper()
+	if not enum_dict.has(key_name):
 		push_warning(
 			"Dckit: '%s' is not a valid value for '%s' (expected one of %s) — skipped."
 			% [value, key, enum_dict.keys()]
 		)
 		return null
-	return enum_dict[name]
+	return enum_dict[key_name]
 
 
 func _warn_bad_value(key: String, expected: String, value) -> void:
@@ -230,11 +297,11 @@ func _install_console(new_console: _DCKitNS.UI.ConsoleBase) -> void:
 	if _console:
 		if _open:
 			_console.release_focus_on_input()
-		# Remove now so child order in the split is right when _apply() runs.
 		_console.get_parent().remove_child(_console)
 		_console.queue_free()
 	_console = new_console
-	_apply() # puts the console in the tree, so its components are ready below
+	_console.ui_close_requested.connect(hide_console) # once per console instance
+	_apply()
 	_update_connections()
 	if _open:
 		_console.grab_focus_on_input()
@@ -245,11 +312,8 @@ func _update_connections() -> void:
 	if _console == null:
 		return
 	_console.connect_cmd_history(cmd_history_obj)
-	_console.ui_close_requested.connect(hide_console)
-
-	if not _connection_request_callback.is_valid():
-		push_error("_connection_request_callback is not valid")
-	_connection_request_callback.call()
+	if _connection_request_callback.is_valid():
+		_connection_request_callback.call()
 
 
 func _set_open(open: bool) -> void:
@@ -279,9 +343,12 @@ func _apply() -> void:
 		return
 	match _mode:
 		_DCKitSetting.ConsoleMode.DOCK:
+			_console.set_title_bar_visibility(true)
 			_place_in_dock()
 		_DCKitSetting.ConsoleMode.WINDOW:
+			_console.set_title_bar_visibility(false)
 			_place_in_window()
+
 	placement_changed.emit(_mode, _edge)
 
 
@@ -290,8 +357,11 @@ func _place_in_dock() -> void:
 	_move_console_to(split)
 
 	split.vertical = _edge in [_DCKitSetting.WindowEdge.TOP, _DCKitSetting.WindowEdge.BOTTOM]
+	
+	var index := 0 if _console_first() else 1
 	# Child order decides the side: console first = left/top.
-	split.move_child(_console, 0 if _console_first() else 1)
+	split.move_child(_console, mini(index, split.get_child_count() - 1))
+	
 	split.visible = _open
 	_update_min_size()
 	_ratio_pending = true
