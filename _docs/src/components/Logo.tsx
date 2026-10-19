@@ -9,7 +9,7 @@ interface LogoProps {
 export const Logo: React.FC<LogoProps> = ({ name }) => {
   return (
     <div className="flex items-center gap-2 text-left shrink-0 group">
-      <div className="w-8 h-8 flex items-center justify-center text-[#00ff41] group-hover:scale-105 transition-transform">
+      <div className="w-8 h-8 flex items-center justify-center text-fd-primary group-hover:scale-105 transition-transform">
         <Image
           src="/logos/icon.svg"
           alt="DCKit Icon"
@@ -20,7 +20,7 @@ export const Logo: React.FC<LogoProps> = ({ name }) => {
       </div>
       {name && (
         <div className="flex items-center gap-2">
-          <span className="font-display font-bold text-lg sm:text-xl tracking-tight text-white light:text-slate-900 group-hover:text-[#00ff41] transition-colors">
+          <span className="font-display font-bold text-lg sm:text-xl tracking-tight  light:text-slate-900 group-hover:text-fd-primary transition-colors">
             {name}
           </span>
         </div>

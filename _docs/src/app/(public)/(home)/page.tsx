@@ -4,6 +4,23 @@ import IntergrationMatrix from "./_components/integration_matrix";
 import { HeroSection } from "./_components/hero_section";
 import { PillarCards } from "./_components/pillar_cards";
 
+import type { Metadata, ResolvingMetadata } from "next";
+
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  return {
+    description:
+      "Learn about our Godot addons, their purpose, features, and development. Discover tools and resources designed to enhance your Godot game development workflow.",
+  };
+}
+
 export default function HomePage() {
   return (
     <div className="flex flex-col justify-center text-center flex-1">

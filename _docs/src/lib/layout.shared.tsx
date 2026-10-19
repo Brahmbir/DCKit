@@ -1,5 +1,5 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
-import { appName, gitConfig } from "./shared";
+import { appName, gitConfig, latestVersion } from "./shared";
 import { Logo } from "@/components/Logo";
 
 export function baseOptions(): BaseLayoutProps {
@@ -8,10 +8,15 @@ export function baseOptions(): BaseLayoutProps {
       title: <Logo name={appName} />,
     },
     links: [
-      { text: "DOCS", url: "/docs", on: "nav", active: "nested-url" },
+      {
+        text: "DOCS",
+        url: "/docs" + latestVersion.url,
+        on: "nav",
+        active: "nested-url",
+      },
       {
         text: "API REFERENCE",
-        url: "/api_reference",
+        url: "/docs" + latestVersion.url + "/api_reference",
         on: "nav",
         active: "nested-url",
       },

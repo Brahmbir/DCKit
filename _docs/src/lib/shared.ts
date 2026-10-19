@@ -34,7 +34,10 @@ type Version = {
   url: `/${string}`;
 };
 
-export const latestVersion: Version = { label: "1.0.0-rc.1", url: "/v2" };
+export const latestVersion: Version = { label: "1.0.0-rc.1", url: "/v1" };
+
+export const siteUrl =
+  "https://store.godotengine.org/asset/brahm-bir-singh/dckit/";
 
 export const storeUrl =
   "https://store.godotengine.org/asset/brahm-bir-singh/dckit/";
