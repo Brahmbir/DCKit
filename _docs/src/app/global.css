@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+:root {
+  color-scheme: dark;
+  --cyber-surface: #131313;
+  --cyber-surface-dim: #131313;
+  --cyber-surface-bright: #3a3939;
+  --cyber-surface-container-lowest: #0e0e0e;
+  --cyber-surface-container-low: #1c1b1b;
+  --cyber-surface-container: #201f1f;
+  --cyber-surface-container-high: #2a2a2a;
+  --cyber-surface-container-highest: #353534;
+  --cyber-on-surface: #e5e2e1;
+  --cyber-on-surface-variant: #b9ccb2;
+  --cyber-inverse-surface: #e5e2e1;
+  --cyber-inverse-on-surface: #313030;
+  --cyber-outline: #84967e;
+  --cyber-outline-variant: #3b4b37;
+  --cyber-surface-tint: #00e639;
+  --cyber-primary: #ebffe2;
+  --cyber-on-primary: #003907;
+  --cyber-primary-container: #00ff41;
+  --cyber-on-primary-container: #007117;
+  --cyber-inverse-primary: #006e16;
+  --cyber-secondary: #bdf4ff;
+  --cyber-on-secondary: #00363d;
+  --cyber-secondary-container: #00e3fd;
+  --cyber-on-secondary-container: #00616d;
+  --cyber-tertiary: #fff8f3;
+  --cyber-on-tertiary: #432c00;
+  --cyber-tertiary-container: #ffd799;
+  --cyber-on-tertiary-container: #825900;
+  --cyber-error: #ffb4ab;
+  --cyber-on-error: #690005;
+  --cyber-error-container: #93000a;
+  --cyber-on-error-container: #ffdad6;
+  --cyber-primary-fixed: #72ff70;
+  --cyber-primary-fixed-dim: #00e639;
+  --cyber-on-primary-fixed: #002203;
+  --cyber-on-primary-fixed-variant: #00530e;
+  --cyber-secondary-fixed: #9cf0ff;
+  --cyber-secondary-fixed-dim: #00daf3;
+  --cyber-on-secondary-fixed: #001f24;
+  --cyber-on-secondary-fixed-variant: #004f58;
+  --cyber-tertiary-fixed: #ffdeac;
+  --cyber-tertiary-fixed-dim: #ffba38;
+  --cyber-on-tertiary-fixed: #281900;
+  --cyber-on-tertiary-fixed-variant: #604100;
+  --cyber-background: #131313;
+  --cyber-on-background: #e5e2e1;
+  --cyber-surface-variant: #353534;
+  --cyber-gutter: 12px;
+  --cyber-page-margin: 24px;
+  --cyber-panel-gap: 8px;
+  --cyber-container-padding: 16px;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}

@@ -37,19 +37,93 @@ func _ready() -> void:
 		global_position = target.global_position + Vector3.UP * settings.follow_height
 
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	
-func _register_commands() -> void:
-	var handler := func(_ctx: DCContext) -> DCResult:
-		toggle_free_cam()
-		DCKit.hide_console()
-		return DCResult.ok("Free cam [b]%s[/b]." % ("on" if free_cam else "off"))
 
-	DCKit.register_def(DCDefinition.new(
-		"toggle_free_cam",
-		handler,
-		"Toggles the free-flying camera.",
-		[],
-	).alias("tfc"))
+
+func _process(delta: float) -> void:
+	if free_cam:
+		_free_cam_move(delta)
+		return
+	if target == null:
+		return
+	var goal := target.global_position + Vector3.UP * settings.follow_height
+	if settings.follow_lag <= 0.0:
+		global_position = goal
+	else:
+		global_position = global_position.lerp(goal, 1.0 - exp(-delta / settings.follow_lag))
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		rotation.y -= event.relative.x * settings.mouse_sensitivity
+		_pitch_angle = clampf(
+			_pitch_angle - event.relative.y * settings.mouse_sensitivity,
+			deg_to_rad(settings.pitch_min_deg),
+			deg_to_rad(settings.pitch_max_deg),
+		)
+		_pitch.rotation.x = _pitch_angle
+	elif event.is_action_pressed("ui_cancel"):
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func toggle_free_cam() -> void:
+	set_free_cam(not free_cam)
+
+
+func set_free_cam(active: bool) -> void:
+	if active == free_cam:
+		return
+	free_cam = active
+	if active:
+		# Move the pivot to where the camera is now, then collapse the arm,
+		# so the view doesn't jump when free cam starts.
+		global_position = _camera.global_position
+		_arm.spring_length = 0.0
+	else:
+		# Restore the arm; the follow code flies the pivot back to the target.
+		_arm.spring_length = settings.follow_distance
+	free_cam_toggled.emit(active)
+
+
+## Yaw-only basis for camera-relative movement.
+func yaw_basis() -> Basis:
+	return Basis(Vector3.UP, rotation.y)
+
+
+func _register_commands() -> void:
+	DCKit.register_def(
+		DCDefinition
+		.new(
+			"toggle_free_cam",
+			func(_ctx: DCContext) -> DCResult:
+				toggle_free_cam()
+
+				DCKit.hide_console()
+				return DCResult.ok("Free cam [b]%s[/b]." % ("on" if free_cam else "off")),
+			"Toggles the free-flying camera.",
+			[],
+		)
+		.alias("tfc")
+	)
+
+	DCKit.register_def(
+		DCDefinition
+		.new(
+			"set_free_cam",
+			func(ctx: DCContext) -> DCResult:
+				var enabled: bool = (await ctx.arg(0)).value.as_bool()
+
+				if free_cam != enabled:
+					toggle_free_cam()
+
+				return DCResult.ok("Free cam [b]%s[/b]." % ("on" if free_cam else "off")),
+			"Enables or disables the free-flying camera.",
+			[DCDefinition.Param.new("switch").describe("on or off")],
+		)
+		.alias("sfc")
+	)
 
 
 func _build() -> void:
@@ -79,63 +153,14 @@ func _apply_settings() -> void:
 		_arm.add_excluded_object((target as CollisionObject3D).get_rid())
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotation.y -= event.relative.x * settings.mouse_sensitivity
-		_pitch_angle = clampf(
-			_pitch_angle - event.relative.y * settings.mouse_sensitivity,
-			deg_to_rad(settings.pitch_min_deg),
-			deg_to_rad(settings.pitch_max_deg))
-		_pitch.rotation.x = _pitch_angle
-	elif event is InputEventKey and event.pressed and not event.echo \
-			and event.physical_keycode == toggle_key:
-		toggle_free_cam()
-	elif event.is_action_pressed("ui_cancel"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		else:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
-
-func _process(delta: float) -> void:
-	if free_cam:
-		_free_cam_move(delta)
-		return
-	if target == null:
-		return
-	var goal := target.global_position + Vector3.UP * settings.follow_height
-	if settings.follow_lag <= 0.0:
-		global_position = goal
-	else:
-		global_position = global_position.lerp(goal, 1.0 - exp(-delta / settings.follow_lag))
-
-
-func toggle_free_cam() -> void:
-	set_free_cam(not free_cam)
-
-
-func set_free_cam(active: bool) -> void:
-	if active == free_cam:
-		return
-	free_cam = active
-	if active:
-		# Move the pivot to where the camera is now, then collapse the arm,
-		# so the view doesn't jump when free cam starts.
-		global_position = _camera.global_position
-		_arm.spring_length = 0.0
-	else:
-		# Restore the arm; the follow code flies the pivot back to the target.
-		_arm.spring_length = settings.follow_distance
-	free_cam_toggled.emit(active)
-
-
 func _free_cam_move(delta: float) -> void:
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
 	var axis := Vector3(
 		float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_E)) - float(Input.is_physical_key_pressed(KEY_Q)),
-		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
+		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)),
+	)
 	if axis == Vector3.ZERO:
 		return
 	# Horizontal axes follow the view direction (including pitch); Q/E are world up/down.
@@ -144,8 +169,3 @@ func _free_cam_move(delta: float) -> void:
 	if Input.is_physical_key_pressed(KEY_SHIFT):
 		speed *= free_cam_fast_multiplier
 	global_position += move.normalized() * speed * delta
-
-
-## Yaw-only basis for camera-relative movement.
-func yaw_basis() -> Basis:
-	return Basis(Vector3.UP, rotation.y)
