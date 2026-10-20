@@ -1,3 +1,93 @@
 ---
 title: What is DCKit
+description: An introduction to DCKit, a modular developer console framework for Godot 4.
 ---
+
+> **Documentation in Progress**
+>
+> This documentation site is currently a work in progress. Some sections may be incomplete or missing. More guides and API references will be added as the documentation develops.
+
+## Overview
+
+**DCKit** is a modular developer console framework for Godot 4, designed to bring a powerful, extensible in-game command console to your projects.
+
+From parsing commands and resolving variables to executing commands and displaying syntax-highlighted input, DCKit provides the core infrastructure needed to build developer-facing tools directly into your game.
+
+Its modular architecture lets you register custom commands, manage variables, execute commands from GDScript, and integrate the console into your development workflow without tightly coupling your game logic to the framework.
+
+## Features
+
+- **Command system** — Register, execute, unregister, and manage custom commands.
+- **Command parsing** — Support for quoted strings, typed constructors, variables, fallbacks, nested commands, and command chaining.
+- **Variable store** — Read, write, and manage variables shared between the console and game scripts.
+- **Extensible architecture** — Define reusable commands, aliases, parameters, and command metadata.
+- **GDScript integration** — Execute commands programmatically and handle their results asynchronously.
+- **In-game console UI** — Interact with commands through a dedicated console interface.
+- **Development-focused workflow** — Integrate debugging and testing utilities directly into your Godot project.
+
+## Installation
+
+1. Copy the `dckit/` directory into your project's `addons/` directory.
+
+   ```text
+   res://addons/dckit/
+   ```
+
+2. Open **Project → Project Settings → Plugins**.
+3. Find **DCKit** and enable the plugin.
+4. Once enabled, DCKit registers its autoload singleton, making it accessible throughout your project.
+
+## Quick Example
+
+Register a custom command to heal the player:
+
+```gdscript
+DCKit.register(
+    "player.heal",
+    func(ctx: DCContext) -> DCResult:
+        var amount = await ctx.arg(0)
+        player.heal(amount.as_float())
+        return DCResult.ok("Player healed by %s HP." % amount),
+    "Heals the player by the given amount.",
+    [
+        DCDefinition.Param.new("amount")
+            .describe("Amount of HP to restore.")
+    ]
+)
+```
+
+You can also execute commands directly from GDScript:
+
+```gdscript
+var result := await DCKit.run("player.heal 50")
+
+if not result.success:
+    push_warning(result.message)
+```
+
+These examples illustrate how DCKit can connect console commands to your game's existing systems.
+
+## Documentation
+
+The documentation will expand to cover the framework's main components, command syntax, API, and integration patterns.
+
+Planned topics include:
+
+- **Getting Started** — Installation, setup, and initial configuration.
+- **Commands** — Registration, definitions, parameters, aliases, and execution.
+- **Command Syntax** — Arguments, variables, constructors, nested commands, and chaining.
+- **Variables** — Accessing and managing the console's variable store.
+- **Console Integration** — Opening the console and connecting it to your game's input and UI systems.
+- **API Reference** — Documentation for the public classes, methods, and signals.
+
+Some topics may not yet have dedicated documentation pages.
+
+## Project Status
+
+DCKit is actively being developed and tested. Its documentation is evolving alongside the project, and some APIs or implementation details may change.
+
+Feedback from developers using DCKit in real projects is welcome. If you encounter an issue or have a suggestion, please report it through the project's GitHub issue tracker.
+
+---
+
+_Built for Godot 4 · GDScript · MIT License_

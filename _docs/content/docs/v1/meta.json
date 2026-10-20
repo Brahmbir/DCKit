@@ -2,5 +2,5 @@
   "title": "1.0.0-rc.1",
   "description": "DCKit Documentation",
   "root": "version",
-  "pages": ["index", "getting_started", "guides", "api_reference"]
+  "pages": ["index", "wip_getting_started", "wip_guides", "api_reference"]
 }
