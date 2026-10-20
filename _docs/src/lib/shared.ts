@@ -36,7 +36,7 @@ type Version = {
 
 export const latestVersion: Version = { label: "1.0.0-rc.1", url: "/v1" };
 
-export const siteUrl = "https://localhost:3000";
+export const siteUrl = "https://brahmbir.github.io/DCkit";
 
 export const storeUrl =
-  "https://store.godotengine.org/asset/brahm-bir-singh/dckit/";
+  "https://store.godotengine.org/asset/brahm-bir-singh/dckit";

@@ -4,6 +4,8 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
+  basePath: "/DCKit",
+  images: { unoptimized: true },
   output: "export",
   reactStrictMode: true,
 };
