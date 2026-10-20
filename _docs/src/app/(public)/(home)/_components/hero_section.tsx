@@ -1,6 +1,7 @@
 import { BookOpen, Download, ExternalLink } from "lucide-react";
 import { baseOptions } from "@/lib/layout.shared";
 import { latestVersion, storeUrl } from "@/lib/shared";
+import Link from "next/link";
 
 export interface IHeroSectionProps {}
 
@@ -30,7 +31,7 @@ export function HeroSection(props: IHeroSectionProps) {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
-        <a
+        <Link
           href={storeUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -38,9 +39,9 @@ export function HeroSection(props: IHeroSectionProps) {
         >
           <Download className="w-4 h-4" />
           <span>[ GET ADDON ]</span>
-        </a>
+        </Link>
 
-        <a
+        <Link
           href={"/docs" + latestVersion.url}
           target="_blank"
           rel="noopener noreferrer"
@@ -48,7 +49,7 @@ export function HeroSection(props: IHeroSectionProps) {
         >
           <BookOpen className="w-4 h-4 text-fd-primary" />
           <span>READ DOCUMENTATION</span>
-        </a>
+        </Link>
       </div>
 
       {/* Get Addon Command Box */}
@@ -74,15 +75,15 @@ export function HeroSection(props: IHeroSectionProps) {
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <a
-            href={githubUrl}
+          <Link
+            href={githubUrl ?? "/"}
             target="_blank"
             rel="noopener noreferrer"
             className="p-1 rounded text-neutral-400 hover:text-fd-primary transition-colors"
             title="View on Godot Asset Library / GitHub"
           >
             <ExternalLink className="w-4 h-4" />
-          </a>
+          </Link>
         </div>
       </div>
     </section>

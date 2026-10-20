@@ -1,4 +1,6 @@
+import { brahmbirUrl } from "@/lib/shared";
 import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 interface IMeTagProps {
   variant?: "flat" | "link";
@@ -19,8 +21,8 @@ export default function MeTag({
   };
 
   return (
-    <a
-      href="https://brahmbir.dev"
+    <Link
+      href={brahmbirUrl}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Visit Brahmbir's website (opens in a new tab)"
@@ -34,6 +36,6 @@ export default function MeTag({
           className="size-3.5 text-fd-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-fd-primary"
         />
       )}
-    </a>
+    </Link>
   );
 }

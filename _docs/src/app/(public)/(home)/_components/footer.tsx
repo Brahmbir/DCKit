@@ -2,6 +2,7 @@ import { ExternalLink } from "lucide-react";
 import { storeUrl } from "@/lib/shared";
 import { baseOptions } from "@/lib/layout.shared";
 import MeTag from "@/components/MeTag";
+import Link from "next/link";
 
 type Props = {};
 
@@ -24,7 +25,7 @@ export default function Footer({}: Props) {
         </div>
 
         <div className="flex items-center gap-4 text-fd-muted-foreground">
-          <a
+          <Link
             href={storeUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -32,11 +33,11 @@ export default function Footer({}: Props) {
           >
             <span>GODOT ASSET STORE</span>
             <ExternalLink className="w-3 h-3" />
-          </a>
+          </Link>
 
           <span>·</span>
 
-          <a
+          <Link
             href={githubUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -44,7 +45,7 @@ export default function Footer({}: Props) {
           >
             <span>GITHUB REPO</span>
             <ExternalLink className="w-3 h-3" />
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

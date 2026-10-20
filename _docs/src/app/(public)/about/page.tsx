@@ -2,6 +2,7 @@ import MeTag from "@/components/MeTag";
 import { baseOptions } from "@/lib/layout.shared";
 import { latestVersion } from "@/lib/shared";
 import { ExternalLink, Code2, Heart, Shield, BookOpen } from "lucide-react";
+import Link from "next/link";
 
 export default function AboutPage() {
   return (
@@ -112,24 +113,24 @@ export default function AboutPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <a
-            href={baseOptions().githubUrl}
+          <Link
+            href={baseOptions().githubUrl ?? "/"}
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 rounded text-xs font-mono font-bold bg-fd-primary hover:brightness-110 text-fd-primary-foreground transition-all inline-flex items-center gap-1.5 cursor-pointer"
           >
             <span>GITHUB REPOSITORY</span>
             <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+          </Link>
 
-          <a
+          <Link
             href={"/docs" + latestVersion.url}
             target="_blank"
             className="px-4 py-2 rounded text-xs font-mono font-bold bg-fd-card hover:bg-fd-accent text-fd-foreground border border-fd-border transition-colors inline-flex items-center gap-1.5 cursor-pointer"
           >
             <BookOpen className="w-3.5 h-3.5 text-fd-primary" />
             <span>EXPLORE DOCS</span>
-          </a>
+          </Link>
         </div>
       </div>
     </main>
