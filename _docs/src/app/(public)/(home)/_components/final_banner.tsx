@@ -1,6 +1,6 @@
 import { Download, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { storeUrl } from "@/lib/shared";
+import { latestVersion, storeUrl } from "@/lib/shared";
 
 type Props = {};
 
@@ -36,7 +36,8 @@ export default function FinalBanner({}: Props) {
           </Link>
 
           <Link
-            href="/docs/quickstart"
+            href="/docs"
+            target="_blank"
             className="px-6 py-3 rounded text-xs font-mono font-bold tracking-wider bg-fd-muted hover:bg-fd-accent text-fd-foreground border border-fd-border transition-colors inline-flex items-center gap-2 cursor-pointer"
           >
             <BookOpen className="w-4 h-4 text-fd-primary" />

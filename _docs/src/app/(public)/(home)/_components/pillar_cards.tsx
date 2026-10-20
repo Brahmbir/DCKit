@@ -7,7 +7,7 @@ export function PillarCards(props: IPillarCardsProps) {
     <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* PIL-01: Command History & Autocomplete */}
-        <div className="p-6 sm:p-8 rounded-lg bg-fd-card text-fd-card-foreground border border-fd-border hover:border-fd-primary transition-all flex flex-col justify-between group shadow-lg">
+        <div className="p-6 sm:p-8 rounded-lg bg-fd-card text-fd-card-foreground border border-fd-border hover:border-pillar-1 transition-all flex flex-col justify-between group shadow-lg">
           <div>
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-xs font-bold tracking-widest text-pillar-1">
@@ -36,7 +36,7 @@ export function PillarCards(props: IPillarCardsProps) {
         </div>
 
         {/* PIL-02: Batch Runner */}
-        <div className="p-6 sm:p-8 rounded-lg bg-fd-card text-fd-card-foreground border border-fd-border hover:border-fd-primary transition-all flex flex-col justify-between group shadow-lg">
+        <div className="p-6 sm:p-8 rounded-lg bg-fd-card text-fd-card-foreground border border-fd-border hover:border-pillar-2 transition-all flex flex-col justify-between group shadow-lg">
           <div>
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-xs font-bold tracking-widest text-pillar-2">
@@ -66,7 +66,7 @@ export function PillarCards(props: IPillarCardsProps) {
         </div>
 
         {/* PIL-03: Simple Syntax */}
-        <div className="p-6 sm:p-8 rounded-lg bg-fd-card text-fd-card-foreground border border-fd-border hover:border-fd-primary transition-all flex flex-col justify-between group shadow-lg">
+        <div className="p-6 sm:p-8 rounded-lg bg-fd-card text-fd-card-foreground border border-fd-border hover:border-pillar-3 transition-all flex flex-col justify-between group shadow-lg">
           <div>
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-xs font-bold tracking-widest text-pillar-3">

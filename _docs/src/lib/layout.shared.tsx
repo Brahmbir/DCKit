@@ -10,7 +10,7 @@ export function baseOptions(): BaseLayoutProps {
     links: [
       {
         text: "DOCS",
-        url: "/docs" + latestVersion.url,
+        url: "/docs",
         on: "nav",
         active: "nested-url",
       },

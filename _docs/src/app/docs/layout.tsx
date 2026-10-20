@@ -2,12 +2,6 @@ import { source } from "@/lib/source";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { baseOptions } from "@/lib/layout.shared";
 
-import FooterResources from "@/components/docs/FooterResources";
-import {
-  SearchTriggerFull,
-  SearchTriggerSM,
-} from "@/components/util/search_trigger";
-
 export default function Layout({ children }: LayoutProps<"/docs">) {
   return (
     <DocsLayout
@@ -21,8 +15,8 @@ export default function Layout({ children }: LayoutProps<"/docs">) {
             </p>
           </div>
         ),
-        footer: <FooterResources />,
       }}
+      tabMode="top"
       tree={source.getPageTree()}
     >
       {children}

@@ -13,41 +13,41 @@ import type { Metadata } from "next";
 import { siteUrl } from "@/lib/shared";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  // metadataBase: new URL(siteUrl),
 
   title: {
-    default: "DCKit — Godot Addons & Developer Tools",
+    default: "DCKit — Godot Addons & In-game Console",
     template: "%s | DCKit",
   },
 
   description:
-    "Explore DCKit, a collection of Godot addons and developer tools designed to simplify workflows and help you build better games with Godot.",
+    "Explore DCKit, In-Game console for Godot with simple way to define custom command.",
 
   applicationName: "DCKit",
 
   openGraph: {
     type: "website",
     siteName: "DCKit",
-    title: "DCKit — Godot Addons & Developer Tools",
+    title: "DCKit — Godot Addons & In-game Console",
     description:
-      "Discover useful Godot addons, tools, and documentation to streamline your game development workflow.",
+      "Explore DCKit, a Godot in-game console for easily defining custom commands.",
     url: siteUrl,
     images: [
       {
-        url: "/side_dock_with_logo.png",
-        width: 1200,
-        height: 630,
-        alt: "DCKit — Godot Addons & Developer Tools",
+        url: "/og_img.jpg",
+        width: 1440,
+        height: 810,
+        alt: "DCKit — Godot Addons & In-game Console",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "DCKit — Godot Addons & Developer Tools",
+    title: "DCKit — Godot Addons & In-game Console",
     description:
-      "Discover Godot addons, developer tools, and documentation to improve your game development workflow.",
-    images: ["/side_dock_with_logo.png"],
+      "Explore DCKit, a Godot in-game console for easily defining custom commands.",
+    images: ["/og_img.jpg"],
   },
 
   robots: {
