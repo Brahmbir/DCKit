@@ -36,7 +36,7 @@ export default function FinalBanner({}: Props) {
           </Link>
 
           <Link
-            href="/docs"
+            href={"/docs" + latestVersion.url}
             target="_blank"
             className="px-6 py-3 rounded text-xs font-mono font-bold tracking-wider bg-fd-muted hover:bg-fd-accent text-fd-foreground border border-fd-border transition-colors inline-flex items-center gap-2 cursor-pointer"
           >

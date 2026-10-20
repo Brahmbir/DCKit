@@ -3,7 +3,10 @@ import { baseOptions } from "@/lib/layout.shared";
 
 export default function Layout({ children }: LayoutProps<"/">) {
   return (
-    <HomeLayout className="HOME_ROOT" {...baseOptions()}>
+    <HomeLayout
+      className="bg-fd-background bg-[radial-gradient(#66706455_0.8px,transparent_0.8px)] bg-position-[0_0] bg-size-[22px_22px]"
+      {...baseOptions()}
+    >
       {children}
     </HomeLayout>
   );

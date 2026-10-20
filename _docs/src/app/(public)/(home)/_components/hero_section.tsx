@@ -41,7 +41,7 @@ export function HeroSection(props: IHeroSectionProps) {
         </a>
 
         <a
-          href="/docs"
+          href={"/docs" + latestVersion.url}
           target="_blank"
           rel="noopener noreferrer"
           className="px-6 py-3 rounded text-xs font-mono font-bold tracking-wider bg-fd-secondary hover:bg-fd-muted text-fd-foreground border border-fd-border light:bg-white light:hover:bg-slate-100 light:border-slate-300 light:text-slate-900 transition-colors inline-flex items-center gap-2 cursor-pointer"

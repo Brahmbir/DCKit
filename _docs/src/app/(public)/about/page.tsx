@@ -123,7 +123,7 @@ export default function AboutPage() {
           </a>
 
           <a
-            href="/docs"
+            href={"/docs" + latestVersion.url}
             target="_blank"
             className="px-4 py-2 rounded text-xs font-mono font-bold bg-fd-card hover:bg-fd-accent text-fd-foreground border border-fd-border transition-colors inline-flex items-center gap-1.5 cursor-pointer"
           >

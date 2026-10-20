@@ -11,13 +11,6 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
-/* .HOME_ROOT {
-  background-color: #101110;
-  background-image: radial-gradient(#66706455 0.8px, transparent 0.8px);
-  background-position: "0 0";
-  background-size: "22px 22px";
-} */
-
 @theme {
   --color-fd-background: #f8fafc;
   --color-fd-foreground: #0f172a;
