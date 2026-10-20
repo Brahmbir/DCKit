@@ -234,7 +234,7 @@ func _ready() -> void:
 				{
 					"res://LICENSE": "addons/dc_kit/LICENSE",
 					"res://README.md": "addons/dc_kit/README.md",
-					"res://icon.svg": "addons/dc_kit/icon.svg",
+					#"res://icon.svg": "addons/dc_kit/icon.svg",
 				},
 			)
 
