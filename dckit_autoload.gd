@@ -3,7 +3,10 @@ extends Node
 signal console_visibility_changed(is_open: bool)
 
 const BackendInterface = preload("./utils/backend_interface.gd")
-const DCBackend_Class_Path = "res://addons/dc_kit/backend.gd"
+var _backend_path: String:
+	get:
+		return get_script().resource_path.get_base_dir().path_join("backend.gd")
+
 
 var log_absent_backend_warnings: bool = false
 var _backend: BackendInterface = null
@@ -11,21 +14,21 @@ var _dc_kit_ui: BackendInterface.UI_HOST_INTERFACE = null
 
 
 func _init() -> void:
-	if not FileAccess.file_exists(DCBackend_Class_Path):
+	if not FileAccess.file_exists(_backend_path):
 		if OS.is_debug_build():
 			push_warning(
 				"DCKit: backend script not found at '%s' — running without backend."
-				% DCBackend_Class_Path
+				% _backend_path
 			)
 		else:
 			print("DCKit console disabled")
 		return
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-	var backend_impl = load(DCBackend_Class_Path)
+	var backend_impl = load(_backend_path)
 	if backend_impl == null:
 		if OS.is_debug_build():
-			push_warning("DCKit: failed to load backend script at '%s'." % DCBackend_Class_Path)
+			push_warning("DCKit: failed to load backend script at '%s'." % _backend_path)
 		return
 
 	_backend = backend_impl.new() as BackendInterface

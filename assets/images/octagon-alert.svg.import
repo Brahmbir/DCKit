@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d1l5nd34rok4i"
-path="res://.godot/imported/octagon-alert.svg-28751772da878491a8340d4a134b0074.ctex"
+path="res://.godot/imported/octagon-alert.svg-a94c01a1b6196d936f9b349f76860668.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/dc_kit/assets/images/octagon-alert.svg"
-dest_files=["res://.godot/imported/octagon-alert.svg-28751772da878491a8340d4a134b0074.ctex"]
+source_file="res://addons/dckit/assets/images/octagon-alert.svg"
+dest_files=["res://.godot/imported/octagon-alert.svg-a94c01a1b6196d936f9b349f76860668.ctex"]
 
 [params]
 

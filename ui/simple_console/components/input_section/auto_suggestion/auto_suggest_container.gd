@@ -9,11 +9,11 @@ const _DETAIL_TAGS := "\\[.+?\\]"
 @export var item_list: ItemList
 
 @export_group("icon", "icon")
-@export var icon_command: Texture2D = preload("res://addons/dc_kit/assets/images/command.svg")
-@export var icon_command_alias: Texture2D = preload("res://addons/dc_kit/assets/images/alias.svg")
-@export var icon_variable: Texture2D = preload("res://addons/dc_kit/assets/images/variable.svg")
-@export var icon_type: Texture2D = preload("res://addons/dc_kit/assets/images/ctype.svg")
-@export var icon_text: Texture2D = preload("res://addons/dc_kit/assets/images/text.svg")
+@export var icon_command: Texture2D = preload("../../../../../assets/images/command.svg")
+@export var icon_command_alias: Texture2D = preload("../../../../../assets/images/alias.svg")
+@export var icon_variable: Texture2D = preload("../../../../../assets/images/variable.svg")
+@export var icon_type: Texture2D = preload("../../../../../assets/images/ctype.svg")
+@export var icon_text: Texture2D = preload("../../../../../assets/images/text.svg")
 
 var _selected_index := 0
 var _start := 0

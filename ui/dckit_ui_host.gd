@@ -5,9 +5,7 @@ signal placement_changed(mode: _DCKitSetting.ConsoleMode, edge: _DCKitSetting.Wi
 const WINDOW_MODE_SUPPORTED := true
 
 @export_group("Console Scene")
-@export var console_scene: PackedScene = preload(
-	"res://addons/dc_kit/ui/simple_console/SimpleConsole.tscn"
-)
+@export var console_scene: PackedScene = preload("./simple_console/SimpleConsole.tscn")
 
 @export_group("Dock size")
 # Console's share of the screen. x: left/right dock, y: top/bottom dock.

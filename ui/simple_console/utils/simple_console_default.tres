@@ -1,7 +1,7 @@
 [gd_resource type="Theme" format=3 uid="uid://bed2ko8wcdjjh"]
 
-[ext_resource type="FontFile" uid="uid://6gunmtyx1g7e" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf" id="1_0jfm5"]
-[ext_resource type="FontFile" uid="uid://0bs703x6reir" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-Italic-VariableFont_wght.ttf" id="2_ooera"]
+[ext_resource type="FontFile" uid="uid://6gunmtyx1g7e" path="res://addons/dckit/assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf" id="1_0jfm5"]
+[ext_resource type="FontFile" uid="uid://0bs703x6reir" path="res://addons/dckit/assets/fonts/Roboto_Mono/RobotoMono-Italic-VariableFont_wght.ttf" id="2_ooera"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6pdhr"]
 bg_color = Color(0.043137256, 0.043137256, 0.043137256, 0.93333334)
