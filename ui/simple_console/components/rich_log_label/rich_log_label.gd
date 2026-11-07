@@ -15,6 +15,17 @@ var COLOR_MAP := {
 	"plain": Color("CDD6F4"),
 }
 
+const SYMBOL_MAP := {
+	"OK": "✓",
+	"FAIL": "X",
+	"ERROR": "X",
+	"WARN": "!",
+	"INFO": "i",
+	"HELP": "?",
+	"DEBUG": "D",
+	"CMD": ">",
+	"SYS": "-",
+}
 
 func set_colour_map(data:={}):
 	COLOR_MAP = data
@@ -84,13 +95,18 @@ func _render_body(text: String) -> void:
 	_label.pop_all()
 
 
-func _render_badge(level: String) -> void:
+func _render_badge(level: String, details: String = "") -> void:
 	if level.is_empty():
 		return
+	var hinted := not details.is_empty()
+	if hinted:
+		_label.push_hint(details)
 	_label.push_color(COLOR_MAP.get(level, COLOR_MAP.get("muted", Color.WHITE)))
-	_label.add_text("[%s]  " % level)
-	_label.pop()
-
+	_label.add_text("[%s]" % SYMBOL_MAP.get(level, "-"))
+	_label.pop()  # color
+	if hinted:
+		_label.pop()  # hint
+	_label.add_text(" ")
 
 func _badge_level(entry: _DCKitNS.Executor.Tracer.LogEntry) -> String:
 	match entry.kind:
