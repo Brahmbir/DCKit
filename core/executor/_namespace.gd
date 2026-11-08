@@ -2,7 +2,7 @@ extends RefCounted
 
 const Executor := preload("./executor.gd")
 const Tracer := preload("./tracer/tracer.gd")
-
+const Profiler := preload("./profiler.gd")
 
 #region inner classes
 # STATE

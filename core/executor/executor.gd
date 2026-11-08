@@ -67,6 +67,10 @@ var detail: Detail:
 
 var _tracker := _DCKitNS.Executor.StateTracker.new()
 
+# Names of deferred variables being resolved right now. Guards against a
+# deferred variable that (directly or indirectly) reads itself.
+var _resolving: Array[String] = []
+
 var _cmd_reg: _DCKitNS.Registries.CommandRegistry
 var _vars: _DCKitNS.Core.VariableStore
 var _ctor_reg: _DCKitNS.Registries.ConstructorRegistry
@@ -93,50 +97,6 @@ func _init(
 	logger = _DCKitNS.Executor.Tracer.new()
 	_tracker.changed.connect(state_changed.emit)
 	logger.open_session()
-
-
-func get_command_def_array() -> Array[DCDefinition]:
-	var def_arr: Array[DCDefinition] = []
-
-	def_arr.append(
-		DCDefinition
-		.new(
-			"clear",
-			func(_ctx: DCContext) -> DCResult:
-				logger.clear()
-				return DCResult.ok("cleared"),
-			"Clears all console log entries.",
-			[],
-		)
-		.as_utility()
-	)
-
-	def_arr.append(
-		DCDefinition.new(
-			"profile",
-			func(ctx: DCContext) -> DCResult:
-				if ctx.args_length() != 1:
-					return DCResult.fail("profile requires one argument (nested command).")
-				if profiler == null:
-					return DCResult.fail("Profiler is unavailable.")
-				profiler.reset()
-				profiler.enabled = true
-				var result: DCResult = await ctx.arg(0)
-				profiler.enabled = false
-				var report := profiler.report()
-				if not result.success:
-					return DCResult.fail("%s\n\n%s" % [result.message, report])
-				var output := report
-				if not result.value.as_string().is_empty():
-					output = "%s\n\n%s" % [result.value.as_string(), report]
-				return DCResult.ok(output),
-			"Profiles a nested command and all commands executed beneath it.",
-			[DCDefinition.Param.new("command").describe("Command to profile.")],
-			true,
-		)
-	)
-
-	return def_arr
 
 
 # INFO PUBLIC Methods
@@ -370,15 +330,48 @@ func _resolve_variable(
 	root_ctx: DCContext,
 ) -> DCResult:
 	var value = _vars.get_value_raw(node.name)
+	if value is Callable and not value.is_valid():
+		value = null # dead Callable counts as missing
 	if value != null:
-		if value is String:
-			return DCResult.ok(DCResult.Value.literal(value))
-		return DCResult.ok(DCResult.Value.from_constructor(value))
+		return await _resolve_stored(node.name, value, exec, root_ctx)
 	if node.is_silent:
 		if node.fallback != null:
 			return await _resolve_node(node.fallback, exec, root_ctx)
 		return DCResult.ok(DCResult.Value.literal(""))
 	return DCResult.fail("Variable '$%s' is not defined." % node.name)
+
+
+# The store hands back what it holds, unresolved:
+#   plain value → wrapped as before
+#   Callable    → called now; sync or coroutine, await handles both
+#   Deferred    → its stored node is resolved in THIS reader's context
+func _resolve_stored(
+	name: String,
+	value,
+	exec: _DCKitNS.Executor.Execution,
+	root_ctx: DCContext,
+) -> DCResult:
+	if value is Callable:
+		return _wrap_value(await value.call())
+	if value is _DCKitNS.Core.VariableStore.Deferred:
+		if _resolving.has(name):
+			return DCResult.fail("Circular variable '$%s'." % name)
+		_resolving.append(name)
+		var result: DCResult = await _resolve_node(value.node, exec, root_ctx)
+		_resolving.erase(name)
+		if not result.success:
+			return DCResult.fail("Deferred '$%s': %s" % [name, result.message])
+		return result
+	return _wrap_value(value)
+
+
+# String stays a literal (as before); anything else keeps its real type.
+func _wrap_value(value) -> DCResult:
+	if value == null:
+		return DCResult.ok(DCResult.Value.literal(""))
+	if value is String:
+		return DCResult.ok(DCResult.Value.literal(value))
+	return DCResult.ok(DCResult.Value.from_constructor(value))
 
 
 # Parts resolved eagerly depth-first; first failure short-circuits.

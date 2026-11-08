@@ -1,57 +1,17 @@
-# batch_runner.gd
-# Reads a bat.txt file line by line and feeds each line to the Executor
-# via ctx.run_raw(), so script lines share the calling command's call
-# stack (log ancestry "bat > <cmd>") and abort scope.
-# Accessed via preload; no class_name.
-#
-# Built-in commands
-#
-#   bat <path>  — execute a script file
-#
-# Rules
-#
-#   • Nested bat is fully supported — each call pushes a new ScriptFrame.
-#   • Lines beginning with '#' are comments — skipped entirely.
-#   • Empty lines are skipped.
-#   • Abort is handled via the DCContext passed to the handler.
-#     When ctx.is_aborted(), the loop stops after the current line completes.
-#
-# Constructor:
-#   DevConsoleBatchRunner.new()
-extends RefCounted
+## Optional module: the `bat` command (script runner).
+## Reads a script file line by line and feeds each line to the Executor
+## via ctx.run_raw(), so script lines share the calling command's call
+## stack (log ancestry "bat > <cmd>") and abort scope.
+##
+##   bat <path>  — execute a script file
+##
+## Rules
+##   • Nested bat is fully supported — each call pushes a new ScriptFrame.
+##   • Lines beginning with '#' are comments; empty lines are skipped.
+##   • When ctx.is_aborted(), the loop stops after the current line completes.
+extends DCModule
 
-var bat_cmd := DCDefinition.new(
-	"bat",
-	func(ctx: DCContext) -> DCResult:
-		if ctx.args_length() < 1:
-			return DCResult.fail("bat requires a file path.")
-		var r0 := await ctx.arg(0)
-		if not r0.success:
-			return r0
-		return await run(r0.value.as_string(), ctx),
-	"Executes a [b]bat.txt[/b] script file line by line.\n\n"
-	+ "Lines beginning with [code]#[/code] are comments. "
-	+ "Nested [b]bat[/b] calls are fully supported.",
-	[
-		DCDefinition
-		.Param
-		.new("path")
-		.describe("Path to the script file. Relative paths resolve from the configured root folder.")
-		.suggest(
-			func() -> Array[String]:
-				var out: Array[String] = []
-
-				for alias in _predefined_files:
-					out.append(alias)
-				_collect_scripts(_root_folder, "", out)
-
-				out.sort()
-				return out,
-		)
-	],
-	true,
-)
-var _root_folder: String = _resolve_batch_root(_DCKitSetting.get_batch_directory())
+var _root_folder := ""
 
 var _predefined_files: Dictionary[String, String] = {
 	#"init": "res://batch_file/init.txt",
@@ -59,9 +19,52 @@ var _predefined_files: Dictionary[String, String] = {
 }
 
 
-# COMMAND REGISTRATION
-func get_command_def_array() -> Array[DCDefinition]:
-	return [bat_cmd]
+func get_id() -> String:
+	return "dckit_batch"
+
+
+## Needs no services, but still has to initialise: the batch root comes
+## from a project setting, so it is resolved here, not in a field initializer.
+func setup(_services: Services) -> void:
+	_root_folder = _resolve_batch_root(_DCKitSetting.get_batch_directory())
+
+
+func get_commands() -> Array[DCDefinition]:
+	return [_bat()]
+
+
+func _bat() -> DCDefinition:
+	return DCDefinition.new(
+		"bat",
+		func(ctx: DCContext) -> DCResult:
+			if ctx.args_length() < 1:
+				return DCResult.fail("bat requires a file path.")
+			var r0 := await ctx.arg(0)
+			if not r0.success:
+				return r0
+			return await run(r0.value.as_string(), ctx),
+		"Executes a [b]bat.txt[/b] script file line by line.\n\n"
+		+ "Lines beginning with [code]#[/code] are comments. "
+		+ "Nested [b]bat[/b] calls are fully supported.",
+		[
+			DCDefinition
+			.Param
+			.new("path")
+			.describe("Path to the script file. Relative paths resolve from the configured root folder.")
+			.suggest(
+				func() -> Array[String]:
+					var out: Array[String] = []
+
+					for alias in _predefined_files:
+						out.append(alias)
+					_collect_scripts(_root_folder, "", out)
+
+					out.sort()
+					return out,
+			)
+		],
+		true,
+	)
 
 
 # PUBLIC

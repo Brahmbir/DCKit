@@ -47,6 +47,10 @@ const HISTORY_ENABLED = "cmd_history/enabled"
 const HISTORY_DIRECTORY = "cmd_history/directory"
 const HISTORY_LIMIT = "cmd_history/limit"
 
+const MODULES_BASIC = "modules/basic"
+const MODULES_CONTROL_FLOW = "modules/control_flow"
+const MODULES_BATCH = "modules/batch"
+
 
 #region Generic
 static func get_setting(key: String, default_value: Variant) -> Variant:
@@ -78,6 +82,10 @@ static func register_dckit_settings():
 	)
 
 	declare_setting(DEFAULT_CANVAS_LAYER, 9999, TYPE_INT)
+	
+	declare_setting(MODULES_BASIC, true, TYPE_BOOL)
+	declare_setting(MODULES_CONTROL_FLOW, true, TYPE_BOOL)
+	declare_setting(MODULES_BATCH, true, TYPE_BOOL)
 
 	declare_setting(BATCH_DIR, "res://batch_file", TYPE_STRING, PROPERTY_HINT_GLOBAL_DIR)
 
@@ -161,6 +169,10 @@ static func get_default_canvas_layer() -> int:
 	return get_setting(DEFAULT_CANVAS_LAYER, 9999)
 #endregion
 
+#region Modules
+static func is_module_enabled(key: String) -> bool:
+	return get_setting(key, true) as bool
+#endregion
 
 #region Batch Directory
 static func get_batch_directory() -> String:

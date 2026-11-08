@@ -170,6 +170,16 @@ func get_all_args() -> Array:
 	return out
 
 
+## Returns the unresolved argument at index [param n] exactly as the parser
+## produced it, or null when out of bounds. For commands that must keep an
+## argument unevaluated (var.setd). Pass it back to the executor's
+## resolver later; don't inspect it.
+func arg_node(n: int) -> Variant:
+	if n < 0 or n >= _raw_args.size():
+		return null
+	return _raw_args[n]
+
+
 ## Runs a raw command string through the executor's full pipeline
 ## (analyze → execute), nested under this command. See class doc for
 ## usage and return shape.

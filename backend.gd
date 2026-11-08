@@ -1,6 +1,15 @@
 extends "./utils/backend_interface.gd"
 
-const BatchRunner = preload("./basic_command/batch_runner.gd")
+const CORE: Array[Resource] = [
+	preload("./modules/variables_module.gd"),
+	preload("./modules/diagnostics_module.gd"),
+]
+const OPTIONAL: Array[Dictionary] = [
+	#{ "path": _DIR + "basic/basic_module.gd", "setting": _DCKitSetting.MODULES_BASIC },
+	#{ "path": _DIR + "basic/control_flow_module.gd", "setting": _DCKitSetting.MODULES_CONTROL_FLOW },
+	{ "path": "modules/batch_module.gd", "setting": _DCKitSetting.MODULES_BATCH },
+]
+
 const BasicCMD = preload("./basic_command/basic_commands.gd")
 const ControlFlowCMD = preload("./basic_command/control_flow_commands.gd")
 
@@ -18,6 +27,8 @@ var _input_feedback_controller: _DCKitNS.UI.InputFeedbackController = null
 
 var _dckit_host_ref := WeakRef.new()
 
+var _modules: Dictionary = { } # id → DCModule
+
 
 func _init() -> void:
 	_cmd_reg = _DCKitNS.Registries.CommandRegistry.new()
@@ -33,6 +44,7 @@ func _init() -> void:
 
 	_executor = _DCKitNS.Executor.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
 
+	_register_modules()
 	_register_commands(_cmd_reg)
 
 
@@ -97,6 +109,27 @@ func lock_command(p_name: String) -> void:
 
 func unlock_command(p_name: String) -> void:
 	_cmd_reg.unlock(p_name)
+
+
+# Public: built-in and user modules take the same path. Add-only.
+func add_module(module: DCModule) -> bool:
+	if module == null or module.get_id().is_empty():
+		push_warning("DCKit: module is null or has no id.")
+		return false
+	if _modules.has(module.get_id()):
+		push_warning("DCKit: module '%s' already added." % module.get_id())
+		return false
+	_modules[module.get_id()] = module
+
+	module.setup(_build_services(module.get_needs())) # always called; default is a no-op
+	for def in module.get_commands():
+		_cmd_reg.register(def)
+	return true
+
+
+# Lets callers reach a module's own public API (e.g. batch aliases).
+func get_module(id: String) -> DCModule:
+	return _modules.get(id)
 #endregion
 
 
@@ -122,6 +155,31 @@ func get_var_keys() -> Array:
 #endregion
 
 
+func _register_modules() -> void:
+	for path in CORE:
+		add_module(path.new())
+
+	for entry in OPTIONAL:
+		if not _DCKitSetting.is_module_enabled(entry.setting):
+			continue # skipped before anything is created or set up
+		var module_res := load(get_script().resource_path.get_base_dir().path_join(entry.path))
+		if module_res:
+			add_module(module_res.new())
+
+
+func _build_services(needs: int) -> DCModule.Services:
+	var s := DCModule.Services.new()
+	if needs & DCModule.Need.VARIABLES:
+		s.variables = _var_store
+	if needs & DCModule.Need.LOGGER:
+		s.logger = _executor.logger
+	if needs & DCModule.Need.PROFILER:
+		s.profiler = _executor.profiler
+	if needs & DCModule.Need.REGISTRY:
+		s.registry = _cmd_reg
+	return s
+
+
 func _on_host_connection_requested() -> void:
 	var dckit_host = _dckit_host_ref.get_ref() as UI_HOST_PRIVATE_INTERFACE
 	if not dckit_host:
@@ -145,10 +203,3 @@ func _register_commands(_command_reg: _DCKitNS.Registries.CommandRegistry) -> vo
 		_register_defs(BasicCMD.get_command_def_array())
 	if ControlFlowCMD:
 		_register_defs(ControlFlowCMD.get_command_def_array())
-
-	if BatchRunner:
-		_register_defs(BatchRunner.new().get_command_def_array())
-	if _var_store:
-		_register_defs(_var_store.get_command_def_array())
-	if _executor:
-		_register_defs(_executor.get_command_def_array())
