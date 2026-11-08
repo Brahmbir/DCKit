@@ -51,8 +51,10 @@ const MODULES_UTILITY = "modules/utility"
 const MODULES_LOGIC = "modules/logic"
 const MODULES_MATH = "modules/math"
 const MODULES_STRING = "modules/string"
-
 const MODULES_BATCH = "modules/batch"
+const MODULES_SYSTEM = "modules/system"
+
+
 
 
 #region Generic
@@ -91,7 +93,8 @@ static func register_dckit_settings():
 	declare_setting(MODULES_STRING, true, TYPE_BOOL)
 	declare_setting(MODULES_UTILITY, true, TYPE_BOOL)
 	declare_setting(MODULES_BATCH, true, TYPE_BOOL)
-
+	declare_setting(MODULES_SYSTEM, true, TYPE_BOOL)
+	
 	declare_setting(BATCH_DIR, "res://batch_file", TYPE_STRING, PROPERTY_HINT_GLOBAL_DIR)
 
 	declare_setting(

@@ -10,6 +10,8 @@ const OPTIONAL: Array[Dictionary] = [
 	{ "path": "modules/math_module.gd", "setting": _DCKitSetting.MODULES_MATH },
 	{ "path": "modules/string_module.gd", "setting": _DCKitSetting.MODULES_STRING },
 	{ "path": "modules/batch_module.gd", "setting": _DCKitSetting.MODULES_BATCH },
+	{ "path": "modules/system_module.gd", "setting": _DCKitSetting.MODULES_SYSTEM },
+	
 ]
 
 const UI_HOST_PRIVATE_INTERFACE = preload("./ui/dckit_host_interface.gd")
