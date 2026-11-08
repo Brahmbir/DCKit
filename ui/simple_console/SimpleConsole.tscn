@@ -1,14 +1,14 @@
 [gd_scene format=3 uid="uid://diuuuu04kjo0b"]
 
-[ext_resource type="Script" uid="uid://di6fuf24actgn" path="res://addons/dc_kit/ui/simple_console/simple_console.gd" id="1_0wgy3"]
-[ext_resource type="FontFile" uid="uid://0bs703x6reir" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-Italic-VariableFont_wght.ttf" id="2_0x88e"]
-[ext_resource type="FontFile" uid="uid://6gunmtyx1g7e" path="res://addons/dc_kit/assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf" id="2_vwtn4"]
-[ext_resource type="Theme" uid="uid://bed2ko8wcdjjh" path="res://addons/dc_kit/ui/simple_console/utils/simple_console_default.tres" id="4_gasbt"]
-[ext_resource type="PackedScene" uid="uid://bb4iiog4ixxsc" path="res://addons/dc_kit/ui/simple_console/components/header_bar/header_component.tscn" id="5_gasbt"]
-[ext_resource type="PackedScene" uid="uid://bihuh3740pvx3" path="res://addons/dc_kit/ui/simple_console/components/input_section/input_component_panel.tscn" id="5_v1qrv"]
-[ext_resource type="PackedScene" uid="uid://bokp0qrlc3y04" path="res://addons/dc_kit/ui/simple_console/components/rich_log_label/rich_log_label.tscn" id="5_vwtn4"]
-[ext_resource type="PackedScene" uid="uid://bsxhrm41boutj" path="res://addons/dc_kit/ui/simple_console/components/info_panel/info_panel_container.tscn" id="6_0x88e"]
-[ext_resource type="PackedScene" uid="uid://chm4u3x5uk6g5" path="res://addons/dc_kit/ui/simple_console/components/error_list/error_list.tscn" id="6_i6iku"]
+[ext_resource type="Script" uid="uid://di6fuf24actgn" path="res://addons/dckit/ui/simple_console/simple_console.gd" id="1_0wgy3"]
+[ext_resource type="FontFile" uid="uid://0bs703x6reir" path="res://addons/dckit/assets/fonts/Roboto_Mono/RobotoMono-Italic-VariableFont_wght.ttf" id="2_0x88e"]
+[ext_resource type="FontFile" uid="uid://6gunmtyx1g7e" path="res://addons/dckit/assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf" id="2_vwtn4"]
+[ext_resource type="Theme" uid="uid://bed2ko8wcdjjh" path="res://addons/dckit/ui/simple_console/utils/simple_console_default.tres" id="4_gasbt"]
+[ext_resource type="PackedScene" uid="uid://bb4iiog4ixxsc" path="res://addons/dckit/ui/simple_console/components/header_bar/header_component.tscn" id="5_gasbt"]
+[ext_resource type="PackedScene" uid="uid://bihuh3740pvx3" path="res://addons/dckit/ui/simple_console/components/input_section/input_component_panel.tscn" id="5_v1qrv"]
+[ext_resource type="PackedScene" uid="uid://bokp0qrlc3y04" path="res://addons/dckit/ui/simple_console/components/rich_log_label/rich_log_label.tscn" id="5_vwtn4"]
+[ext_resource type="PackedScene" uid="uid://bsxhrm41boutj" path="res://addons/dckit/ui/simple_console/components/info_panel/info_panel_container.tscn" id="6_0x88e"]
+[ext_resource type="PackedScene" uid="uid://chm4u3x5uk6g5" path="res://addons/dckit/ui/simple_console/components/error_list/error_list.tscn" id="6_i6iku"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6pdhr"]
 bg_color = Color(0.043137256, 0.043137256, 0.043137256, 0.93333334)
@@ -66,7 +66,7 @@ base_font = ExtResource("2_0x88e")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4jtcb"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gasbt"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4k44y"]
 content_margin_left = 4.0
 content_margin_top = 3.0
 content_margin_right = 4.0
@@ -97,7 +97,7 @@ subpixel_positioning = 0
 fallbacks = Array[Font]([SubResource("SystemFont_0nc27")])
 base_font = ExtResource("2_vwtn4")
 
-[sub_resource type="Theme" id="Theme_4jtcb"]
+[sub_resource type="Theme" id="Theme_qtt5o"]
 default_font = SubResource("FontVariation_l7cum")
 default_font_size = 24
 Black_PanelContainer/base_type = &"PanelContainer"
@@ -176,7 +176,7 @@ VBoxContainer/constants/separation = 14
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
 VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_dlema")
-VScrollBar/styles/scroll = SubResource("StyleBoxFlat_gasbt")
+VScrollBar/styles/scroll = SubResource("StyleBoxFlat_4k44y")
 Window/styles/embedded_border = SubResource("StyleBoxFlat_0x88e")
 
 [sub_resource type="Shader" id="Shader_6pdhr"]
@@ -423,7 +423,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = SubResource("Theme_4jtcb")
+theme = SubResource("Theme_qtt5o")
 script = ExtResource("1_0wgy3")
 header_component = NodePath("CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/HeaderComponentPanel")
 input_component = NodePath("CRTOverlay/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer/InputComponentPanel")

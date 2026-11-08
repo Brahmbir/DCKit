@@ -70,6 +70,7 @@ func _on_cleared() -> void:
 
 # Rendering
 func _render_entry(entry: _DCKitNS.Core.Tracer.LogEntry) -> void:
+	#_render_badge(_badge_level(entry),entry.details)
 	_render_badge(_badge_level(entry))
 	match entry.kind:
 		"SYSTEM":

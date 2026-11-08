@@ -59,6 +59,9 @@ base_font = ExtResource("2_ooera")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4jtcb"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_62p4c"]
+bg_color = Color(0.006466695, 0.0064666974, 0.0064666937, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0x88e"]
 content_margin_left = 10.0
 content_margin_top = 28.0
@@ -154,6 +157,11 @@ TextEdit/constants/outline_size = 2
 TextEdit/styles/focus = SubResource("StyleBoxEmpty_0x88e")
 TextEdit/styles/normal = SubResource("StyleBoxEmpty_7jkh5")
 TextEdit/styles/read_only = SubResource("StyleBoxEmpty_4jtcb")
+TooltipPanel/colors/title_color = Color(0, 0, 0, 1)
+TooltipPanel/colors/title_outline_modulate = Color(0, 0, 0, 1)
+TooltipPanel/styles/embedded_border = null
+TooltipPanel/styles/embedded_unfocused_border = null
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_62p4c")
 VBoxContainer/constants/separation = 12
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_6u0a8")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_0mlb5")
