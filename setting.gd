@@ -47,8 +47,11 @@ const HISTORY_ENABLED = "cmd_history/enabled"
 const HISTORY_DIRECTORY = "cmd_history/directory"
 const HISTORY_LIMIT = "cmd_history/limit"
 
-const MODULES_BASIC = "modules/basic"
-const MODULES_CONTROL_FLOW = "modules/control_flow"
+const MODULES_UTILITY = "modules/utility"
+const MODULES_LOGIC = "modules/logic"
+const MODULES_MATH = "modules/math"
+const MODULES_STRING = "modules/string"
+
 const MODULES_BATCH = "modules/batch"
 
 
@@ -83,8 +86,10 @@ static func register_dckit_settings():
 
 	declare_setting(DEFAULT_CANVAS_LAYER, 9999, TYPE_INT)
 	
-	declare_setting(MODULES_BASIC, true, TYPE_BOOL)
-	declare_setting(MODULES_CONTROL_FLOW, true, TYPE_BOOL)
+	declare_setting(MODULES_LOGIC, true, TYPE_BOOL)
+	declare_setting(MODULES_MATH, true, TYPE_BOOL)
+	declare_setting(MODULES_STRING, true, TYPE_BOOL)
+	declare_setting(MODULES_UTILITY, true, TYPE_BOOL)
 	declare_setting(MODULES_BATCH, true, TYPE_BOOL)
 
 	declare_setting(BATCH_DIR, "res://batch_file", TYPE_STRING, PROPERTY_HINT_GLOBAL_DIR)

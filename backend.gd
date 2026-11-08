@@ -5,13 +5,12 @@ const CORE: Array[Resource] = [
 	preload("./modules/diagnostics_module.gd"),
 ]
 const OPTIONAL: Array[Dictionary] = [
-	#{ "path": _DIR + "basic/basic_module.gd", "setting": _DCKitSetting.MODULES_BASIC },
-	#{ "path": _DIR + "basic/control_flow_module.gd", "setting": _DCKitSetting.MODULES_CONTROL_FLOW },
+	{ "path": "modules/utility_module.gd", "setting": _DCKitSetting.MODULES_UTILITY },
+	{ "path": "modules/logic_module.gd", "setting": _DCKitSetting.MODULES_LOGIC },
+	{ "path": "modules/math_module.gd", "setting": _DCKitSetting.MODULES_MATH },
+	{ "path": "modules/string_module.gd", "setting": _DCKitSetting.MODULES_STRING },
 	{ "path": "modules/batch_module.gd", "setting": _DCKitSetting.MODULES_BATCH },
 ]
-
-const BasicCMD = preload("./basic_command/basic_commands.gd")
-const ControlFlowCMD = preload("./basic_command/control_flow_commands.gd")
 
 const UI_HOST_PRIVATE_INTERFACE = preload("./ui/dckit_host_interface.gd")
 const DCKit_Host = preload("./ui/dckit_ui_host.tscn")
@@ -45,7 +44,6 @@ func _init() -> void:
 	_executor = _DCKitNS.Executor.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
 
 	_register_modules()
-	_register_commands(_cmd_reg)
 
 
 func init_ui() -> UI_HOST_INTERFACE:
@@ -191,15 +189,3 @@ func _on_host_connection_requested() -> void:
 		return
 	console.connect_executor(_executor)
 	console.connect_feedback_controller(_input_feedback_controller)
-
-
-func _register_defs(defs: Array[DCDefinition]) -> void:
-	for def in defs:
-		_cmd_reg.register(def)
-
-
-func _register_commands(_command_reg: _DCKitNS.Registries.CommandRegistry) -> void:
-	if BasicCMD:
-		_register_defs(BasicCMD.get_command_def_array())
-	if ControlFlowCMD:
-		_register_defs(ControlFlowCMD.get_command_def_array())
