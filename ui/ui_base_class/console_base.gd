@@ -52,6 +52,10 @@ func connect_executor(executor: _DCKitNS.Executor.Executor):
 	_DCKitNS.not_implemented("connect_executor")
 
 
+func connect_tracer(tracer: _DCKitNS.Core.Tracer):
+	_DCKitNS.not_implemented("connect_tracer")
+
+
 func connect_feedback_controller(controller: _DCKitNS.UI.InputFeedbackController):
 	_DCKitNS.not_implemented("connect_feedback_controller")
 

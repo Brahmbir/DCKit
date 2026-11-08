@@ -96,15 +96,23 @@ func connect_cmd_history(history: _DCKitNS.UI.CommandHistory):
 
 
 func connect_executor(executor: _DCKitNS.Executor.Executor):
-	if not input_component or not log_component:
+	if not input_component:
 		push_warning(
-			"SimpleConsole.connect_executor: input_component and log_component must both be assigned."
+			"SimpleConsole.connect_executor: input_component must both be assigned."
 		)
 		return
 
 	input_component.connect_executor(executor)
 
-	log_component.connect_logger(executor.logger)
+
+func connect_tracer(tracer : _DCKitNS.Core.Tracer):
+	if not log_component:
+		push_warning(
+			"SimpleConsole.connect_executor: log_component must both be assigned."
+		)
+		return
+
+	log_component.connect_logger(tracer)
 	log_component.set_colour_map(LOGGER_COLOR_MAP)
 
 

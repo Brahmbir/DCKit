@@ -8,8 +8,10 @@
 #
 # Call-stack tracing
 #   Every _execute() push/pops a _CallStack shared across the whole
-#   execution tree. run_raw() inherits the caller's stack so the logger
-#   always sees the full ancestry: "player.warp > var.get > ..."
+#   execution tree. run_raw() inherits the caller's stack, so the breadcrumb
+#   string (CallStack.breadcrumb) always shows the full ancestry:
+#   "player.warp>var.get>...". It is passed to the logger as `details` and
+#   exposed to handlers as ctx.breadcrumb.
 #
 # Depth limits
 #   _CallStack tracks two independent depths, each checked in _execute()
@@ -33,7 +35,7 @@
 #
 # Log contract
 #   log_command  — fires once in run(), before execution, with the raw user
-#                  string. Stack is always empty at this point.
+#                  string. Details are always empty at this point.
 #   log_system   — fires only for chain steps (one per command in a multi-
 #                  command chain) and for every ctx.run_raw() call. Carries
 #                  a human-readable message. Nowhere else.
@@ -56,7 +58,8 @@ const _ORIGIN_USER := "user"
 var MAX_EXECUTION_DEPTH: int = _DCKitSetting.get_max_execution_depth()
 var MAX_ARGUMENT_DEPTH: int = _DCKitSetting.get_max_argument_depth()
 
-var logger: _DCKitNS.Executor.Tracer = null
+# Owned by the backend and injected; the executor only writes to it.
+var logger: _DCKitNS.Core.Tracer = null
 var profiler: Profiler = null
 
 var detail: Detail:
@@ -86,17 +89,17 @@ func _init(
 	ctor_reg: _DCKitNS.Registries.ConstructorRegistry,
 	vars_store: _DCKitNS.Core.VariableStore,
 	analyzer: _DCKitNS.Analyzer.Analyzer,
+	tracer: _DCKitNS.Core.Tracer,
 ) -> void:
 	_cmd_reg = cmd_reg
 	_vars = vars_store
 	_ctor_reg = ctor_reg
 	_analyzer = analyzer
+	logger = tracer
 
 	profiler = Profiler.new()
 
-	logger = _DCKitNS.Executor.Tracer.new()
 	_tracker.changed.connect(state_changed.emit)
-	logger.open_session()
 
 
 # INFO PUBLIC Methods
@@ -115,11 +118,11 @@ func reset() -> void:
 
 func run(raw: String) -> DCResult:
 	# Always log what the user typed first — even if we reject it below.
-	_log_command(raw, _ORIGIN_USER, [])
+	_log_command(raw)
 
 	if _tracker.is_running():
 		var f := DCResult.fail("A command is already running.")
-		_log_result(f, _ORIGIN_USER, [])
+		_log_result(f)
 		return f
 
 	var exec := _DCKitNS.Executor.Execution.new(
@@ -152,7 +155,7 @@ func _run_execution(exec: _DCKitNS.Executor.Execution) -> DCResult:
 	var analysis: DCAnalysisResult = _analyzer.analyze(exec.raw)
 	if not analysis.ok():
 		var f := DCResult.fail(_format_errors(analysis.diagnostics))
-		_log_result(f, exec.origin, exec.call_stack.snapshot())
+		_log_result(f, exec.call_stack.breadcrumb())
 		return f
 
 	exec.commands = analysis.ast
@@ -172,8 +175,7 @@ func _run_execution(exec: _DCKitNS.Executor.Execution) -> DCResult:
 			var segment := _slice(exec.raw, cmd) if not exec.raw.is_empty() else cmd.name
 			_log_system(
 				"Chain [%d/%d]: %s" % [i + 1, total, segment],
-				exec.origin,
-				exec.call_stack.snapshot(),
+				exec.call_stack.breadcrumb(),
 			)
 
 		exec.chain_index = i + 1
@@ -231,9 +233,9 @@ func _execute(
 
 	var cmd_ctx := DCContext.new(
 		node.args,
-		_create_logger(exec.origin, exec.call_stack.snapshot()),
 		resolver,
 		null if is_root else exec.abort_root,
+		exec.call_stack.breadcrumb(),
 	)
 
 	# run_raw inherits the live call stack so nesting stays visible in log ancestry.
@@ -241,7 +243,7 @@ func _execute(
 	var effective_root: DCContext = cmd_ctx if is_root else exec.abort_root
 	cmd_ctx._bind_raw_runner(
 		func(s: String) -> DCResult:
-			_log_system("run_raw: %s" % s, exec.origin, exec.call_stack.snapshot())
+			_log_system("run_raw: %s" % s, cmd_ctx.breadcrumb)
 			var nested := _DCKitNS.Executor.Execution.new(
 				s,
 				exec.origin,
@@ -268,7 +270,7 @@ func _execute(
 			]
 		if not definition.deprecated_message.is_empty():
 			msg += " " + definition.deprecated_message
-		_log_system(msg, exec.origin, exec.call_stack.snapshot())
+		_log_system(msg, cmd_ctx.breadcrumb)
 
 	var raw_result = await handler.call(cmd_ctx)
 
@@ -283,12 +285,12 @@ func _execute(
 	# Don't spam the console with successful utility commands.
 	match definition.log_mode:
 		DCDefinition.LogMode.NORMAL:
-			_log_result(result, exec.origin, exec.call_stack.snapshot())
+			_log_result(result, cmd_ctx.breadcrumb)
 		DCDefinition.LogMode.HIDDEN_ALL:
 			pass
 		DCDefinition.LogMode.HIDDEN_SUCCESS:
 			if not result.success:
-				_log_result(result, exec.origin, exec.call_stack.snapshot())
+				_log_result(result, cmd_ctx.breadcrumb)
 
 	exec.call_stack.pop()
 	_publish()
@@ -395,27 +397,23 @@ func _resolve_ctor(
 
 
 # LOGGER STUBS
-# These define the interface the new logger must implement.
+# These define the interface the logger must implement.
 # See the "Log contract" section in the file header for when each fires.
 #
 # raw:     the verbatim string the user submitted — log_command only.
 # message: human-readable description of a system event — log_system only.
-# stack:   Array[String] — ancestry from root to current command, oldest first.
-#          Empty ([]) at run() entry; populated once frames are pushed.
-func _log_command(raw: String, origin: String, stack: Array) -> void:
-	logger.log_command(raw, stack, origin)
+# details: breadcrumb string (CallStack.breadcrumb) — empty at run() entry,
+#          populated once frames are pushed. The logger caps it at 100 chars.
+func _log_command(raw: String, details: String = "") -> void:
+	logger.log_command(raw, details)
 
 
-func _log_system(message: String, origin: String, stack: Array) -> void:
-	logger.log_system(message, stack, origin)
+func _log_system(message: String, details: String = "") -> void:
+	logger.log_system(message, details)
 
 
-func _log_result(result: DCResult, origin: String, stack: Array) -> void:
-	logger.log_result(result, stack, origin)
-
-
-func _create_logger(origin: String, stack: Array) -> DCLogger:
-	return logger.create_command_logger(stack, origin)
+func _log_result(result: DCResult, details: String = "") -> void:
+	logger.log_result(result, details)
 
 
 # HELPERS

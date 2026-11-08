@@ -1,4 +1,3 @@
-class_name LogFileWriter
 extends RefCounted
 
 const _SUFFIX := "_session.log"

@@ -76,13 +76,12 @@ func _wait_cmd() -> DCDefinition:
 			if seconds < 0.0:
 				return DCResult.fail("Invalid duration '%s'." % duration_text)
 
-			var was_aborted := await ctx \
-					.step() \
-					.exec(
-				func() -> Signal:
-					return Engine.get_main_loop().create_timer(seconds).timeout,
-			) \
-					.run()
+			if ctx.is_aborted():
+				return DCResult.fail("Wait aborted.")
+
+			var timer: SceneTreeTimer = Engine.get_main_loop().create_timer(seconds)
+
+			var was_aborted := await ctx.await_or_abort(timer.timeout)
 
 			if was_aborted:
 				return DCResult.fail("Wait aborted.")
@@ -90,8 +89,7 @@ func _wait_cmd() -> DCDefinition:
 			return DCResult.ok("Waited %s." % duration_text),
 		"Pauses execution for a duration.",
 		[DCDefinition.Param.new("duration").describe("Examples: 500ms, 2s, 1m")],
-	) \
-			.as_utility()
+	).as_utility()
 
 
 func _abort_cmd() -> DCDefinition:

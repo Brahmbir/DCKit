@@ -59,7 +59,7 @@ func _ensure_label() -> void:
 	add_child(_label)
 
 
-func _append_entry(entry: _DCKitNS.Executor.Tracer.LogEntry) -> void:
+func _append_entry(entry: _DCKitNS.Core.Tracer.LogEntry) -> void:
 	_render_entry(entry)
 	_label.add_text("\n")
 
@@ -69,7 +69,7 @@ func _on_cleared() -> void:
 
 
 # Rendering
-func _render_entry(entry: _DCKitNS.Executor.Tracer.LogEntry) -> void:
+func _render_entry(entry: _DCKitNS.Core.Tracer.LogEntry) -> void:
 	_render_badge(_badge_level(entry))
 	match entry.kind:
 		"SYSTEM":
@@ -108,7 +108,7 @@ func _render_badge(level: String, details: String = "") -> void:
 		_label.pop()  # hint
 	_label.add_text(" ")
 
-func _badge_level(entry: _DCKitNS.Executor.Tracer.LogEntry) -> String:
+func _badge_level(entry: _DCKitNS.Core.Tracer.LogEntry) -> String:
 	match entry.kind:
 		"COMMAND":
 			return "CMD"

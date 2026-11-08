@@ -2,7 +2,7 @@
 ## Needs services, so it declares them and keeps what setup() gives it.
 extends DCModule
 
-var _logger: _DCKitNS.Executor.Tracer = null
+var _logger: _DCKitNS.Core.Tracer = null
 var _profiler: _DCKitNS.Executor.Profiler = null
 var _registry: _DCKitNS.Registries.CommandRegistry = null
 
@@ -16,7 +16,7 @@ func get_needs() -> int:
 
 
 func setup(services: Services) -> void:
-	_logger = services.logger as _DCKitNS.Executor.Tracer
+	_logger = services.logger as _DCKitNS.Core.Tracer
 	_profiler = services.profiler as _DCKitNS.Executor.Profiler
 	_registry = services.registry as _DCKitNS.Registries.CommandRegistry
 

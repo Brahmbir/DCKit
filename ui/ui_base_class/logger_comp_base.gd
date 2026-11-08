@@ -21,7 +21,7 @@ func set_colour_map(data:={}):
 	return
 
 
-func connect_logger(logger: _DCKitNS.Executor.Tracer) -> void:
+func connect_logger(logger: _DCKitNS.Core.Tracer) -> void:
 	var previous := _get_logger()
 	_detach()
 	_logger_ref = weakref(logger) if logger else null
@@ -35,12 +35,12 @@ func connect_logger(logger: _DCKitNS.Executor.Tracer) -> void:
 		_attach()
 
 
-func _get_logger() -> _DCKitNS.Executor.Tracer:
+func _get_logger() -> _DCKitNS.Core.Tracer:
 	return _logger_ref.get_ref() if _logger_ref else null
 
 
 func _attach() -> void:
-	var logger := _get_logger() as _DCKitNS.Executor.Tracer
+	var logger := _get_logger() as _DCKitNS.Core.Tracer
 	if logger == null:
 		return
 	if not logger.entry_added.is_connected(_append_entry):
@@ -60,15 +60,15 @@ func _detach() -> void:
 		logger.cleared.disconnect(_on_cleared)
 
 
-func _replay_all(logger: _DCKitNS.Executor.Tracer) -> void:
+func _replay_all(logger: _DCKitNS.Core.Tracer) -> void:
 	_on_cleared()
 	if logger == null:
 		return
-	for entry: _DCKitNS.Executor.Tracer.LogEntry in logger.get_all():
+	for entry: _DCKitNS.Core.Tracer.LogEntry in logger.get_all():
 		_append_entry(entry)
 
 
-func _append_entry(entry: _DCKitNS.Executor.Tracer.LogEntry) -> void:
+func _append_entry(entry: _DCKitNS.Core.Tracer.LogEntry) -> void:
 	_DCKitNS.not_implemented("_append_entry")
 	return
 

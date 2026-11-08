@@ -11,7 +11,6 @@ const OPTIONAL: Array[Dictionary] = [
 	{ "path": "modules/string_module.gd", "setting": _DCKitSetting.MODULES_STRING },
 	{ "path": "modules/batch_module.gd", "setting": _DCKitSetting.MODULES_BATCH },
 	{ "path": "modules/system_module.gd", "setting": _DCKitSetting.MODULES_SYSTEM },
-	
 ]
 
 const UI_HOST_PRIVATE_INTERFACE = preload("./ui/dckit_host_interface.gd")
@@ -20,6 +19,7 @@ const DCKit_Host = preload("./ui/dckit_ui_host.tscn")
 var _cmd_reg: _DCKitNS.Registries.CommandRegistry = null
 var _ctor_reg: _DCKitNS.Registries.ConstructorRegistry = null
 var _var_store: _DCKitNS.Core.VariableStore = null
+var _tracer: _DCKitNS.Core.Tracer = null
 
 var _analyzer: _DCKitNS.Analyzer.Analyzer = null
 var _executor: _DCKitNS.Executor.Executor = null
@@ -36,6 +36,9 @@ func _init() -> void:
 	_ctor_reg = _DCKitNS.Registries.ConstructorRegistry.new()
 	_var_store = _DCKitNS.Core.VariableStore.new()
 
+	_tracer = _DCKitNS.Core.Tracer.new()
+	_tracer.open_session()
+
 	_analyzer = _DCKitNS.Analyzer.Analyzer.new(_cmd_reg, _ctor_reg, _var_store)
 
 	var auto = _DCKitNS.Core.AutoComplete.new(_cmd_reg, _ctor_reg, _var_store)
@@ -43,7 +46,7 @@ func _init() -> void:
 	_input_feedback_controller = _DCKitNS.UI.InputFeedbackController.new(_analyzer)
 	_input_feedback_controller.set_completion_provider(auto)
 
-	_executor = _DCKitNS.Executor.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer)
+	_executor = _DCKitNS.Executor.Executor.new(_cmd_reg, _ctor_reg, _var_store, _analyzer, _tracer)
 
 	_register_modules()
 
@@ -133,6 +136,27 @@ func get_module(id: String) -> DCModule:
 #endregion
 
 
+#region Logger API
+# `details` is optional short context (max 100 chars) shown as a tooltip on
+# the badge and written to the log file. Executor entries fill it with the
+# breadcrumb themselves; callers here normally leave it empty.
+func log_info(msg: String, details: String = "") -> void:
+	_tracer.info(msg, details)
+
+
+func log_warn(msg: String, details: String = "") -> void:
+	_tracer.warn(msg, details)
+
+
+func log_error(msg: String, details: String = "") -> void:
+	_tracer.error(msg, details)
+
+
+func log_help(msg: String, details: String = "") -> void:
+	_tracer.help(msg, details)
+#endregion
+
+
 #region Variable store API
 func get_var(key: String, fallback: String = "") -> String:
 	return _var_store.get_value(key, fallback)
@@ -172,7 +196,7 @@ func _build_services(needs: int) -> DCModule.Services:
 	if needs & DCModule.Need.VARIABLES:
 		s.variables = _var_store
 	if needs & DCModule.Need.LOGGER:
-		s.logger = _executor.logger
+		s.logger = _tracer
 	if needs & DCModule.Need.PROFILER:
 		s.profiler = _executor.profiler
 	if needs & DCModule.Need.REGISTRY:
@@ -190,4 +214,5 @@ func _on_host_connection_requested() -> void:
 		push_warning("console is null in '_on_host_connection_requested' function")
 		return
 	console.connect_executor(_executor)
+	console.connect_tracer(_tracer)
 	console.connect_feedback_controller(_input_feedback_controller)

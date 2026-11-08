@@ -19,6 +19,22 @@ func abort() -> void:
 	return
 
 
+func log_info(msg: String, details: String = "") -> void:
+	pass
+
+
+func log_warn(msg: String, details: String = "") -> void:
+	pass
+
+
+func log_error(msg: String, details: String = "") -> void:
+	pass
+
+
+func log_help(msg: String, details: String = "") -> void:
+	pass
+
+
 func register(
 	p_name: String,
 	handler: Callable,

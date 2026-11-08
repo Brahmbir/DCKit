@@ -3,7 +3,6 @@
 ## [b]What it contains[/b]
 ## [br]
 ## [br]
-## [code]log[/code]   — scoped logger for this invocation[br]
 ## [code]abort[/code] — cooperative cancellation: is_aborted(), aborted signal, step()[br]
 ## [code]args[/code]  — lazy arg resolution: arg(n), get_all_args(), args_length()
 ##
@@ -52,12 +51,12 @@
 ## [br]
 ## [b]Handler signature[/b]
 ## [codeblock]
-## func(ctx: DevConsoleCommandContext) -> DCResult
+## func(ctx: DCContext) -> DCResult
 ## [/codeblock]
 ##
 ## [b]Typical eager handler[/b]
 ## [codeblock]
-## func(ctx: DevConsoleCommandContext) -> DCResult:
+## func(ctx: DCContext) -> DCResult:
 ##     var all = await ctx.get_all_args()
 ##     # check each result as needed, or just pull values directly:
 ##     var r0 = all[0]
@@ -68,7 +67,7 @@
 ##
 ## [b]Lazy control-flow handler[/b]
 ## [codeblock]
-## func(ctx: DevConsoleCommandContext) -> DCResult:
+## func(ctx: DCContext) -> DCResult:
 ##     var cond = await ctx.arg(0)
 ##     if not cond.success: return cond
 ##     if not cond.value.raw:
@@ -84,9 +83,7 @@ extends RefCounted
 ## Emitted exactly once, when abort() is first called on the root context.
 signal aborted
 
-# Public fields
-## Scoped logger for this command invocation.
-var log: DCLogger
+var breadcrumb: String = ""
 
 # Internal state
 # Raw unresolved argument nodes from the parser.
@@ -118,11 +115,16 @@ var _root_ctx: DCContext = null
 ## [param p_log]       — scoped logger for this command invocation.
 ## [param p_resolver]  — async callable the context uses to resolve one node.
 ## [param p_root]      — parent context when this is a nested command; null for root.
-func _init(p_raw_args: Array, p_log: DCLogger, p_resolver: Callable, p_root: DCContext = null) -> void:
+func _init(
+	p_raw_args: Array,
+	p_resolver: Callable,
+	p_root: DCContext = null,
+	_breadcrumb: String = "",
+) -> void:
 	_raw_args = p_raw_args
 	_resolver = p_resolver
 	_root_ctx = p_root
-	log = p_log
+	breadcrumb = _breadcrumb
 
 
 # Arg API
@@ -136,7 +138,7 @@ func args_length() -> int:
 ## Returns a cached result on subsequent calls — the underlying node runs once.
 ##
 ## Returns [DCResult]:[br]
-## success = true  → value is DCVal[br]
+## success = true  → value is DCResult.Value[br]
 ## success = false → message contains the error; value is null
 ##
 ## Out-of-bounds → immediate fail result, no error is pushed.
@@ -210,28 +212,16 @@ func abort() -> void:
 	aborted.emit()
 
 
-## Returns a new [Step] builder bound to this context.
-## Each call produces a fresh Step — do not reuse instances.
-##
-## [b]Usage[/b]
-## [codeblock]
-## var timer : SceneTreeTimer = null
-## var was_aborted := await ctx.step() \
-##     .init(func():
-##         timer = Engine.get_main_loop().create_timer(5.0)
-##     ) \
-##     .exec(func() -> Signal:
-##         return timer.timeout
-##     ) \
-##     .cleanup(func():
-##         pass
-##     ) \
-##     .run()
-## if was_aborted:
-##     return DCResult.fail("Aborted.")
-## [/codeblock]
-func step() -> Step:
-	return Step.new(self)
+func await_or_abort(exec_signal: Signal) -> bool:
+	var abort_source := _root_ctx if _root_ctx != null else self
+
+	if abort_source.is_aborted():
+		return true
+
+	var race := _SignalRace.new()
+	var winner: int = await race.wait(exec_signal, abort_source.aborted)
+
+	return winner == 1
 
 
 # Raw-string execution
@@ -240,108 +230,38 @@ func _bind_raw_runner(fn: Callable) -> void:
 	_raw_runner = fn
 
 
-## Abortable async block. Races an exec signal against ctx.aborted.
-## Whichever fires first wins — no polling, no frame spinning.
-##
-## [b]Three cases[/b][br]
-## Case 1 — Normal:     exec signal fires.   cleanup skipped. run() → false.[br]
-## Case 2 — Pre-abort:  ctx already aborted. init skipped.    run() → true.[br]
-## Case 3 — Mid-abort:  abort fires during await.  cleanup runs. run() → true.
-##
-## [b]Constraints[/b][br]
-## init    — must be synchronous.[br]
-## cleanup — must be synchronous.[br]
-## exec    — must return a valid live Signal. If the owning object is freed
-## before the signal fires, the step will hang. cleanup must prevent
-## this by freeing or stopping the resource.
-class Step extends RefCounted:
-	signal _resolved(was_aborted: bool)
+class _SignalRace extends RefCounted:
+	signal completed(winner: int)
 
-	var _ctx: DCContext
-	var _init_fn: Callable
-	var _exec_fn: Callable
-	var _cleanup_fn: Callable
+	var _resolved := false
 
 
-	func _init(ctx: DCContext) -> void:
-		_ctx = ctx
+	## Waits for whichever signal fires first.
+	## Returns 0 if first_signal wins, 1 if second_signal wins.
+	func wait(first_signal: Signal, second_signal: Signal) -> int:
+		var on_first := func() -> void:
+			_resolve(0)
 
-	# Fluent builders
+		var on_second := func() -> void:
+			_resolve(1)
 
-	## Sets a synchronous function to run before exec.
-	func init(fn: Callable) -> Step:
-		_init_fn = fn
-		return self
+		first_signal.connect(on_first, CONNECT_ONE_SHOT)
+		second_signal.connect(on_second, CONNECT_ONE_SHOT)
+
+		var winner: int = await completed
+
+		if first_signal.is_connected(on_first):
+			first_signal.disconnect(on_first)
+
+		if second_signal.is_connected(on_second):
+			second_signal.disconnect(on_second)
+
+		return winner
 
 
-	## Sets the async trigger. [param fn] must have signature: func() -> Signal.
-	func exec(fn: Callable) -> Step:
-		_exec_fn = fn
-		return self
+	func _resolve(winner: int) -> void:
+		if _resolved:
+			return
 
-
-	## Sets a synchronous function to run only if aborted mid-exec.
-	func cleanup(fn: Callable) -> Step:
-		_cleanup_fn = fn
-		return self
-
-	# Run
-
-	## Runs the step, awaiting either the exec signal or abort, whichever
-	## fires first. Returns true if the step was aborted, false otherwise.
-	func run() -> bool:
-		# Case 2 — already aborted before this step starts.
-		if _ctx.is_aborted():
-			return true
-
-		# init — synchronous, always runs before exec.
-		if _init_fn.is_valid():
-			_init_fn.call()
-
-		# No exec provided — nothing async to race.
-		if not _exec_fn.is_valid():
-			return false
-
-		# Retrieve the signal to await.
-		var exec_signal = _exec_fn.call()
-		if not exec_signal is Signal:
-			push_error("DevConsoleCommandContext.Step: exec() must return a Signal.")
-			return false
-
-		# Always race against the ROOT context's aborted signal.
-		# If this IS the root, _root_ctx is null and we use ourselves.
-		var abort_source: DCContext = _ctx._root_ctx if _ctx._root_ctx != null else _ctx
-
-		# Race both signals. _guard[0] is the fired flag.
-		# An Array is used instead of a plain bool because GDScript lambdas
-		# capture variables by value — assigning _fired = true inside a lambda
-		# only modifies the lambda's local copy and the outer variable never
-		# changes. Arrays are reference types, so both lambdas share the same
-		# object and _guard[0] = true is visible to both.
-		var _guard := [false]
-
-		var on_exec_done := func() -> void:
-			if _guard[0]:
-				return
-			_guard[0] = true
-			_resolved.emit(false)
-
-		var on_aborted := func() -> void:
-			if _guard[0]:
-				return
-			_guard[0] = true
-			if _cleanup_fn.is_valid():
-				_cleanup_fn.call()
-			_resolved.emit(true)
-
-		exec_signal.connect(on_exec_done, CONNECT_ONE_SHOT)
-		abort_source.aborted.connect(on_aborted, CONNECT_ONE_SHOT)
-
-		var was_aborted: bool = await _resolved
-
-		if exec_signal.is_connected(on_exec_done):
-			exec_signal.disconnect(on_exec_done)
-		if abort_source.aborted.is_connected(on_aborted):
-			abort_source.aborted.disconnect(on_aborted)
-
-		return was_aborted
+		_resolved = true
+		completed.emit(winner)

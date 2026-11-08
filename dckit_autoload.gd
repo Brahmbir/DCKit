@@ -3,27 +3,25 @@ extends Node
 signal console_visibility_changed(is_open: bool)
 
 const BackendInterface = preload("./utils/backend_interface.gd")
+
+var log_absent_backend_warnings: bool = false
 var _backend_path: String:
 	get:
 		return get_script().resource_path.get_base_dir().path_join("backend.gd")
-
-
-var log_absent_backend_warnings: bool = false
 var _backend: BackendInterface = null
 var _dc_kit_ui: BackendInterface.UI_HOST_INTERFACE = null
 
 
 func _init() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	if not FileAccess.file_exists(_backend_path):
 		if OS.is_debug_build():
 			push_warning(
-				"DCKit: backend script not found at '%s' — running without backend."
-				% _backend_path
+				"DCKit: backend script not found at '%s' — running without backend." % _backend_path
 			)
 		else:
 			print("DCKit console disabled")
 		return
-	process_mode = Node.PROCESS_MODE_ALWAYS
 
 	var backend_impl = load(_backend_path)
 	if backend_impl == null:
@@ -47,10 +45,12 @@ func configure_ui(config: Dictionary) -> void:
 		return
 	_dc_kit_ui.configure(config)
 
+
 func get_ui_config() -> Dictionary:
 	if not _dc_kit_ui:
-		return {}
+		return { }
 	return _dc_kit_ui.get_configure()
+
 
 func has_backend() -> bool:
 	return _backend != null
@@ -66,13 +66,39 @@ func analyze(input: String, cursor_pos: int = -1) -> DCAnalysisResult:
 func run(raw_string: String) -> DCResult:
 	if _guard("run"):
 		return DCResult.fail("Console disabled")
-	return await _backend.run(raw_string) as DCResult
+	return await _backend.run(raw_string)
 
 
 func abort() -> void:
 	if _guard("abort"):
 		return
 	_backend.abort()
+
+
+#region Logger API
+func log_info(msg: String, details: String = "") -> void:
+	if _guard("log_info"):
+		return
+	_backend.log_info(msg, details)
+
+
+func log_warn(msg: String, details: String = "") -> void:
+	if _guard("log_warn"):
+		return
+	_backend.log_warn(msg, details)
+
+
+func log_error(msg: String, details: String = "") -> void:
+	if _guard("log_error"):
+		return
+	_backend.log_error(msg, details)
+
+
+func log_help(msg: String, details: String = "") -> void:
+	if _guard("log_help"):
+		return
+	_backend.log_help(msg, details)
+#endregion
 
 
 func register(
