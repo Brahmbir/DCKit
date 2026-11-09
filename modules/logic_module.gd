@@ -130,10 +130,13 @@ func _try_cmd() -> DCDefinition:
 			if result.success:
 				return result
 
+			if ctx.is_aborted():
+				return result
+
 			if ctx.args_length() == 2:
 				return await ctx.arg(1)
 
-			return DCResult.ok(null, "Success"),
+			return DCResult.ok("", "Success"),
 		"Runs a command; on failure runs an optional fallback instead of "
 		+ "propagating the error. Returns empty string when the command fails "
 		+ "and no fallback is given.",
@@ -173,12 +176,14 @@ func _repeat_cmd() -> DCDefinition:
 
 			var last := DCResult.ok(null, "Success")
 			for _iteration in count:
+				if not await ctx.step():
+					return DCResult.fail("Repeat aborted.")
 				for arg_index in range(1, ctx.args_length()):
 					last = await ctx.arg(arg_index, false)
 					if not last.success:
 						return last
-
 			return last,
+
 		"Runs one or more commands [b]N[/b] times and returns the last result.\n"
 		+ "Each command is executed in order every iteration.\n"
 		+ "Stops immediately if any command fails.\n" + "Maximum %d repetitions." % MAX_REPEAT_COUNT,
@@ -207,15 +212,15 @@ func _while_cmd() -> DCDefinition:
 
 			var last := DCResult.ok(null, "Success")
 			for _iteration in MAX_WHILE_ITERS:
+				if not await ctx.step():
+					return DCResult.fail("While aborted.")
 				var condition := await ctx.arg(0, false)
 				if not condition.truthy():
 					break
-
 				for arg_index in range(1, ctx.args_length()):
 					last = await ctx.arg(arg_index, false)
 					if not last.success:
 						return last
-
 			return last,
 		"Re-evaluates a condition before every iteration and executes one or more "
 		+ "commands while it is truthy.\n" + "Commands are executed in order each iteration.\n"
@@ -395,7 +400,7 @@ func _numeric_comparison_cmd(
 		command_name,
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 2:
-				return DCResult.fail("%s requires exactly 2 arguments.")
+				return DCResult.fail("Requires exactly 2 arguments.")
 
 			var pair := await _resolve_numeric_pair(ctx)
 			if not pair.success:
@@ -414,12 +419,12 @@ func _resolve_string_pair(ctx: DCContext) -> _ValuePair:
 
 	var left := await ctx.arg(0)
 	if not left.success:
-		pair.message = left.message
+		pair.message = left.full_message()
 		return pair
 
 	var right := await ctx.arg(1)
 	if not right.success:
-		pair.message = right.message
+		pair.message = right.full_message()
 		return pair
 
 	pair.success = true
@@ -434,12 +439,12 @@ func _resolve_numeric_pair(ctx: DCContext) -> _ValuePair:
 
 	var left := await ctx.arg(0)
 	if not left.success:
-		pair.message = left.message
+		pair.message = left.full_message()
 		return pair
 
 	var right := await ctx.arg(1)
 	if not right.success:
-		pair.message = right.message
+		pair.message = right.full_message()
 		return pair
 
 	var left_string := str(left.value)

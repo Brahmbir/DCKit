@@ -167,7 +167,7 @@ func unlock_command(p_name: String) -> void:
 
 
 #region Variable methods
-func set_var(key: String, value: String) -> bool:
+func set_var(key: String, value: Variant) -> bool:
 	if _guard():
 		return false
 	return _backend.set_var(key, value)

@@ -58,7 +58,7 @@ func _profile() -> DCDefinition:
 			for i in count:
 				var result: DCResult = await ctx.arg(i)
 				if not result.success:
-					failure = result.message
+					failure = result.full_message()
 					break # stop at the first failure, keep the partial report
 				var text := result.text()
 				if not text.is_empty():

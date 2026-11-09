@@ -108,7 +108,7 @@ func is_var_deferred(key: String) -> bool:
 	return false
 
 
-func set_var(key: String, value: String) -> bool:
+func set_var(key: String, value: Variant) -> bool:
 	return false
 
 

@@ -1,81 +1,4 @@
-## The sole argument every command handler receives.
-##
-## [b]What it contains[/b]
-## [br]
-## [br]
-## [code]abort[/code] — cooperative cancellation: is_aborted(), aborted signal, step()[br]
-## [code]args[/code]  — lazy arg resolution: arg(n), get_all_args(), args_length()
-##
-## [br]
-## [br]
-## [b]Arg resolution[/b]
-## [br]
-## Arguments are never pre-resolved. The handler pulls each one on demand.
-## Resolution is async because nested commands and constructors may await.
-##
-## [codeblock]
-## await ctx.arg(n)           → DCResult
-##                                .success = true  → .value is DCVal
-##                                .success = false → .message is the error
-##
-## await ctx.get_all_args()   → Array[DCResult]
-##                                one entry per argument, in order
-##                                the handler decides what to do with failures
-##
-## ctx.args_length()          → int   (sync — no await needed)
-## [/codeblock]
-##
-## Results are cached after first resolution. Calling ctx.arg(0) twice
-## runs the nested command / constructor only once. The second call returns
-## the cached DCResult immediately.
-##
-## [br]
-## [br]
-## [b]Running raw command strings[/b]
-## [codeblock]
-## await ctx.run_raw(raw: String) → Array[DCResult]
-## [/codeblock]
-##
-## Lets a handler execute another command string through the executor's
-## full pipeline (analyze → execute), nested under this command. Shares
-## this command's abort scope (ctx.abort() cancels it too) and logging
-## origin. Same return shape as Executor.run() — currently 0 or 1 entries
-## (chains are gated upstream at the lexer), but chain-ready.
-##
-## [codeblock]
-## var results := await ctx.run_raw("var.set speed 5")
-## if not results.is_empty() and not results.back().success:
-##     return results.back()
-## [/codeblock]
-##
-## [br]
-## [b]Handler signature[/b]
-## [codeblock]
-## func(ctx: DCContext) -> DCResult
-## [/codeblock]
-##
-## [b]Typical eager handler[/b]
-## [codeblock]
-## func(ctx: DCContext) -> DCResult:
-##     var all = await ctx.get_all_args()
-##     # check each result as needed, or just pull values directly:
-##     var r0 = all[0]
-##     if not r0.success: return r0
-##     var name : String = r0.text()
-##     ...
-## [/codeblock]
-##
-## [b]Lazy control-flow handler[/b]
-## [codeblock]
-## func(ctx: DCContext) -> DCResult:
-##     var cond = await ctx.arg(0)
-##     if not cond.success: return cond
-##     if not cond.value:
-##         return DCResult.ok("Condition false — skipped.")
-##     var branch = await ctx.arg(1)   # only runs if condition was true
-##     if not branch.success: return branch
-##     return DCResult.ok(branch.value)
-## [/codeblock]
+
 class_name DCContext
 extends RefCounted
 
@@ -137,8 +60,8 @@ func args_length() -> int:
 ## Resolves and returns argument at index [param n].
 ## Returns a cached result on subsequent calls — the underlying node runs once.
 ##
-## Returns [DCResult]:[br]
-## success = true  → value is DCResult.Value[br]
+## Returns [DCResult]:
+## success = true  → value
 ## success = false → message contains the error; value is null
 ##
 ## Out-of-bounds → immediate fail result, no error is pushed.
@@ -222,7 +145,13 @@ func abort() -> void:
 	_aborted = true
 	aborted.emit()
 
-
+## Cooperative checkpoint for long loops. Yields one frame, then returns
+## false if the context was aborted before or during that frame.
+func step() -> bool:
+	if is_aborted():
+		return false
+	await Engine.get_main_loop().process_frame
+	return not is_aborted()
 
 func await_or_abort(exec_signal: Signal) -> bool:
 	var abort_source := _root_ctx if _root_ctx != null else self

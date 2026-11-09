@@ -1,12 +1,11 @@
 ## Optional module: the `bat` command (script runner).
 ## Reads a script file line by line and feeds each line to the Executor
 ## via ctx.run_raw(), so script lines share the calling command's call
-## stack (log ancestry "bat > <cmd>") and abort scope.
 ##
 ##   bat <path>  — execute a script file
 ##
 ## Rules
-##   • Nested bat is fully supported — each call pushes a new ScriptFrame.
+##   • Nested bat is fully supported.
 ##   • Lines beginning with '#' are comments; empty lines are skipped.
 ##   • When ctx.is_aborted(), the loop stops after the current line completes.
 extends DCModule
@@ -113,7 +112,7 @@ func run(path: String, ctx: DCContext) -> DCResult:
 
 		if not last_result.success:
 			return DCResult.fail(
-				"Script '%s' failed at line %d: %s" % [path, entry.line_number, last_result.message]
+				"Script '%s' failed at line %d: %s" % [path, entry.line_number, last_result.full_message()]
 			)
 
 	return (

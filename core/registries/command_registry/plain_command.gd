@@ -25,6 +25,8 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 	var slots := params.duplicate() # Param refs; unaffected by remove_param
 
 	var handler := func(ctx: DCContext) -> DCResult:
+		if not fn.is_valid():
+			return DCResult.fail("The owner of this command no longer exists.")
 		var given := ctx.args_length()
 		if given < required or given > count:
 			var expected := str(count) if required == count else "%d-%d" % [required, count]

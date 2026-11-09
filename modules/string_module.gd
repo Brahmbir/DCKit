@@ -25,50 +25,64 @@ func get_commands() -> Array[DCDefinition]:
 
 func _len_cmd() -> DCDefinition:
 	return _unary_string_command(
-		"str.len", "Returns the number of characters in the string.",
-		func(value: String) -> String: return str(value.length())
+		"str.len",
+		"Returns the number of characters in the string.",
+		func(value: String) -> String:
+			return str(value.length()),
 	)
 
 
 func _trim_cmd() -> DCDefinition:
 	return _unary_string_command(
-		"str.trim", "Removes whitespace from both ends of the string.",
-		func(value: String) -> String: return value.strip_edges()
+		"str.trim",
+		"Removes whitespace from both ends of the string.",
+		func(value: String) -> String:
+			return value.strip_edges(),
 	)
 
 
 func _lower_cmd() -> DCDefinition:
 	return _unary_string_command(
-		"str.lower", "Converts the string to lowercase.",
-		func(value: String) -> String: return value.to_lower()
+		"str.lower",
+		"Converts the string to lowercase.",
+		func(value: String) -> String:
+			return value.to_lower(),
 	)
 
 
 func _upper_cmd() -> DCDefinition:
 	return _unary_string_command(
-		"str.upper", "Converts the string to uppercase.",
-		func(value: String) -> String: return value.to_upper()
+		"str.upper",
+		"Converts the string to uppercase.",
+		func(value: String) -> String:
+			return value.to_upper(),
 	)
 
 
 func _contains_cmd() -> DCDefinition:
 	return _binary_string_bool_command(
-		"str.contains", "Returns [b]true[/b] when the first string contains the second.",
-		func(a: String, b: String) -> bool: return a.contains(b)
+		"str.contains",
+		"Returns [b]true[/b] when the first string contains the second.",
+		func(a: String, b: String) -> bool:
+			return a.contains(b),
 	)
 
 
 func _starts_with_cmd() -> DCDefinition:
 	return _binary_string_bool_command(
-		"str.starts_with", "Returns [b]true[/b] when the first string starts with the second.",
-		func(a: String, b: String) -> bool: return a.begins_with(b)
+		"str.starts_with",
+		"Returns [b]true[/b] when the first string starts with the second.",
+		func(a: String, b: String) -> bool:
+			return a.begins_with(b),
 	)
 
 
 func _ends_with_cmd() -> DCDefinition:
 	return _binary_string_bool_command(
-		"str.ends_with", "Returns [b]true[/b] when the first string ends with the second.",
-		func(a: String, b: String) -> bool: return a.ends_with(b)
+		"str.ends_with",
+		"Returns [b]true[/b] when the first string ends with the second.",
+		func(a: String, b: String) -> bool:
+			return a.ends_with(b),
 	)
 
 
@@ -76,12 +90,14 @@ func _replace_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"str.replace",
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_strings(ctx, "str.replace", 3, 3)
+			var values := await _resolve_strings(ctx, 3, 3)
 			if not values.success:
-				return DCResult.fail(values.message)
+				return DCResult.fail(values.full_message())
 			return DCResult.ok(values.items[0].replace(values.items[1], values.items[2])),
 		"Replaces every occurrence of the search string with the replacement string.",
-		[DCDefinition.Param.new("text"), DCDefinition.Param.new("search"), DCDefinition.Param.new("replacement")],
+		[DCDefinition.Param.new("text"), DCDefinition.Param.new("search"), DCDefinition.Param.new(
+				"replacement"
+			)],
 	)
 
 
@@ -89,9 +105,9 @@ func _split_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"str.split",
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_strings(ctx, "str.split", 2, 3)
+			var values := await _resolve_strings(ctx, 2, 3)
 			if not values.success:
-				return DCResult.fail(values.message)
+				return DCResult.fail(values.full_message())
 			var allow_empty := values.items.size() == 3 and values.items[2].to_lower() == "true"
 			var parts := values.items[0].split(values.items[1], allow_empty)
 			return DCResult.ok(parts),
@@ -108,9 +124,9 @@ func _join_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"str.join",
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_strings(ctx, "str.join", 2, -1)
+			var values := await _resolve_strings(ctx, 2, -1)
 			if not values.success:
-				return DCResult.fail(values.message)
+				return DCResult.fail(values.full_message())
 			var delimiter := values.items[0]
 			var parts: PackedStringArray = []
 			for index in range(1, values.items.size()):
@@ -128,9 +144,9 @@ func _slice_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"str.slice",
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_strings(ctx, "str.slice", 2, 3)
+			var values := await _resolve_strings(ctx, 2, 3)
 			if not values.success:
-				return DCResult.fail(values.message)
+				return DCResult.fail(values.full_message())
 
 			var start_text := values.items[1]
 			if not start_text.is_valid_int():
@@ -149,49 +165,59 @@ func _slice_cmd() -> DCDefinition:
 		[
 			DCDefinition.Param.new("text"),
 			DCDefinition.Param.new("start"),
-			DCDefinition.Param.new("length").describe("Optional number of characters; defaults to the end."),
+			DCDefinition.Param.new("length").describe(
+				"Optional number of characters; defaults to the end."
+			),
 		],
 	)
 
 
-func _unary_string_command(command_name: String, description: String, operation: Callable) -> DCDefinition:
+func _unary_string_command(
+	command_name: String,
+	description: String,
+	operation: Callable,
+) -> DCDefinition:
 	return DCDefinition.new(
 		command_name,
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_strings(ctx, command_name, 1, 1)
+			var values := await _resolve_strings(ctx, 1, 1)
 			if not values.success:
-				return DCResult.fail(values.message)
+				return DCResult.fail(values.full_message())
 			return DCResult.ok(operation.call(values.items[0])),
 		description,
 		[DCDefinition.Param.new("value")],
 	)
 
 
-func _binary_string_bool_command(command_name: String, description: String, operation: Callable) -> DCDefinition:
+func _binary_string_bool_command(
+	command_name: String,
+	description: String,
+	operation: Callable,
+) -> DCDefinition:
 	return DCDefinition.new(
 		command_name,
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_strings(ctx, command_name, 2, 2)
+			var values := await _resolve_strings(ctx, 2, 2)
 			if not values.success:
-				return DCResult.fail(values.message)
+				return DCResult.fail(values.full_message())
 			return DCResult.ok(operation.call(values.items[0], values.items[1])),
 		description,
 		[DCDefinition.Param.new("text"), DCDefinition.Param.new("search")],
 	)
 
 
-func _resolve_strings(ctx: DCContext, command_name: String, min_count: int, max_count: int) -> _ResolvedStrings:
+func _resolve_strings(ctx: DCContext, min_count: int, max_count: int) -> _ResolvedStrings:
 	var out := _ResolvedStrings.new()
 	var count := ctx.args_length()
 	if count < min_count or (max_count >= 0 and count > max_count):
 		var expected := str(min_count) if min_count == max_count else ("at least %d" % min_count)
-		out.message = "%s requires %s argument(s)." % [command_name, expected]
+		out.message = "Requires %s argument(s)." % [expected]
 		return out
 
 	for index in count:
 		var result := await ctx.arg(index)
 		if not result.success:
-			out.message = result.message
+			out.message = result.full_message()
 			return out
 		out.items.append(result.text())
 

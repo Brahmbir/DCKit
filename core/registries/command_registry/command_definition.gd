@@ -34,7 +34,7 @@ var aliases: PackedStringArray:
 	get:
 		return _aliases
 	set(_value):
-		printerr("sliases are read-only")
+		printerr("aliases are read-only")
 var deprecated: bool:
 	get:
 		return _deprecated
@@ -74,22 +74,22 @@ func _init(
 
 
 ## Adds a single alias, if not already present.
-func alias(name: String) -> DCDefinition:
-	if not _aliases.has(name):
-		_aliases.append(name)
+func alias(new_alias: String) -> DCDefinition:
+	if not _aliases.has(new_alias):
+		_aliases.append(new_alias)
 	return self
 
 
 ## Adds multiple aliases at once, skipping duplicates.
-func alias_many(names: PackedStringArray) -> DCDefinition:
-	for name in names:
-		if not _aliases.has(name):
-			_aliases.append(name)
+func alias_many(new_alias_array: PackedStringArray) -> DCDefinition:
+	for new_alias in new_alias_array:
+		if not _aliases.has(new_alias):
+			_aliases.append(new_alias)
 	return self
 
 
-func unalias(name: String) -> DCDefinition:
-	var i := _aliases.find(name)
+func unalias(_alias: String) -> DCDefinition:
+	var i := _aliases.find(_alias)
 	if i >= 0:
 		_aliases.remove_at(i)
 	return self

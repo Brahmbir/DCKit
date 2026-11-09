@@ -1,28 +1,28 @@
 class_name UtilityModule
 extends DCModule
 
-
 static func _parse_duration(text: String) -> float:
 	text = text.strip_edges().to_lower()
 
 	if text.ends_with("ms"):
-		return text.left(-2).to_float() / 1000.0
+		var value := text.left(-2).strip_edges()
+		return float(value) / 1000.0 if value.is_valid_float() else -1.0
 
 	if text.ends_with("s"):
-		return text.left(-1).to_float()
+		var value := text.left(-1).strip_edges()
+		return float(value) if value.is_valid_float() else -1.0
 
 	if text.ends_with("m"):
-		return text.left(-1).to_float() * 60.0
+		var value := text.left(-1).strip_edges()
+		return float(value) * 60.0 if value.is_valid_float() else -1.0
 
 	if text.ends_with("h"):
-		return text.left(-1).to_float() * 3600.0
+		var value := text.left(-1).strip_edges()
+		return float(value) * 3600.0 if value.is_valid_float() else -1.0
 
 	# No suffix: default to seconds.
 	if text.is_valid_float():
-		return text.to_float()
-
-	if text.is_valid_int():
-		return float(text.to_int())
+		return float(text)
 
 	return -1.0
 
@@ -71,6 +71,7 @@ func _wait_cmd() -> DCDefinition:
 				return result
 
 			var duration_text := result.text()
+ 
 			var seconds := _parse_duration(duration_text)
 
 			if seconds < 0.0:
@@ -101,7 +102,7 @@ func _abort_cmd() -> DCDefinition:
 
 			var result := await ctx.arg(0)
 			if not result.success:
-				return DCResult.fail("Execution aborted. reason: %s" % result.message)
+				return DCResult.fail("Execution aborted. reason:%s" % result.message)
 
 			ctx.abort()
 			return DCResult.fail("Execution aborted. reason:%s" % result.text()),
@@ -123,11 +124,11 @@ func _time_cmd() -> DCDefinition:
 			var elapsed_ms := float(Time.get_ticks_usec() - start) / 1000.0
 
 			if not result.success:
-				return DCResult.fail("%s\nExecuted in %.3f ms." % [result.message, elapsed_ms])
+				return DCResult.fail("%s\nExecuted in %.3f ms." % [result.full_message(), elapsed_ms])
 
 			return DCResult.ok(
 				elapsed_ms,
-				"%s\nExecuted in %.3f ms." % [result.message, elapsed_ms],
+				"%s\nExecuted in %.3f ms." % [result.full_message(), elapsed_ms],
 			),
 		"Measures how long a nested command takes.",
 		[DCDefinition.Param.new("command").describe("Command to execute.")],
