@@ -142,14 +142,15 @@ func input_handler(event: InputEvent) -> bool:
 				if event.shift_pressed:
 					navigate(-1)
 				else:
-					accept()
+					navigate(1)
 				get_viewport().set_input_as_handled()
 				return true
 		KEY_ENTER, KEY_KP_ENTER:
-			if not event.echo:
+			if not event.echo and has_items():
 				accept()
 				get_viewport().set_input_as_handled()
 				return true
+			return false
 		KEY_ESCAPE:
 			if not event.echo:
 				hide_popup()

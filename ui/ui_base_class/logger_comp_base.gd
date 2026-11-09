@@ -5,8 +5,8 @@ var _logger_ref: WeakRef = null
 var _hint := """[i][b][color=gray]Keyboard shortcuts:[/color][/b]
 [color=#858aa0][color=gray]Autocomplete[/color]
 		[b]Ctrl+Space[/b] — toggle autocomplete
-		[b]Up[/b] / [b]Down[/b] — navigate suggestions (when open)
-		[b]Tab[/b] / [b]Enter[/b] — accept highlighted suggestion (when open)
+		[b]Up[/b] / [b]Down[/b] / [b]Tab[/b] — navigate suggestions (when open)
+		[b]Enter[/b] — accept highlighted suggestion (when open)
 		[b]Esc[/b] — close autocomplete (when open)
 [color=gray]History[/color]
 		[b]Up[/b] / [b]Down[/b] — navigate history
