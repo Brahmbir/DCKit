@@ -35,7 +35,7 @@ extends "./inbuilt_base.gd"
 # Core extraction
 # Always returns a String. Never returns null.
 static func extract(val: DCResult) -> String:
-	return val.as_string()
+	return val.text()
 
 
 # Part hint factory

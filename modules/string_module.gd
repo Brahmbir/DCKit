@@ -174,7 +174,7 @@ func _binary_string_bool_command(command_name: String, description: String, oper
 			var values := await _resolve_strings(ctx, command_name, 2, 2)
 			if not values.success:
 				return DCResult.fail(values.message)
-			return DCResult.ok("true" if operation.call(values.items[0], values.items[1]) else "false"),
+			return DCResult.ok(operation.call(values.items[0], values.items[1])),
 		description,
 		[DCDefinition.Param.new("text"), DCDefinition.Param.new("search")],
 	)

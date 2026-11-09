@@ -47,10 +47,10 @@ func _set_var() -> DCDefinition:
 				return r1
 
 			var key: String = r0.text()
-			var r := _vars.set_value(key, r1.raw) # r1.raw is the real Vector2/Color/etc.
+			var r := _vars.set_value(key, r1.value) # r1.value is the real Vector2/Color/etc.
 			if not r.ok:
 				return DCResult.fail(r.message)
-			return DCResult.ok(str(r1.raw)), # display string for the console log
+			return DCResult.ok(r1.value), # display string for the console log
 		"Writes a variable into the store. The value is resolved first and keeps its type. "
 		+ "Replaces any existing variable, including deferred ones.",
 		[DCDefinition.Param.new("name").describe(

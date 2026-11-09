@@ -86,7 +86,7 @@ func _wait_cmd() -> DCDefinition:
 			if was_aborted:
 				return DCResult.fail("Wait aborted.")
 
-			return DCResult.ok("Waited %s." % duration_text),
+			return DCResult.ok(null,"Waited %s." % duration_text),
 		"Pauses execution for a duration.",
 		[DCDefinition.Param.new("duration").describe("Examples: 500ms, 2s, 1m")],
 	).as_utility()
@@ -125,7 +125,10 @@ func _time_cmd() -> DCDefinition:
 			if not result.success:
 				return DCResult.fail("%s\nExecuted in %.3f ms." % [result.message, elapsed_ms])
 
-			return DCResult.ok("%s\nExecuted in %.3f ms." % [result.message, elapsed_ms]),
+			return DCResult.ok(
+				elapsed_ms,
+				"%s\nExecuted in %.3f ms." % [result.message, elapsed_ms],
+			),
 		"Measures how long a nested command takes.",
 		[DCDefinition.Param.new("command").describe("Command to execute.")],
 		true,
@@ -148,19 +151,18 @@ func _type_of_cmd() -> DCDefinition:
 			if value == null:
 				return DCResult.ok("null")
 
-			var raw = value.raw
 			var type_name := ""
 
-			match typeof(raw):
+			match typeof(value):
 				TYPE_OBJECT:
-					if raw != null:
-						type_name = raw.get_class()
+					if value != null:
+						type_name = value.get_class()
 					else:
 						type_name = "Object"
 				_:
-					type_name = type_string(typeof(raw))
+					type_name = type_string(typeof(value))
 
-			return DCResult.ok(type_name),
+			return DCResult.ok(typeof(value), type_name),
 		"Returns the type of a value.",
 		[DCDefinition.Param.new("value").describe("Value to inspect.")],
 		true,

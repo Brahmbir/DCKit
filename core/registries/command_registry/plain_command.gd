@@ -39,7 +39,7 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 			if not c.success:
 				var hint := "" if p.choices.is_empty() else " Try: %s." % ", ".join(PackedStringArray(p.choices.keys()))
 				return DCResult.fail("%s: argument %d (%s) %s%s" % [p_name, i, p.name, c.message, hint])
-			values.append(c.raw)
+			values.append(c.value)
 		
 		var ret = await fn.callv(values)
 		if ret is DCResult:
@@ -52,7 +52,7 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 static func _lookup(v: Variant, choices: Dictionary) -> Variant:
 	if choices.is_empty() or not (v is String):
 		return v
-	var s: String = v.value.strip_edges()
+	var s: String = v.strip_edges()
 	for k in choices:
 		if String(k).nocasecmp_to(s) == 0:
 			var val = choices[k]
@@ -99,9 +99,9 @@ static func _coerce(v: Variant, type: int) -> DCResult:
 					"false", "no", "0":
 						return DCResult.ok(false)
 		TYPE_STRING:
-			return DCResult.ok(v.as_string())
+			return DCResult.ok(v)
 		TYPE_STRING_NAME:
-			return DCResult.ok(StringName(v.as_string()))
+			return DCResult.ok(StringName(v))
 		_:
 			if typeof(raw) == type:
 				return DCResult.ok(raw)
