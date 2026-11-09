@@ -226,6 +226,9 @@ func _orphans_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"orphans",
 		func(_ctx: DCContext) -> DCResult:
+			if not OS.is_debug_build():
+				return DCResult.fail("'orphans' is only available in debug builds.")
+
 			var orphan_ids := Node.get_orphan_node_ids()
 
 			if orphan_ids.is_empty():
@@ -248,7 +251,7 @@ func _orphans_cmd() -> DCDefinition:
 				output.append("- %s [%s] (ID: %d)" % [node.name, node.get_class(), instance_id])
 
 			return DCResult.ok(found_ids, "\n".join(output)),
-		"Lists nodes that are not inside the active scene tree.",
+		"Lists nodes that are not inside the active scene tree (debug builds only).",
 		[],
 		true,
 	)

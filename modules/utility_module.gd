@@ -1,6 +1,7 @@
 class_name UtilityModule
 extends DCModule
 
+
 static func _parse_duration(text: String) -> float:
 	text = text.strip_edges().to_lower()
 
@@ -71,7 +72,7 @@ func _wait_cmd() -> DCDefinition:
 				return result
 
 			var duration_text := result.text()
- 
+
 			var seconds := _parse_duration(duration_text)
 
 			if seconds < 0.0:
@@ -87,7 +88,7 @@ func _wait_cmd() -> DCDefinition:
 			if was_aborted:
 				return DCResult.fail("Wait aborted.")
 
-			return DCResult.ok(null,"Waited %s." % duration_text),
+			return DCResult.ok(null, "Waited %s." % duration_text),
 		"Pauses execution for a duration.",
 		[DCDefinition.Param.new("duration").describe("Examples: 500ms, 2s, 1m")],
 	).as_utility()
@@ -124,7 +125,9 @@ func _time_cmd() -> DCDefinition:
 			var elapsed_ms := float(Time.get_ticks_usec() - start) / 1000.0
 
 			if not result.success:
-				return DCResult.fail("%s\nExecuted in %.3f ms." % [result.full_message(), elapsed_ms])
+				return DCResult.fail(
+					"%s\nExecuted in %.3f ms." % [result.full_message(), elapsed_ms]
+				)
 
 			return DCResult.ok(
 				elapsed_ms,
