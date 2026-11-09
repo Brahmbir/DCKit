@@ -82,7 +82,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 				],
 			),
 		],
-	)
+	).alias_many(["vec4"])
 
 
 static func extract_vector4(val: DCResult.Value) -> Variant:

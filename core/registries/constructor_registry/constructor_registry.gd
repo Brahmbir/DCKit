@@ -44,7 +44,8 @@ const _TypeTransform3D = preload("./inbuilt/t_transform3d.gd")
 const _TypeProjection = preload("./inbuilt/t_projection.gd")
 
 # State
-var _defs: Dictionary = { } # name (String) →  _DCKitNS.Registries.ConstructorDef
+var _defs: Dictionary = { } # lowercase type name → ConstructorDef
+var _aliases: Dictionary = { } # lowercase alias → lowercase type name
 
 
 func _init() -> void:
@@ -59,34 +60,19 @@ func _init() -> void:
 #   • name was already registered by a previous custom call
 #   • handler is not a valid Callable
 func register(def: _DCKitNS.Registries.ConstructorDef) -> bool:
-	if _defs.has(def.name):
-		var existing: _DCKitNS.Registries.ConstructorDef = _defs[def.name]
-		if existing.is_builtin:
-			push_warning(
-				"ConstructorRegistry: '%s' is a built-in type and cannot be replaced." \
-						% def.name
-			)
-		else:
-			push_warning(
-				"ConstructorRegistry: '%s' is already registered — ignored." \
-						% def.name
-			)
-		return false
-
 	if not def.handler.is_valid():
 		push_warning("ConstructorRegistry: '%s' has an invalid handler — ignored." % def.name)
 		return false
-
-	_defs[def.name] = def
-	return true
+	return _store(def)
 
 
 func knows(name: String) -> bool:
-	return _defs.has(name)
+	return _canonical(name) != ""
 
 
 func get_def(name: String) -> _DCKitNS.Registries.ConstructorDef:
-	return _defs.get(name)
+	var key := _canonical(name)
+	return _defs[key] if key != "" else null
 
 
 func get_all() -> Array:
@@ -102,7 +88,7 @@ func get_all() -> Array:
 # Called after all parts are already resolved depth-first.
 # Returns a Godot Variant on success, or a DCResult.fail() on error.
 func resolve(name: String, parts: Array):
-	var def: _DCKitNS.Registries.ConstructorDef = _defs.get(name)
+	var def := get_def(name)
 	if def == null:
 		return DCResult.fail("Unknown constructor type '%s'." % name)
 	return def.handler.call(parts)
@@ -135,4 +121,74 @@ func _seed_builtins() -> void:
 
 func _add_builtin(def: _DCKitNS.Registries.ConstructorDef) -> void:
 	def.is_builtin = true
-	_defs[def.name] = def
+	_store(def)
+
+
+# Type name first, then alias. Returns the lowercase type key, "" when unknown.
+func _canonical(name: String) -> String:
+	var key := name.to_lower()
+	if _defs.has(key):
+		return key
+	return _aliases.get(key, "")
+
+
+# Describes whatever already owns this key, "" when it is free.
+func _owner_of(key: String) -> String:
+	if _defs.has(key):
+		var d: _DCKitNS.Registries.ConstructorDef = _defs[key]
+		return "%s type '%s'" % ["built-in" if d.is_builtin else "custom", d.name]
+	if _aliases.has(key):
+		return "alias '%s' of '%s'" % [key, _defs[_aliases[key]].name]
+	return ""
+
+
+func _alias_error(alias: String) -> String:
+	if alias.is_empty():
+		return "alias is empty."
+	if "." in alias:
+		return "alias cannot contain a dot (the parser rejects dotted type names)."
+	if not alias.is_valid_identifier():
+		return "alias must match [A-Za-z_][A-Za-z0-9_]*."
+	return ""
+
+
+func _store(def: _DCKitNS.Registries.ConstructorDef) -> bool:
+	var key := def.name.to_lower()
+	var taken := _owner_of(key)
+	if taken != "":
+		push_warning(
+			"ConstructorRegistry: type '%s' clashes with %s (names are case-insensitive) — ignored."
+			% [def.name, taken]
+		)
+		return false
+	_defs[key] = def
+
+	var seen := { }
+	for a in def.aliases:
+		var akey := a.to_lower()
+		var err := _alias_error(a)
+		if err != "":
+			push_warning("ConstructorRegistry: alias '%s' for '%s' — %s" % [a, def.name, err])
+			continue
+		if akey == key:
+			push_warning(
+				"ConstructorRegistry: alias '%s' is just '%s' in another case — redundant, ignored."
+				% [a, def.name]
+			)
+			continue
+		if seen.has(akey):
+			push_warning(
+				"ConstructorRegistry: alias '%s' for '%s' is listed twice — duplicate ignored."
+				% [a, def.name]
+			)
+			continue
+		seen[akey] = true
+		var owner := _owner_of(akey)
+		if owner != "":
+			push_warning(
+				"ConstructorRegistry: alias '%s' for '%s' clashes with %s — ignored."
+				% [a, def.name, owner]
+			)
+			continue
+		_aliases[akey] = key
+	return true

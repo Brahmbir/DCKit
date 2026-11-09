@@ -72,6 +72,7 @@ func _build_info(def, kind: DCAnalysisResult.Scope.Kind) -> _DCKitNS.UI.Signatur
 			var k := _DCKitNS.UI.Signature.ConstructorInfo.new()
 			k.title = def.name
 			k.description = def.description
+			k.aliases = def.aliases
 			for sig in def.signatures:
 				var si := _DCKitNS.UI.Signature.TypeSignatureInfo.new()
 				si.description = sig.description

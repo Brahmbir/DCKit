@@ -54,7 +54,9 @@ const MODULES_STRING = "modules/string"
 const MODULES_BATCH = "modules/batch"
 const MODULES_SYSTEM = "modules/system"
 
-
+const FEEDBACK_ENABLED = "feedback/enabled"
+const FEEDBACK_INFO_PANEL = "feedback/info_panel"
+const FEEDBACK_ERROR_PANEL = "feedback/error_panel"
 
 
 #region Generic
@@ -118,7 +120,11 @@ static func register_dckit_settings():
 		PROPERTY_HINT_RANGE,
 		"0.5,3.0,0.05,suffix:x",
 	)
-
+	
+	declare_setting(FEEDBACK_ENABLED, true, TYPE_BOOL)
+	declare_setting(FEEDBACK_INFO_PANEL, true, TYPE_BOOL)
+	declare_setting(FEEDBACK_ERROR_PANEL, true, TYPE_BOOL)
+	
 	declare_setting(MAX_EXECUTION_DEPTH, 16, TYPE_INT, PROPERTY_HINT_RANGE, "1,32,1")
 	declare_setting(MAX_ARGUMENT_DEPTH, 32, TYPE_INT, PROPERTY_HINT_RANGE, "1,128,1")
 
@@ -175,6 +181,20 @@ static func get_window_edge() -> WindowEdge:
 
 static func get_default_canvas_layer() -> int:
 	return get_setting(DEFAULT_CANVAS_LAYER, 9999)
+#endregion
+
+#region Feedback
+## Master switch: off = no analysis, auto-suggestion or panel updates while typing.
+static func get_feedback_enabled() -> bool:
+	return get_setting(FEEDBACK_ENABLED, true) as bool
+
+
+static func get_feedback_info_panel() -> bool:
+	return get_setting(FEEDBACK_INFO_PANEL, true) as bool
+
+
+static func get_feedback_error_panel() -> bool:
+	return get_setting(FEEDBACK_ERROR_PANEL, true) as bool
 #endregion
 
 #region Modules

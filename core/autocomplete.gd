@@ -97,8 +97,9 @@ func _command_items(prefix: String) -> Array:
 
 func _type_items(prefix: String) -> Array:
 	var out: Array = []
+	var p := prefix.to_lower()
 	for def in _ctor_reg.get_all():
-		if def.name.begins_with(prefix):
+		if def.name.to_lower().begins_with(p):
 			out.append(CompletionItem.new(def.name, CompletionItem.Kind.TYPE, def.description))
 	return out
 
@@ -230,7 +231,7 @@ func _scan_prefix(input: String, cursor_pos: int) -> String:
 #or c in ["_", ".", "$", "?", "{"]
 func _is_prefix_code(n: int) -> bool:
 	return (
-			(n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) \
+		(n >= 65 and n <= 90) or (n >= 97 and n <= 122) or (n >= 48 and n <= 57) \
 				or n == 95
 		or n == 46 or n == 36 or n == 63 or n == 123
 	)

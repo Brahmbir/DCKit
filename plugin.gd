@@ -10,7 +10,7 @@ extends EditorPlugin
 
 const ExportPlugin = preload("./export_plugin.gd")
 const _AUTOLOAD_NAME = "DCKit"
-const _AUTOLOAD_SCRIPT = "res://addons/dc_kit/dckit_autoload.gd"
+const _AUTOLOAD_SCRIPT = "./dckit_autoload.gd"
 
 var _export_plugin: ExportPlugin = ExportPlugin.new()
 

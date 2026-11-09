@@ -3,13 +3,18 @@ extends RefCounted
 ## diagnostics view, the signature-help view, and the completion provider.
 
 signal analysis_changed(analysis) # DCAnalysisResult
-signal scope_changed(scope)       # DCAnalysisResult.Scope
+signal scope_changed(scope) # DCAnalysisResult.Scope
 
 const DiagnosticsView = preload("./diagnostics_view.gd")
 const SignatureHelpView = preload("./signature_help_view.gd")
 
-## Most recent analysis. The executor reads this on submit.
+## Most recent analysis, for UI and tooling. The executor runs its own analysis on submit.
 var latest_analysis = null # DCAnalysisResult
+
+## Read once from project settings. A switched-off feature is skipped, not just hidden.
+var enabled: bool
+var diagnostics_enabled: bool # error panel
+var signature_help_enabled: bool # info panel
 
 var diagnostics_view: DiagnosticsView
 var signature_help_view: SignatureHelpView
@@ -26,6 +31,10 @@ func _init(analyzer) -> void:
 	diagnostics_view = DiagnosticsView.new()
 	signature_help_view = SignatureHelpView.new()
 
+	enabled = _DCKitSetting.get_feedback_enabled()
+	diagnostics_enabled = enabled and _DCKitSetting.get_feedback_error_panel()
+	signature_help_enabled = enabled and _DCKitSetting.get_feedback_info_panel()
+
 
 func set_completion_provider(provider: _DCKitNS.Core.AutoComplete) -> void:
 	completion_provider = provider
@@ -33,6 +42,8 @@ func set_completion_provider(provider: _DCKitNS.Core.AutoComplete) -> void:
 
 #region Input events
 func handle_text_changed(text: String, cursor_pos: int) -> void:
+	if not enabled:
+		return
 	var analyzer = _analyzer_ref.get_ref()
 	if analyzer == null or not analyzer.has_method("analyze"):
 		return
@@ -41,8 +52,10 @@ func handle_text_changed(text: String, cursor_pos: int) -> void:
 	_current_cursor = cursor_pos
 	latest_analysis = analyzer.analyze(text, cursor_pos)
 
-	_refresh_diagnostics()
-	_refresh_signature_help(true)
+	if diagnostics_enabled:
+		_refresh_diagnostics()
+	if signature_help_enabled:
+		_refresh_signature_help(true)
 	_refresh_completions()
 
 	analysis_changed.emit(latest_analysis)
@@ -50,7 +63,7 @@ func handle_text_changed(text: String, cursor_pos: int) -> void:
 
 
 func handle_cursor_moved(cursor_pos: int) -> void:
-	if latest_analysis == null:
+	if not enabled or latest_analysis == null:
 		return
 	# A caret event right after a text change reports the same position
 	# and was already handled.
@@ -64,7 +77,8 @@ func handle_cursor_moved(cursor_pos: int) -> void:
 	_current_cursor = cursor_pos
 	latest_analysis.scope = analyzer.compute_scope(latest_analysis.tokens, cursor_pos)
 
-	_refresh_signature_help()
+	if signature_help_enabled:
+		_refresh_signature_help()
 	_refresh_completions()
 
 	scope_changed.emit(latest_analysis.scope)

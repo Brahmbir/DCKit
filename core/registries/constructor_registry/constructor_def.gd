@@ -16,6 +16,11 @@ var handler: Callable # (parts: Array) -> Variant | DevConsoleResult
 # Must return DevConsoleResult.fail() on error, not null
 var is_builtin: bool # True = sealed by the registry; cannot be replaced
 
+var aliases: PackedStringArray:
+	get:
+		return _aliases
+var _aliases: PackedStringArray = []
+
 
 func _init(
 	p_name: String,
@@ -34,6 +39,18 @@ func _init(
 func _to_string() -> String:
 	return "ConstructorDef(%s)[%d sigs, builtin=%s]" \
 			% [name, signatures.size(), is_builtin]
+
+
+## Adds an alias for this type. Case-insensitive. Duplicates are kept here
+## on purpose, so the registry can warn about them.
+func alias(p_name: String) -> _DCKitNS.Registries.ConstructorDef:
+	_aliases.append(p_name)
+	return self
+
+
+func alias_many(names: PackedStringArray) -> _DCKitNS.Registries.ConstructorDef:
+	_aliases.append_array(names)
+	return self
 
 
 #region TypeSignature inner class

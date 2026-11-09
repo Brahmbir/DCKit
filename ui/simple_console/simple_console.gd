@@ -97,19 +97,15 @@ func connect_cmd_history(history: _DCKitNS.UI.CommandHistory):
 
 func connect_executor(executor: _DCKitNS.Executor.Executor):
 	if not input_component:
-		push_warning(
-			"SimpleConsole.connect_executor: input_component must both be assigned."
-		)
+		push_warning("SimpleConsole.connect_executor: input_component must both be assigned.")
 		return
 
 	input_component.connect_executor(executor)
 
 
-func connect_tracer(tracer : _DCKitNS.Core.Tracer):
+func connect_tracer(tracer: _DCKitNS.Core.Tracer):
 	if not log_component:
-		push_warning(
-			"SimpleConsole.connect_executor: log_component must both be assigned."
-		)
+		push_warning("SimpleConsole.connect_executor: log_component must both be assigned.")
 		return
 
 	log_component.connect_logger(tracer)
@@ -125,6 +121,9 @@ func connect_feedback_controller(controller: _DCKitNS.UI.InputFeedbackController
 		push_warning("SimpleConsole.connect_feedback_controller: variable `controller` is null.")
 		return
 
+	_set_panel_active(info_component, controller.signature_help_enabled)
+	_set_panel_active(error_component, controller.diagnostics_enabled)
+
 	controller.diagnostics_view.diagnostics_changed.connect(_on_diagnostics_changed)
 	controller.signature_help_view.definition_changed.connect(_on_definition_changed)
 	controller.signature_help_view.active_changed.connect(_on_active_changed)
@@ -134,7 +133,16 @@ func connect_feedback_controller(controller: _DCKitNS.UI.InputFeedbackController
 	input_component.cmd_text_changed.connect(controller.handle_text_changed)
 	input_component.cmd_caret_location_changed.connect(controller.handle_cursor_moved)
 
-	controller.handle_text_changed("", 0) #
+	controller.handle_text_changed("", 0)
+
+
+# A switched-off panel is hidden and stops processing, shortcuts included
+# (the info panel listens to _shortcut_input).
+func _set_panel_active(panel: Control, active: bool) -> void:
+	if panel == null:
+		return
+	panel.visible = active
+	panel.process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 
 
 func _on_resize():

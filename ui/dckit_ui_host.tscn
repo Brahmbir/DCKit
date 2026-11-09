@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bfbuaygg7fps0"]
 
-[ext_resource type="Script" uid="uid://csk6wf6fo0u51" path="res://addons/dc_kit/ui/dckit_ui_host.gd" id="1_a8uxx"]
+[ext_resource type="Script" uid="uid://csk6wf6fo0u51" path="res://addons/dckit/ui/dckit_ui_host.gd" id="1_a8uxx"]
 
 [node name="DckitUiHost" type="Node" unique_id=325115929]
 script = ExtResource("1_a8uxx")

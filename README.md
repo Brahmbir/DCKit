@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="icon.svg" width="120" height="120" alt="DCKit logo" />
+<img src="https://brahmbir.github.io/DCKitDocs/logos/icon.svg" width="120" height="120" alt="DCKit logo" />
 
 <h1>DCKit</h1>
 

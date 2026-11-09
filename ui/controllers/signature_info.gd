@@ -44,6 +44,7 @@ class TypeSignatureInfo:
 
 class ConstructorInfo extends SignatureInfo:
 	var signatures: Array[TypeSignatureInfo] = []
+	var aliases: PackedStringArray = []
 
 	func _init() -> void:
 		type = "constructor"

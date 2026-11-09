@@ -157,6 +157,8 @@ func _build_constructor(info: Sig.ConstructorInfo) -> Control:
 
 	if info.description != "":
 		root.add_child(_boxed(_rich(info.description, TEXT_COLOR), 0, 0, 0, .4))
+	if not info.aliases.is_empty():
+		root.add_child(_make_aliases_row(info.aliases))
 	if info.signatures.is_empty():
 		root.add_child(_make_empty_state("No signatures"))
 		return root
