@@ -90,22 +90,15 @@ func _get_var() -> DCDefinition:
 		"var.get",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 2:
-				return DCResult.fail("var.get requires two arguments: <name> <default>")
+				return DCResult.fail("var.get requires two arguments: <n> <default>")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
-			var r1 := await ctx.arg(1)
-			if not r1.success:
-				return r1
-
 			var key: String = r0.value.as_string()
 			if not _vars.is_valid_key(key):
 				return DCResult.fail("Invalid variable name '%s'." % key)
-			if not _vars.has(key):
-				return r1 # the default, with its own type
-			# Same resolver as $name: live values run, a failing live
-			# expression is reported instead of hidden behind the default.
-			return DCResult.ok(await _vars.get_value(key)),
+			# Same path as ${key?:default}: the one resolver, nothing duplicated.
+			return await ctx.resolve_var(key, ctx.arg_node(1)),
 		"Reads a variable like [code]$name[/code] does: live values are run and the current "
 		+ "value is returned. Returns the default when the variable does not exist.",
 		[DCDefinition.Param.new("name").suggest(_vars.get_keys), DCDefinition

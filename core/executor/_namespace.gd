@@ -50,7 +50,9 @@ class CallStack:
 
 	# Array[Dictionary] — {name: String, kind: FrameKind}, oldest → newest.
 	var frames: Array = []
-
+	# Variables being resolved in this tree right now (circular guard).
+	var resolving: Array[String] = []
+	
 	var _execution_depth: int = 0
 	var _argument_depth: int = 0
 

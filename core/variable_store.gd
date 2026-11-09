@@ -6,17 +6,6 @@
 # Accessed via preload; no class_name.
 extends RefCounted
 
-
-## Unresolved expression stored by var.setd. The executor resolves it
-## in the reader's context every time the variable is read.
-class Deferred extends RefCounted:
-	var node = null # unresolved parser node
-
-
-	func _init(p_node = null) -> void:
-		node = p_node
-
-
 var _vars: Dictionary = { }
 
 
@@ -42,12 +31,6 @@ func get_value(key: String, fallback: Variant = null) -> Variant:
 	return v
 
 
-## Display form of get_value().
-func get_string(key: String, fallback := "") -> String:
-	var v: Variant = get_value(key, null)
-	return fallback if v == null else str(v)
-
-
 ## get_value(), but only if it is of the wanted TYPE_* — otherwise fallback.
 func get_typed(key: String, type: int, fallback: Variant = null) -> Variant:
 	var v: Variant = get_value(key, null)
@@ -64,6 +47,11 @@ func has(key: String) -> bool:
 func is_live(key: String) -> bool:
 	var v: Variant = _vars.get(key)
 	return v is Callable or v is Deferred
+
+
+## True only for a var.setd expression (needs the executor to resolve).
+func is_deferred(key: String) -> bool:
+	return _vars.get(key) is Deferred
 
 
 ## Copy of everything stored, unresolved.
@@ -118,3 +106,13 @@ func is_valid_key(key: String) -> bool:
 func _fail(msg: String) -> Dictionary:
 	return { ok = false, message = msg }
 #endregion
+
+
+## Unresolved expression stored by var.setd. The executor resolves it
+## in the reader's context every time the variable is read.
+class Deferred extends RefCounted:
+	var node = null # unresolved parser node
+
+
+	func _init(p_node = null) -> void:
+		node = p_node

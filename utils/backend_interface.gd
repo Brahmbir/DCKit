@@ -35,15 +35,6 @@ func log_help(msg: String, details: String = "") -> void:
 	pass
 
 
-func register(
-	p_name: String,
-	handler: Callable,
-	description: String = "",
-	params: Array[DCDefinition.Param] = [],
-) -> bool:
-	return false
-
-
 func register_def(def: DCDefinition) -> bool:
 	return false
 
@@ -60,8 +51,24 @@ func unlock_command(p_name: String) -> void:
 	return
 
 
-func get_var(key: String, fallback: String = "") -> String:
-	return ""
+func get_var_value_raw(key: String) -> Variant:
+	return null
+
+
+func get_var_value(key: String, fallback: Variant = null) -> Variant:
+	return null
+
+
+func get_typed_var(key: String, type: int, fallback: Variant = null) -> Variant:
+	return null
+
+
+func is_var_live(key: String) -> bool:
+	return false
+
+
+func is_var_deferred(key: String) -> bool:
+	return false
 
 
 func set_var(key: String, value: String) -> bool:
@@ -78,3 +85,7 @@ func delete_var(key: String) -> bool:
 
 func get_var_keys() -> Array:
 	return []
+
+
+func resolve_var(key: String) -> DCResult:
+	return null

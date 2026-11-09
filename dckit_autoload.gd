@@ -56,115 +56,150 @@ func has_backend() -> bool:
 	return _backend != null
 
 
-#region Public API
+# Public API
 func analyze(input: String, cursor_pos: int = -1) -> DCAnalysisResult:
-	if _guard("analyze"):
+	if _guard():
 		return null
 	return _backend.analyze(input, cursor_pos)
 
 
 func run(raw_string: String) -> DCResult:
-	if _guard("run"):
+	if _guard():
 		return DCResult.fail("Console disabled")
 	return await _backend.run(raw_string)
 
 
 func abort() -> void:
-	if _guard("abort"):
+	if _guard():
 		return
 	_backend.abort()
 
 
 #region Logger API
 func log_info(msg: String, details: String = "") -> void:
-	if _guard("log_info"):
+	if _guard():
 		return
 	_backend.log_info(msg, details)
 
 
 func log_warn(msg: String, details: String = "") -> void:
-	if _guard("log_warn"):
+	if _guard():
 		return
 	_backend.log_warn(msg, details)
 
 
 func log_error(msg: String, details: String = "") -> void:
-	if _guard("log_error"):
+	if _guard():
 		return
 	_backend.log_error(msg, details)
 
 
 func log_help(msg: String, details: String = "") -> void:
-	if _guard("log_help"):
+	if _guard():
 		return
 	_backend.log_help(msg, details)
 #endregion
 
 
+#region Definition Methods
 func register(
 	p_name: String,
 	handler: Callable,
 	description: String = "",
-	params: Array = [],
+	params: Array[DCDefinition.Param] = [],
 ) -> bool:
-	if _guard("register"):
+	if _guard():
 		return false
-	return _backend.register(p_name, handler, description, params)
-
+	var def := DCDefinition.new(p_name, handler, description, params)
+	return register_def(def)
 
 func register_def(def: DCDefinition) -> bool:
-	if _guard("register_def"):
+	if _guard():
 		return false
 	return _backend.register_def(def)
 
 
 func unregister(p_name: String) -> bool:
-	if _guard("unregister"):
+	if _guard():
 		return false
 	return _backend.unregister(p_name)
 
 
 func lock_command(p_name: String) -> void:
-	if _guard("lock_command"):
+	if _guard():
 		return
 	_backend.lock_command(p_name)
 
 
 func unlock_command(p_name: String) -> void:
-	if _guard("unlock_command"):
+	if _guard():
 		return
 	_backend.unlock_command(p_name)
+#endregion
 
 
-func get_var(key: String, fallback: String = "") -> String:
-	if _guard("get_var"):
-		return fallback
-	return _backend.get_var(key, fallback)
-
+#region Variable methods
 
 func set_var(key: String, value: String) -> bool:
-	if _guard("set_var"):
+	if _guard():
 		return false
 	return _backend.set_var(key, value)
 
 
+func get_var_value_raw(key: String) -> Variant:
+	if _guard():
+		return null
+	return _backend.get_var_value_raw(key)
+
+
+func get_var_value(key: String, fallback: Variant = null) -> Variant:
+	if _guard():
+		return fallback
+	return _backend.get_var_value(key)
+
+
+func get_typed_var(key: String, type: int, fallback: Variant = null) -> Variant:
+	if _guard():
+		return fallback
+	return _backend.get_typed_var(key, type, fallback)
+
+
+func is_var_live(key: String) -> bool:
+	if _guard():
+		return false
+	return _backend.is_var_live(key)
+
+
+func is_var_deferred(key: String) -> bool:
+	if _guard():
+		return false
+	return _backend.is_var_deferred(key)
+
+
 func has_var(key: String) -> bool:
-	if _guard("has_var"):
+	if _guard():
 		return false
 	return _backend.has_var(key)
 
 
 func delete_var(key: String) -> bool:
-	if _guard("delete_var"):
+	if _guard():
 		return false
 	return _backend.delete_var(key)
 
 
 func get_var_keys() -> Array:
-	if _guard("get_var_keys"):
+	if _guard():
 		return []
 	return _backend.get_var_keys()
+
+
+func resolve_var(key: String) -> DCResult:
+	if _guard():
+		return DCResult.fail("Console disabled")
+	return _backend.resolve_var(key)
 #endregion
+
 
 
 #region visibility API
@@ -197,13 +232,10 @@ func is_console_open() -> bool:
 #endregion
 
 
-func _guard(method_name := "", backend_required: bool = true) -> bool:
-	if backend_required and not has_backend():
+func _guard() -> bool:
+	if not has_backend():
 		if log_absent_backend_warnings and OS.is_debug_build():
-			push_warning(
-				"DCKit:%s method called with no backend — aborting."
-				% ["" if method_name.is_empty() else (" '%s'" % method_name)]
-			)
+			push_warning("DCKit: Backend unavailable. Operation aborted.")
 		return true
 
 	return false

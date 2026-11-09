@@ -107,7 +107,7 @@ var _raw_runner: Callable
 
 var _aborted: bool = false
 var _root_ctx: DCContext = null
-
+var _var_resolver: Callable
 
 # Construction — executor only
 ## Constructs a context for one command invocation.
@@ -193,6 +193,14 @@ func run_raw(raw: String) -> Array:
 		return [result]
 	return result
 
+## Resolves a variable exactly like $name does: live values run, a failing
+## deferred expression is reported. With [param fallback] (an unresolved node,
+## e.g. ctx.arg_node(1)) a missing variable resolves the fallback instead of failing,
+## the same as ${key?:fallback}.
+func resolve_var(key: String, fallback: Variant = null) -> DCResult:
+	if not _var_resolver.is_valid():
+		return DCResult.fail("resolve_var is not available in this context.")
+	return await _var_resolver.call(key, fallback)
 
 # Abort
 ## Returns whether this command has been aborted.
@@ -228,6 +236,10 @@ func await_or_abort(exec_signal: Signal) -> bool:
 # Called by the executor right after construction — not for handler use.
 func _bind_raw_runner(fn: Callable) -> void:
 	_raw_runner = fn
+
+# next to _bind_raw_runner — executor only
+func _bind_var_resolver(fn: Callable) -> void:
+	_var_resolver = fn
 
 
 class _SignalRace extends RefCounted:

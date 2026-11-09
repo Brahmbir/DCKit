@@ -52,6 +52,7 @@ const Profiler := preload("./profiler.gd")
 const Detail := _DCKitNS.Executor.StateTracker.Detail
 
 const _ORIGIN_USER := "user"
+const _ORIGIN_SCRIPT := "script"
 
 # Call-stack safety limits — tune per project. These bound recursion depth,
 # not total work (see header).
@@ -70,16 +71,15 @@ var detail: Detail:
 
 var _tracker := _DCKitNS.Executor.StateTracker.new()
 
-# Names of deferred variables being resolved right now. Guards against a
-# deferred variable that (directly or indirectly) reads itself.
-var _resolving: Array[String] = []
-
 var _cmd_reg: _DCKitNS.Registries.CommandRegistry
 var _vars: _DCKitNS.Core.VariableStore
 var _ctor_reg: _DCKitNS.Registries.ConstructorRegistry
 var _analyzer: _DCKitNS.Analyzer.Analyzer
 
 var _active_ctx: DCContext = null
+
+# Abort roots of script-initiated reads that are still in flight.
+var _script_roots: Array[DCContext] = []
 
 var _root_exec: _DCKitNS.Executor.Execution = null # the user's run only; nested run_raw never replaces it
 
@@ -140,9 +140,28 @@ func run(raw: String) -> DCResult:
 
 
 func abort() -> void:
+	for root in _script_roots.duplicate():
+		root.abort()
 	if _active_ctx != null:
 		_active_ctx.abort()
 		command_aborted.emit()
+
+
+## Async read for code outside a running command (autoloads, game scripts).
+## Same resolver as $name, so live values behave identically.
+func resolve_var(key: String) -> DCResult:
+	var root := DCContext.new([], Callable()) # non-null: not a "root run"
+	var exec := _DCKitNS.Executor.Execution.new(
+		"",
+		_ORIGIN_SCRIPT,
+		root,
+		_DCKitNS.Executor.CallStack.new(),
+	)
+	_script_roots.append(root)
+	var node := _DCKitNS.Analyzer.Parser.VariableNode.new(key)
+	var result: DCResult = await _resolve_variable(node, exec, root)
+	_script_roots.erase(root)
+	return result
 
 
 func _publish() -> void:
@@ -173,10 +192,7 @@ func _run_execution(exec: _DCKitNS.Executor.Execution) -> DCResult:
 
 		if is_chain:
 			var segment := _slice(exec.raw, cmd) if not exec.raw.is_empty() else cmd.name
-			_log_system(
-				"Chain [%d/%d]: %s" % [i + 1, total, segment],
-				exec.call_stack.breadcrumb(),
-			)
+			_log_system("Chain [%d/%d]: %s" % [i + 1, total, segment], exec.call_stack.breadcrumb())
 
 		exec.chain_index = i + 1
 		_publish()
@@ -252,7 +268,14 @@ func _execute(
 			)
 			return await _run_execution(nested),
 	)
-
+	cmd_ctx._bind_var_resolver(
+		func(key: String, fallback) -> DCResult:
+			var var_node := _DCKitNS.Analyzer.Parser.VariableNode.new(key, fallback != null)
+			var_node.fallback = fallback
+			return await _resolve_node(var_node, exec, effective_root),
+	)
+	
+	
 	if is_root:
 		_active_ctx = cmd_ctx
 
@@ -356,11 +379,12 @@ func _resolve_stored(
 	if value is Callable:
 		return _wrap_value(await value.call())
 	if value is _DCKitNS.Core.VariableStore.Deferred:
-		if _resolving.has(name):
+		var chain := exec.call_stack.resolving
+		if chain.has(name):
 			return DCResult.fail("Circular variable '$%s'." % name)
-		_resolving.append(name)
+		chain.append(name)
 		var result: DCResult = await _resolve_node(value.node, exec, root_ctx)
-		_resolving.erase(name)
+		chain.erase(name)
 		if not result.success:
 			return DCResult.fail("Deferred '$%s': %s" % [name, result.message])
 		return result
@@ -436,4 +460,4 @@ func _format_errors(diagnostics: Array) -> String:
 func _slice(raw: String, node: _DCKitNS.Analyzer.Parser.CommandNode) -> String:
 	var a := clampi(node.start_pos, 0, raw.length())
 	var b := clampi(node.end_pos, a, raw.length())
-	return raw.substr(a, b - a)
+	return raw.substr(a, b - a + 1)

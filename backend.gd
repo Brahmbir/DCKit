@@ -85,15 +85,6 @@ func abort() -> void:
 
 
 # Command register API
-func register(
-	p_name: String,
-	handler: Callable,
-	description: String = "",
-	params: Array[DCDefinition.Param] = [],
-) -> bool:
-	var def := DCDefinition.new(p_name, handler, description, params)
-	return _cmd_reg.register(def)
-
 
 func register_def(def: DCDefinition) -> bool:
 	if not def:
@@ -158,11 +149,23 @@ func log_help(msg: String, details: String = "") -> void:
 
 
 #region Variable store API
-func get_var(key: String, fallback: String = "") -> String:
-	return _var_store.get_value(key, fallback)
+func get_var_value_raw(key: String) -> Variant:
+	return _var_store.get_value_raw(key)
 
 
-func set_var(key: String, value: String) -> bool:
+func get_typed_var(key: String, type: int, fallback: Variant = null) -> Variant:
+	return _var_store.get_typed(key, type, fallback)
+
+
+func is_var_live(key: String) -> bool:
+	return _var_store.is_live(key)
+
+
+func is_var_deferred(key: String) -> bool:
+	return _var_store.is_deferred(key)
+
+
+func set_var(key: String, value: Variant) -> bool:
 	return _var_store.set_value(key, value).ok
 
 
@@ -176,6 +179,16 @@ func delete_var(key: String) -> bool:
 
 func get_var_keys() -> Array:
 	return _var_store.get_keys()
+
+
+func get_var_value(key: String, fallback: Variant = null) -> Variant:
+	if _var_store.is_deferred(key):
+		_tracer.warn("get_var('%s') is a deferred variable, use 'await DCKit.resolve_var()'." % key)
+		return fallback
+	return _var_store.get_value(key, fallback)
+	
+func resolve_var(key: String) -> DCResult:
+	return await _executor.resolve_var(key)
 #endregion
 
 
