@@ -214,10 +214,14 @@ func is_aborted() -> bool:
 ## Called by DevConsole when the user presses Stop.
 ## Idempotent — safe to call multiple times, emits exactly once.
 func abort() -> void:
+	if _root_ctx != null:
+		_root_ctx.abort()
+		return
 	if _aborted:
 		return
 	_aborted = true
 	aborted.emit()
+
 
 
 func await_or_abort(exec_signal: Signal) -> bool:

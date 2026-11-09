@@ -149,7 +149,6 @@ func _tree_cmd() -> DCDefinition:
 			if tree == null:
 				return DCResult.fail("SceneTree is unavailable.")
 
-			var scene_root := tree.root
 			var target: Node = tree.current_scene
 
 			if target == null:

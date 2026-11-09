@@ -93,9 +93,10 @@ func run(path: String, ctx: DCContext) -> DCResult:
 	while not file.eof_reached():
 		actual_line += 1
 		var raw_line := file.get_line()
-		var cmd_line := _strip_comments(raw_line)
-		if not cmd_line.is_empty():
-			lines.append(ScriptLine.new(actual_line, cmd_line))
+		var cmd_line := raw_line.strip_edges()
+		if cmd_line.is_empty() or cmd_line.begins_with("#"):
+			continue
+		lines.append(ScriptLine.new(actual_line, cmd_line))
 
 	file.close()
 
@@ -207,11 +208,6 @@ func _collect_scripts(folder: String, relative: String, out: Array[String]) -> v
 			out.append("'%s'" % rel.get_basename())
 
 	dir.list_dir_end()
-
-
-func _strip_comments(line: String) -> String:
-	var idx := line.find("#")
-	return line.strip_edges() if idx == -1 else line.substr(0, idx).strip_edges()
 
 
 class ScriptLine:
