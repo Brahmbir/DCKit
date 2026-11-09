@@ -50,20 +50,20 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One part — existing Color, named color, or HTML hex
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 
 			# Already a Color
-			if val.raw is Color:
-				return val.raw
+			if val.value is Color:
+				return val.value
 
 			# Must be string (name or hex)
-			if val.raw is not String:
+			if val.value is not String:
 				return DCResult.fail(
 					"Color: single-part form expects a color name, hex string, "
 					+ "or existing Color — got %s." % val_label(val)
 				)
 
-			var s: String = (val.raw as String).strip_edges()
+			var s: String = (val.value as String).strip_edges()
 			if Color.html_is_valid(s):
 				return Color.html(s)
 
@@ -192,8 +192,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_color(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract_color(val: DCResult) -> Variant:
+	var r := val.value
 	if r is Color:
 		return r
 	if r is String:

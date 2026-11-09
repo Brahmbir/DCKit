@@ -36,7 +36,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — named constant, existing Transform3D, or Projection
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 
 			# Try extracting existing Transform3D or Projection first
 			var xform := extract_transform3d(val)
@@ -44,13 +44,13 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 				return xform
 
 			# Named constant (LITERAL only)
-			if val.origin == DCResult.Value.Origin.LITERAL:
-				var key := (val.raw as String).to_upper().strip_edges()
+			if val.literal:
+				var key := (val.value as String).to_upper().strip_edges()
 				if key in CONSTS:
 					return CONSTS[key]
 				return DCResult.fail(
 					"Transform3D: '%s' is not a known constant. Expected one of: %s." \
-							% [val.raw, ", ".join(const_names)]
+							% [val.value, ", ".join(const_names)]
 				)
 
 			return DCResult.fail(
@@ -60,8 +60,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Two args — Basis + Vector3 origin
 		if parts.size() == 2:
-			var basis_val: DCResult.Value = parts[0]
-			var origin_val: DCResult.Value = parts[1]
+			var basis_val: DCResult = parts[0]
+			var origin_val: DCResult = parts[1]
 
 			var basis := DCBasis.extract_basis(basis_val)
 			if basis == null:
@@ -85,7 +85,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 			var vecs: Array[Vector3] = []
 
 			for i in 4:
-				var v: DCResult.Value = parts[i]
+				var v: DCResult = parts[i]
 				var vec := DCVector3.extract_vector3(v)
 				if vec == null:
 					return DCResult.fail(
@@ -149,8 +149,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_transform3d(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract_transform3d(val: DCResult) -> Variant:
+	var r := val.value
 	if r is Transform3D:
 		return r
 	if r is Projection:

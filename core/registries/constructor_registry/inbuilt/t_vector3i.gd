@@ -5,7 +5,7 @@
 # Supported forms:
 #   Vector3i()            → Vector3i.ZERO
 #   Vector3i(name)        → named constant  e.g. Vector3i(UP)
-#   Vector3i(x, y, z)     → int components — any DCResult.Value origin
+#   Vector3i(x, y, z)     → int components — any DCResult origin
 extends "./inbuilt_base.gd"
 
 const DCInt = preload("./t_int.gd")
@@ -33,14 +33,14 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — named constant only
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 
 			var vec := extract_vector3i(val)
 			if vec != null:
 				return vec
 
-			if val.origin == DCResult.Value.Origin.LITERAL:
-				var key := (val.raw as String).to_upper().strip_edges()
+			if val.literal:
+				var key := (val.value as String).to_upper().strip_edges()
 				if key in CONSTS:
 					return CONSTS[key]
 
@@ -91,8 +91,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	).alias_many(["vec3i"])
 
 
-static func extract_vector3i(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract_vector3i(val: DCResult) -> Variant:
+	var r := val.value
 	if r is Vector3i:
 		return r
 	if r is Vector3:

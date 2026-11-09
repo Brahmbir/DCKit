@@ -42,7 +42,7 @@ func _bat() -> DCDefinition:
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
-			return await run(r0.value.as_string(), ctx),
+			return await run(r0.text(), ctx),
 		"Executes a [b]bat.txt[/b] script file line by line.\n\n"
 		+ "Lines beginning with [code]#[/code] are comments. "
 		+ "Nested [b]bat[/b] calls are fully supported.",

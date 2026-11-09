@@ -35,7 +35,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — named constant, existing Basis, or Quaternion
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 
 			# Try extracting existing Basis or Quaternion first
 			var basis := extract_basis(val)
@@ -43,13 +43,13 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 				return basis
 
 			# Named constant (LITERAL only)
-			if val.origin == DCResult.Value.Origin.LITERAL:
-				var key := (val.raw as String).to_upper().strip_edges()
+			if val.literal:
+				var key := (val.value as String).to_upper().strip_edges()
 				if key in CONSTS:
 					return CONSTS[key]
 				return DCResult.fail(
 					"Basis: '%s' is not a known constant. Expected one of: %s." \
-							% [val.raw, ", ".join(const_names)]
+							% [val.value, ", ".join(const_names)]
 				)
 
 			return DCResult.fail(
@@ -59,8 +59,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Two args — axis (Vector3) + angle (float, radians)
 		if parts.size() == 2:
-			var axis_val: DCResult.Value = parts[0]
-			var angle_val: DCResult.Value = parts[1]
+			var axis_val: DCResult = parts[0]
+			var angle_val: DCResult = parts[1]
 
 			var axis := DCVector3.extract_vector3(axis_val)
 			if axis == null:
@@ -90,7 +90,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 			var vecs: Array[Vector3] = []
 
 			for i in 3:
-				var v: DCResult.Value = parts[i]
+				var v: DCResult = parts[i]
 				var vec := DCVector3.extract_vector3(v)
 				if vec == null:
 					return DCResult.fail(
@@ -156,8 +156,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_basis(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract_basis(val: DCResult) -> Variant:
+	var r := val.value
 	if r is Basis:
 		return r
 	if r is Quaternion:

@@ -37,8 +37,8 @@ const _FALSY := ["false", "no", "0", "off"]
 # Core extraction
 # Returns true, false, or null.
 # null means the value cannot be interpreted as a boolean.
-static func extract(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract(val: DCResult) -> Variant:
+	var r := val.value
 	if r == null:
 		return null
 	if r is bool:
@@ -137,7 +137,7 @@ static func _bool_validator() -> Callable:
 		return "'%s' is not a boolean. Use true/false, yes/no, or 1/0." % value
 
 
-static func _label(val: DCResult.Value) -> String:
-	if val.raw == null:
+static func _label(val: DCResult) -> String:
+	if val.value == null:
 		return "null"
-	return "%s (%s)" % [var_to_str(val.raw), type_string(typeof(val.raw))]
+	return "%s (%s)" % [var_to_str(val.value), type_string(typeof(val.value))]

@@ -34,20 +34,20 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — named constant (LITERAL only) or existing Transform2D
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 
 			# Try extracting existing Transform2D first
 			var xform := extract_transform2d(val)
 			if xform != null:
 				return xform
 
-			if val.origin == DCResult.Value.Origin.LITERAL:
-				var key := (val.raw as String).to_upper().strip_edges()
+			if val.literal:
+				var key := (val.value as String).to_upper().strip_edges()
 				if key in CONSTS:
 					return CONSTS[key]
 				return DCResult.fail(
 					"Transform2D: '%s' is not a known constant. Expected one of: %s." \
-							% [val.raw, ", ".join(const_names)]
+							% [val.value, ", ".join(const_names)]
 				)
 
 			return DCResult.fail(
@@ -57,8 +57,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Two args — rotation (float) + position (Vector2)
 		if parts.size() == 2:
-			var rot_val: DCResult.Value = parts[0]
-			var pos_val: DCResult.Value = parts[1]
+			var rot_val: DCResult = parts[0]
+			var pos_val: DCResult = parts[1]
 
 			var rotation = DCFloat.extract(rot_val)
 			if rotation == null:
@@ -82,7 +82,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 			var vecs: Array[Vector2] = []
 
 			for i in 3:
-				var v: DCResult.Value = parts[i]
+				var v: DCResult = parts[i]
 				var vec := DCVector2.extract_vector2(v)
 				if vec == null:
 					return DCResult.fail(
@@ -95,10 +95,10 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Four args — rotation, scale, skew, position
 		if parts.size() == 4:
-			var rot_val: DCResult.Value = parts[0]
-			var scale_val: DCResult.Value = parts[1]
-			var skew_val: DCResult.Value = parts[2]
-			var pos_val: DCResult.Value = parts[3]
+			var rot_val: DCResult = parts[0]
+			var scale_val: DCResult = parts[1]
+			var skew_val: DCResult = parts[2]
+			var pos_val: DCResult = parts[3]
 
 			var rotation = DCFloat.extract(rot_val)
 			if rotation == null:
@@ -191,9 +191,9 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_transform2d(val: DCResult.Value) -> Variant:
-	if val.raw is Transform2D:
-		return val.raw
+static func extract_transform2d(val: DCResult) -> Variant:
+	if val.value is Transform2D:
+		return val.value
 	return null
 
 

@@ -193,7 +193,7 @@ func _resolve_strings(ctx: DCContext, command_name: String, min_count: int, max_
 		if not result.success:
 			out.message = result.message
 			return out
-		out.items.append(result.value.as_string())
+		out.items.append(result.text())
 
 	out.success = true
 	return out

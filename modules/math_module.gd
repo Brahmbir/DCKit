@@ -235,7 +235,7 @@ func _resolve_values(ctx: DCContext, command_name: String, min_count: int, max_c
 			out.message = result.message
 			return out
 
-		var text_value := result.value.as_string()
+		var text_value := result.text()
 		if not text_value.is_valid_float():
 			out.message = "%s: '%s' is not a number." % [command_name, text_value]
 			return out

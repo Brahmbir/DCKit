@@ -61,14 +61,15 @@ static func from_function(p_name: String, fn: Callable, p_description: String = 
 func _init(
 	p_name: String,
 	p_handler: Callable,
-	p_description: String = "",
-	p_params: Array[Param] = [],
-	p_locked: bool = false,
+	p_description := "",
+	p_params: Array = [],
+	p_locked := false,
 ) -> void:
 	name = p_name
 	handler = p_handler
 	description = BbCodeUtils.close_bbcode(p_description)
-	params = p_params
+	for p in p_params:
+		params.append(p if p is Param else Param.new(str(p)))
 	locked = p_locked
 
 

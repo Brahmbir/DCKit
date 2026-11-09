@@ -8,7 +8,7 @@
 #   Rect2i(Vector2, Vector2) → position Vector2i + size Vector2i
 #   Rect2i(x, y, w, h)        → four integer: position (x, y) + size (w, h)
 #
-# DCResult.Value origin rules
+# DCResult origin rules
 #
 #   All forms accept any origin (CONSTRUCTOR or COMMAND).
 extends "./inbuilt_base.gd"
@@ -25,7 +25,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — Rect2 pass-through or Rect2i widening
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 
 			var rect := extract_rect2i(val)
 			if rect != null:
@@ -38,8 +38,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Two args — Vector2 position + Vector2 size
 		if parts.size() == 2:
-			var pos_val: DCResult.Value = parts[0]
-			var siz_val: DCResult.Value = parts[1]
+			var pos_val: DCResult = parts[0]
+			var siz_val: DCResult = parts[1]
 
 			var pos := DCVector2i.extract_vector2i(pos_val)
 			if pos == null:
@@ -105,8 +105,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_rect2i(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract_rect2i(val: DCResult) -> Variant:
+	var r := val.value
 	if r is Rect2i:
 		return r
 	if r is Rect2:

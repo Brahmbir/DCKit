@@ -20,8 +20,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Two parts — position + size (Vector3)
 		if parts.size() == 2:
-			var pos_val: DCResult.Value = parts[0]
-			var siz_val: DCResult.Value = parts[1]
+			var pos_val: DCResult = parts[0]
+			var siz_val: DCResult = parts[1]
 
 			var position := DCVector3.extract_vector3(pos_val)
 			if position == null:
@@ -100,9 +100,9 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_aabb(val: DCResult.Value) -> Variant:
-	if val.raw is AABB:
-		return val.raw
+static func extract_aabb(val: DCResult) -> Variant:
+	if val.value is AABB:
+		return val.value
 	return null
 
 

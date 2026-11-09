@@ -49,14 +49,14 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 
 	return DCDefinition.new(p_name, handler, p_description, params)
 
-static func _lookup(v: DCResult.Value, choices: Dictionary) -> DCResult.Value:
-	if choices.is_empty() or not (v.raw is String):
+static func _lookup(v: Variant, choices: Dictionary) -> Variant:
+	if choices.is_empty() or not (v is String):
 		return v
-	var s: String = v.raw.strip_edges()
+	var s: String = v.value.strip_edges()
 	for k in choices:
 		if String(k).nocasecmp_to(s) == 0:
 			var val = choices[k]
-			return DCResult.Value.from_command(val.call() if val is Callable else val)
+			return val.call() if val is Callable else val
 	return v
 
 static func _method_info(fn: Callable) -> Dictionary:
@@ -70,8 +70,8 @@ static func _method_info(fn: Callable) -> Dictionary:
 	return { } # lambdas land here
 
 
-static func _coerce(v: DCResult.Value, type: int) -> DCResult:
-	var raw = v.raw
+static func _coerce(v: Variant, type: int) -> DCResult:
+	var raw = v
 	match type:
 		TYPE_NIL, TYPE_OBJECT:
 			return DCResult.ok(raw)
@@ -107,8 +107,8 @@ static func _coerce(v: DCResult.Value, type: int) -> DCResult:
 				return DCResult.ok(raw)
 	return DCResult.fail("expected %s, got %s." % [type_string(type), type_string(typeof(raw))])
 
-static func _coerce_enum(v: DCResult.Value, choices: Dictionary) -> DCResult:
-	var raw = v.raw
+static func _coerce_enum(v: Variant, choices: Dictionary) -> DCResult:
+	var raw = v
 	if raw is String:
 		var s: String = raw.strip_edges()
 		for k in choices:

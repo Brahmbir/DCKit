@@ -4,7 +4,7 @@
 #
 # Supported forms:
 #   Vector4i()            → Vector4i.ZERO
-#   Vector4i(x, y, z, w)  → float components — any DCResult.Value origin
+#   Vector4i(x, y, z, w)  → float components — any DCResult origin
 #
 # Note: Vector4i has no named constants beyond ZERO and ONE in Godot,
 # so there is no named-constant form.
@@ -30,12 +30,12 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — named constant only
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 			var vec := extract_vector4i(val)
 			if vec != null:
 				return vec
-			if val.origin == DCResult.Value.Origin.LITERAL:
-				var key := (val.raw as String).to_upper().strip_edges()
+			if val.literal:
+				var key := (val.value as String).to_upper().strip_edges()
 				if key in CONSTS:
 					return CONSTS[key]
 			return DCResult.fail(
@@ -86,8 +86,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	).alias_many(["vec4i"])
 
 
-static func extract_vector4i(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract_vector4i(val: DCResult) -> Variant:
+	var r := val.value
 	if r is Vector4i:
 		return r
 	if r is Vector4:

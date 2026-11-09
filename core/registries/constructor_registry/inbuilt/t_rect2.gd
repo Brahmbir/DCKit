@@ -19,7 +19,7 @@
 #   Godot 4 does not expose named constants on Rect2 (no ZERO, ONE, etc.),
 #   so there is no named-constant form and no LITERAL-only restriction.
 #
-# DCResult.Value origin rules
+# DCResult origin rules
 #
 #   All forms accept any origin (CONSTRUCTOR or COMMAND).
 extends "./inbuilt_base.gd"
@@ -36,7 +36,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — Rect2 pass-through or Rect2i widening
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 			var rect := extract_rect2(val)
 			if rect != null:
 				return rect
@@ -47,8 +47,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Two args — Vector2 position + Vector2 size
 		if parts.size() == 2:
-			var pos_val: DCResult.Value = parts[0]
-			var siz_val: DCResult.Value = parts[1]
+			var pos_val: DCResult = parts[0]
+			var siz_val: DCResult = parts[1]
 
 			var pos := DCVector2.extract_vector2(pos_val)
 			if pos == null:
@@ -128,8 +128,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_rect2(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract_rect2(val: DCResult) -> Variant:
+	var r := val.value
 	if r is Rect2:
 		return r
 	if r is Rect2i:

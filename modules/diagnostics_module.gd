@@ -60,7 +60,7 @@ func _profile() -> DCDefinition:
 				if not result.success:
 					failure = result.message
 					break # stop at the first failure, keep the partial report
-				var text := result.value.as_string()
+				var text := result.text()
 				if not text.is_empty():
 					outputs.append(text)
 
@@ -93,7 +93,7 @@ func _help() -> DCDefinition:
 			var arg := await ctx.arg(0)
 			if not arg.success:
 				return arg
-			var name := arg.value.as_string()
+			var name := arg.text()
 			var def := _registry.get_definition(name)
 			if def == null:
 				return DCResult.fail("Unknown command '%s'. Try 'list_cmd %s'." % [name, name])
@@ -114,7 +114,7 @@ func _list_cmd() -> DCDefinition:
 				var arg := await ctx.arg(0)
 				if not arg.success:
 					return arg
-				query = arg.value.as_string()
+				query = arg.text()
 
 			var defs := _registry.get_matching(query)
 			if defs.is_empty():

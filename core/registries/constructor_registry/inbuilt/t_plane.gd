@@ -19,7 +19,7 @@
 #   When the user supplies a non-unit normal in the (a,b,c,d) or (normal,d)
 #   forms, Godot normalises it automatically; we surface that in the description.
 #
-# DCResult.Value origin rules
+# DCResult origin rules
 #
 #   Named-constant form: LITERAL only.
 #   All numeric / vector forms accept any origin.
@@ -46,19 +46,19 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — existing Plane or named constant (LITERAL string)
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 
 			var plane := extract_plane(val)
 			if plane != null:
 				return plane
 
-			if val.origin == DCResult.Value.Origin.LITERAL:
-				var key := (val.raw as String).to_upper().strip_edges()
+			if val.literal:
+				var key := (val.value as String).to_upper().strip_edges()
 				if key in CONSTS:
 					return CONSTS[key]
 				return DCResult.fail(
 					"Plane: '%s' is not a known constant. Expected one of: %s." \
-							% [val.raw, ", ".join(const_names)]
+							% [val.value, ", ".join(const_names)]
 				)
 
 			return DCResult.fail(
@@ -68,8 +68,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Two args — Vector3 normal + float distance, or Vector3 normal + Vector3 point
 		if parts.size() == 2:
-			var normal_val: DCResult.Value = parts[0]
-			var second_val: DCResult.Value = parts[1]
+			var normal_val: DCResult = parts[0]
+			var second_val: DCResult = parts[1]
 
 			var normal := DCVector3.extract_vector3(normal_val)
 			if normal == null:
@@ -98,7 +98,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 			var labels := ["v1", "v2", "v3"]
 			var vecs: Array[Vector3] = []
 			for i in 3:
-				var v: DCResult.Value = parts[i]
+				var v: DCResult = parts[i]
 				var vec := DCVector3.extract_vector3(v)
 				if vec == null:
 					return DCResult.fail(
@@ -188,9 +188,9 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_plane(val: DCResult.Value) -> Variant:
-	if val.raw is Plane:
-		return val.raw
+static func extract_plane(val: DCResult) -> Variant:
+	if val.value is Plane:
+		return val.value
 	return null
 
 

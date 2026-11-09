@@ -5,7 +5,7 @@
 # Two responsibilities
 #
 #   1. extract(val)  — static helper imported by other type files.
-#                      Pulls a float out of any DCResult.Value regardless of origin.
+#                      Pulls a float out of any DCResult regardless of origin.
 #                      Returns float or null — never crashes.
 #
 #   2. create()      — registers Float(...) as a console constructor type.
@@ -31,10 +31,10 @@ extends "./inbuilt_base.gd"
 
 
 # Core extraction
-# Returns a float if the DCResult.Value can be meaningfully interpreted as one.
+# Returns a float if the DCResult can be meaningfully interpreted as one.
 # Returns null on failure — the caller decides the error message.
-static func extract(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract(val: DCResult) -> Variant:
+	var r := val.value
 
 	if r == null:
 		return null
@@ -116,7 +116,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 
 # Internal
-static func _label(val: DCResult.Value) -> String:
-	if val.raw == null:
+static func _label(val: DCResult) -> String:
+	if val.value == null:
 		return "null"
-	return "%s (%s)" % [var_to_str(val.raw), type_string(typeof(val.raw))]
+	return "%s (%s)" % [var_to_str(val.value), type_string(typeof(val.value))]

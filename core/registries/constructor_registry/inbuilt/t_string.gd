@@ -22,7 +22,7 @@
 #   "this value has no string form" — which never happens in Godot.
 #
 #   Handlers that want strict string-only input (no numeric coercion) should
-#   check val.raw is String themselves rather than using extract().
+#   check val.value is String themselves rather than using extract().
 #
 # Usage in other type files
 #
@@ -34,7 +34,7 @@ extends "./inbuilt_base.gd"
 
 # Core extraction
 # Always returns a String. Never returns null.
-static func extract(val: DCResult.Value) -> String:
+static func extract(val: DCResult) -> String:
 	return val.as_string()
 
 

@@ -49,7 +49,7 @@ func _echo_cmd() -> DCDefinition:
 				if not result.success:
 					return result
 
-				parts.append(result.value.as_string())
+				parts.append(result.text())
 
 			return DCResult.ok(" ".join(parts)),
 		"Prints text to the console.",
@@ -70,7 +70,7 @@ func _wait_cmd() -> DCDefinition:
 			if not result.success:
 				return result
 
-			var duration_text := result.value.as_string()
+			var duration_text := result.text()
 			var seconds := _parse_duration(duration_text)
 
 			if seconds < 0.0:
@@ -104,7 +104,7 @@ func _abort_cmd() -> DCDefinition:
 				return DCResult.fail("Execution aborted. reason: %s" % result.message)
 
 			ctx.abort()
-			return DCResult.fail("Execution aborted. reason:%s" % result.value.as_string()),
+			return DCResult.fail("Execution aborted. reason:%s" % result.text()),
 		"Aborts the current command or script.",
 		[DCDefinition.Param.new("reason").describe("Optional reason.")],
 	)

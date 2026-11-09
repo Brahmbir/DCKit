@@ -61,7 +61,7 @@
 ##     # check each result as needed, or just pull values directly:
 ##     var r0 = all[0]
 ##     if not r0.success: return r0
-##     var name : String = r0.value.as_string()
+##     var name : String = r0.text()
 ##     ...
 ## [/codeblock]
 ##
@@ -70,11 +70,11 @@
 ## func(ctx: DCContext) -> DCResult:
 ##     var cond = await ctx.arg(0)
 ##     if not cond.success: return cond
-##     if not cond.value.raw:
+##     if not cond.value:
 ##         return DCResult.ok("Condition false — skipped.")
 ##     var branch = await ctx.arg(1)   # only runs if condition was true
 ##     if not branch.success: return branch
-##     return DCResult.ok(branch.value.raw)
+##     return DCResult.ok(branch.value)
 ## [/codeblock]
 class_name DCContext
 extends RefCounted

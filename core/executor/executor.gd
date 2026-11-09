@@ -325,7 +325,7 @@ func _execute(
 # used as abort parent for anything resolved under it.
 func _resolve_node(node, exec: _DCKitNS.Executor.Execution, root_ctx: DCContext) -> DCResult:
 	if node is _DCKitNS.Analyzer.Parser.StringNode:
-		return DCResult.ok(DCResult.Value.literal(node.value))
+		return DCResult.from_literal(node.value)
 	if node is _DCKitNS.Analyzer.Parser.VariableNode:
 		return await _resolve_variable(node, exec, root_ctx)
 	if node is _DCKitNS.Analyzer.Parser.ConstructorNode:
@@ -342,8 +342,8 @@ func _resolve_node(node, exec: _DCKitNS.Executor.Execution, root_ctx: DCContext)
 		)
 		if not inner.success:
 			return DCResult.fail("Nested '%s' failed: %s" % [node.name, inner.message])
-		return DCResult.ok(DCResult.Value.from_command(inner.raw))
-	return DCResult.ok(DCResult.Value.literal(""))
+		return DCResult.ok(inner.value)
+	return DCResult.from_literal("")
 
 
 # $name        → missing = FAIL
@@ -362,7 +362,7 @@ func _resolve_variable(
 	if node.is_silent:
 		if node.fallback != null:
 			return await _resolve_node(node.fallback, exec, root_ctx)
-		return DCResult.ok(DCResult.Value.literal(""))
+		return DCResult.from_literal("")
 	return DCResult.fail("Variable '$%s' is not defined." % node.name)
 
 
@@ -394,10 +394,10 @@ func _resolve_stored(
 # String stays a literal (as before); anything else keeps its real type.
 func _wrap_value(value) -> DCResult:
 	if value == null:
-		return DCResult.ok(DCResult.Value.literal(""))
+		return DCResult.from_literal("")
 	if value is String:
-		return DCResult.ok(DCResult.Value.literal(value))
-	return DCResult.ok(DCResult.Value.from_constructor(value))
+		return DCResult.from_literal(value)
+	return DCResult.ok(value)
 
 
 # Parts resolved eagerly depth-first; first failure short-circuits.
@@ -411,14 +411,13 @@ func _resolve_ctor(
 		var r: DCResult = await _resolve_node(part, exec, root_ctx)
 		if not r.success:
 			return DCResult.fail("Constructor '%s': %s" % [node.type_name, r.message])
-		parts.append(r.value)
+		parts.append(r)
 	var ctor_result = _ctor_reg.resolve(node.type_name, parts)
 	if ctor_result is DCResult:
 		if not ctor_result.success:
 			return ctor_result
-		return DCResult.ok(DCResult.Value.from_constructor(ctor_result.raw))
-	return DCResult.ok(DCResult.Value.from_constructor(ctor_result))
-
+		return DCResult.ok(ctor_result.value)
+	return DCResult.ok(ctor_result)
 
 # LOGGER STUBS
 # These define the interface the logger must implement.

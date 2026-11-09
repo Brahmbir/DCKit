@@ -22,7 +22,7 @@
 #   The axis must be a unit vector. The handler returns a clear error if it
 #   is not normalised (same check as Basis).
 #
-# DCResult.Value origin rules
+# DCResult origin rules
 #
 #   Named-constant form: LITERAL only.
 #   All other forms accept any origin (CONSTRUCTOR or COMMAND).
@@ -46,19 +46,19 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# One arg — existing Quaternion, Basis pass-through, or named constant (LITERAL)
 		if parts.size() == 1:
-			var val: DCResult.Value = parts[0]
+			var val: DCResult = parts[0]
 
 			var quat := extract_quaternion(val)
 			if quat != null:
 				return quat
 
-			if val.origin == DCResult.Value.Origin.LITERAL:
-				var key := (val.raw as String).to_upper().strip_edges()
+			if val.literal:
+				var key := (val.value as String).to_upper().strip_edges()
 				if key in CONSTS:
 					return CONSTS[key]
 				return DCResult.fail(
 					"Quaternion: '%s' is not a known constant. Expected one of: %s." \
-							% [val.raw, ", ".join(const_names)]
+							% [val.value, ", ".join(const_names)]
 				)
 
 			return DCResult.fail(
@@ -68,8 +68,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 
 		# Two args — axis (Vector3) + angle (float, radians)
 		if parts.size() == 2:
-			var axis_val: DCResult.Value = parts[0]
-			var angle_val: DCResult.Value = parts[1]
+			var axis_val: DCResult = parts[0]
+			var angle_val: DCResult = parts[1]
 
 			var axis := DCVector3.extract_vector3(axis_val)
 			if axis == null:
@@ -178,8 +178,8 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 	)
 
 
-static func extract_quaternion(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract_quaternion(val: DCResult) -> Variant:
+	var r := val.value
 	if r is Quaternion:
 		return r
 	if r is Basis:

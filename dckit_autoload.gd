@@ -32,6 +32,7 @@ func _init() -> void:
 	_backend = backend_impl.new() as BackendInterface
 	if _backend == null:
 		push_error("DCKit: backend instantiation returned null.")
+		return
 
 	_dc_kit_ui = _backend.init_ui()
 	if _dc_kit_ui:
@@ -181,7 +182,7 @@ func get_var_value_raw(key: String) -> Variant:
 func get_var_value(key: String, fallback: Variant = null) -> Variant:
 	if _guard():
 		return fallback
-	return _backend.get_var_value(key)
+	return _backend.get_var_value(key, fallback)
 
 
 func get_typed_var(key: String, type: int, fallback: Variant = null) -> Variant:

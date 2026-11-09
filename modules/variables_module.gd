@@ -46,7 +46,7 @@ func _set_var() -> DCDefinition:
 			if not r1.success:
 				return r1
 
-			var key: String = r0.value.as_string()
+			var key: String = r0.text()
 			var r := _vars.set_value(key, r1.raw) # r1.raw is the real Vector2/Color/etc.
 			if not r.ok:
 				return DCResult.fail(r.message)
@@ -69,7 +69,7 @@ func _setd_var() -> DCDefinition:
 			if not r0.success:
 				return r0
 
-			var key: String = r0.value.as_string()
+			var key: String = r0.text()
 			# Arg 1 is deliberately NOT resolved: it is stored as-is and
 			# run again every time the variable is read.
 			var r := _vars.set_deferred_var(key, ctx.arg_node(1))
@@ -94,7 +94,7 @@ func _get_var() -> DCDefinition:
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
-			var key: String = r0.value.as_string()
+			var key: String = r0.text()
 			if not _vars.is_valid_key(key):
 				return DCResult.fail("Invalid variable name '%s'." % key)
 			# Same path as ${key?:default}: the one resolver, nothing duplicated.
@@ -117,7 +117,7 @@ func _exists_var() -> DCDefinition:
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
-			var key: String = r0.value.as_string()
+			var key: String = r0.text()
 			if not _vars.is_valid_key(key):
 				return DCResult.fail("Invalid variable name '%s'." % key)
 			return DCResult.ok("true" if _vars.has(key) else "false"),
@@ -135,7 +135,7 @@ func _list_var() -> DCDefinition:
 				var r0 := await ctx.arg(0)
 				if not r0.success:
 					return r0
-				var prefix: String = r0.value.as_string()
+				var prefix: String = r0.text()
 				keys = keys.filter(
 					func(k: String) -> bool:
 						return k.begins_with(prefix),
@@ -159,7 +159,7 @@ func _delete_var() -> DCDefinition:
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
-			var key: String = r0.value.as_string()
+			var key: String = r0.text()
 			if not _vars.is_valid_key(key):
 				return DCResult.fail("Invalid variable name '%s'." % key)
 			if not _vars.delete(key):
@@ -179,7 +179,7 @@ func _try_delete_var() -> DCDefinition:
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
-			var key: String = r0.value.as_string()
+			var key: String = r0.text()
 			if not _vars.is_valid_key(key):
 				return DCResult.fail("Invalid variable name '%s'." % key)
 			_vars.delete(key)

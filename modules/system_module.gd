@@ -73,7 +73,7 @@ func _perf_cmd() -> DCDefinition:
 				if not result.success:
 					return result
 
-				return _get_perf_monitor(result.value.as_string())
+				return _get_perf_monitor(result.text())
 
 			var output := PackedStringArray()
 
@@ -181,7 +181,7 @@ func _tree_cmd() -> DCDefinition:
 				if not path_result.success:
 					return path_result
 
-				var path := path_result.value.as_string()
+				var path := path_result.text()
 
 				if not path.is_empty() and path != ".":
 					target = scene_root.get_node_or_null(NodePath(path))
@@ -196,7 +196,7 @@ func _tree_cmd() -> DCDefinition:
 				if not depth_result.success:
 					return depth_result
 
-				var depth_text := depth_result.value.as_string()
+				var depth_text := depth_result.text()
 
 				if not depth_text.is_valid_int():
 					return DCResult.fail("Tree depth must be an integer.")

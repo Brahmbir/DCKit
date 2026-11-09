@@ -2,18 +2,13 @@
 extends RefCounted
 
 
-static func val_label(val: DCResult.Value) -> String:
-	if val.raw == null:
+static func val_label(result: DCResult) -> String:
+	if result.value == null:
 		return "null"
-	var value_str := var_to_str(val.raw)
+	var value_str := var_to_str(result.value)
 
-	match val.origin:
-		DCResult.Value.Origin.LITERAL:
-			return "%s (literal)" % value_str
-		DCResult.Value.Origin.CONSTRUCTOR:
-			return "%s (from constructor)" % value_str
-		DCResult.Value.Origin.COMMAND:
-			return "%s (from command)" % value_str
+	if result.literal:
+		return "%s (literal)" % value_str
 
 	return value_str
 
@@ -31,7 +26,8 @@ static func sig_zero(
 # Case-insensitive. Skips variable references ($...).
 static func const_part(const_names: Array) -> _DCKitNS.Registries.ConstructorDef.PartHint:
 	return (
-		_DCKitNS.Registries
+		_DCKitNS
+		.Registries
 		.ConstructorDef
 		.PartHint
 		.new("name", "<const>", "One of: " + ", ".join(const_names))

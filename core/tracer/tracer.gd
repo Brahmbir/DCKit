@@ -49,7 +49,7 @@ func log_system(message: String, details: String = "") -> void:
 
 
 func log_result(result: DCResult, details: String = "") -> void:
-	_add("RESULT", "OK" if result.success else "FAIL", result.get_log_message(), details)
+	_add("RESULT", "OK" if result.success else "FAIL", result.log_text(), details)
 
 
 func info(msg: String, details: String = "") -> void:

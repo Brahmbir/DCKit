@@ -22,10 +22,10 @@ extends "./inbuilt_base.gd"
 
 
 # Core extraction
-# Returns an int if the DCResult.Value can be meaningfully interpreted as one.
+# Returns an int if the DCResult can be meaningfully interpreted as one.
 # Returns null on failure — the caller decides the error message.
-static func extract(val: DCResult.Value) -> Variant:
-	var r := val.raw
+static func extract(val: DCResult) -> Variant:
+	var r := val.value
 
 	if r == null:
 		return null
@@ -112,7 +112,7 @@ static func _int_validator() -> Callable:
 		return "'%s' is not a number." % value
 
 
-static func _label(val: DCResult.Value) -> String:
-	if val.raw == null:
+static func _label(val: DCResult) -> String:
+	if val.value == null:
 		return "null"
-	return "%s (%s)" % [var_to_str(val.raw), type_string(typeof(val.raw))]
+	return "%s (%s)" % [var_to_str(val.value), type_string(typeof(val.value))]
