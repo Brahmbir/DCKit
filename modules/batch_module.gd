@@ -38,7 +38,7 @@ func _bat() -> DCDefinition:
 		"bat",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 1:
-				return DCResult.fail("bat requires a file path.")
+				return DCResult.fail("Requires a file path.")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
@@ -81,11 +81,11 @@ func run(path: String, ctx: DCContext) -> DCResult:
 	path = _resolve_script_path(path)
 
 	if not FileAccess.file_exists(path):
-		return DCResult.fail("bat: file not found '%s'." % path)
+		return DCResult.fail("File not found '%s'." % path)
 
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		return DCResult.fail("bat: could not open '%s'." % path)
+		return DCResult.fail("Could not open '%s'." % path)
 
 	var lines: Array[ScriptLine] = []
 	var actual_line := 0

@@ -64,7 +64,7 @@ func _wait_cmd() -> DCDefinition:
 		"wait",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 1:
-				return DCResult.fail("wait requires one argument.")
+				return DCResult.fail("Requires one argument.")
 
 			var result := await ctx.arg(0)
 			if not result.success:
@@ -115,7 +115,7 @@ func _time_cmd() -> DCDefinition:
 		"time",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 1:
-				return DCResult.fail("time requires one nested command.")
+				return DCResult.fail("Requires one nested command.")
 
 			var start := Time.get_ticks_usec()
 			var result := await ctx.arg(0)
@@ -140,29 +140,24 @@ func _type_of_cmd() -> DCDefinition:
 		"type_of",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 1:
-				return DCResult.fail("type_of requires one value.")
+				return DCResult.fail("Requires one value.")
 
 			var result := await ctx.arg(0)
 			if not result.success:
 				return result
 
-			var value := result.value
-
-			if value == null:
-				return DCResult.ok("null")
-
 			var type_name := ""
 
-			match typeof(value):
+			match typeof(result.value):
 				TYPE_OBJECT:
-					if value != null:
-						type_name = value.get_class()
+					if result.value != null:
+						type_name = result.value.get_class()
 					else:
 						type_name = "Object"
 				_:
-					type_name = type_string(typeof(value))
+					type_name = type_string(typeof(result.value))
 
-			return DCResult.ok(typeof(value), type_name),
+			return DCResult.ok(typeof(result.value), type_name),
 		"Returns the type of a value.",
 		[DCDefinition.Param.new("value").describe("Value to inspect.")],
 		true,

@@ -38,7 +38,7 @@ func _set_var() -> DCDefinition:
 		"var.set",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 2:
-				return DCResult.fail("var.set requires two arguments: <name> <value>")
+				return DCResult.fail("Requires two arguments: <name> <value>")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
@@ -64,7 +64,7 @@ func _setd_var() -> DCDefinition:
 		"var.setd",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 2:
-				return DCResult.fail("var.setd requires two arguments: <name> <expression>")
+				return DCResult.fail("Requires two arguments: <name> <expression>")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
@@ -75,7 +75,7 @@ func _setd_var() -> DCDefinition:
 			var r := _vars.set_deferred_var(key, ctx.arg_node(1))
 			if not r.ok:
 				return DCResult.fail(r.message)
-			return DCResult.ok("'%s' set as deferred." % key),
+			return DCResult.ok(null,"'%s' set as deferred." % key),
 		"Stores an expression [b]unresolved[/b]. It runs again every time the variable is read.",
 		[DCDefinition.Param.new("name").describe(
 				"Variable name. Must start with a letter or underscore."
@@ -90,7 +90,7 @@ func _get_var() -> DCDefinition:
 		"var.get",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 2:
-				return DCResult.fail("var.get requires two arguments: <n> <default>")
+				return DCResult.fail("Requires two arguments: <n> <default>")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
@@ -113,14 +113,14 @@ func _exists_var() -> DCDefinition:
 		"var.exists",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 1:
-				return DCResult.fail("var.exists requires one argument: <name>")
+				return DCResult.fail("Requires one argument: <name>")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
 			var key: String = r0.text()
 			if not _vars.is_valid_key(key):
 				return DCResult.fail("Invalid variable name '%s'." % key)
-			return DCResult.ok("true" if _vars.has(key) else "false"),
+			return DCResult.ok(_vars.has(key) ),
 		"Returns [b]true[/b] if the variable exists, [b]false[/b] otherwise.",
 		[DCDefinition.Param.new("name").suggest(_vars.get_keys)],
 	)
@@ -141,8 +141,8 @@ func _list_var() -> DCDefinition:
 						return k.begins_with(prefix),
 				)
 			if keys.is_empty():
-				return DCResult.ok("empty")
-			return DCResult.ok(", ".join(keys)),
+				return DCResult.ok([],"Empty")
+			return DCResult.ok(keys,", ".join(keys)),
 		"Lists all variable names, static and deferred, comma-separated. Optionally filters by prefix.",
 		[DCDefinition.Param.new("prefix").describe(
 				"Optional. Only names starting with this are returned."
@@ -155,7 +155,7 @@ func _delete_var() -> DCDefinition:
 		"var.delete",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 1:
-				return DCResult.fail("var.delete requires one argument: <name>")
+				return DCResult.fail("Requires one argument: <name>")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0
@@ -175,7 +175,7 @@ func _try_delete_var() -> DCDefinition:
 		"var.try_delete",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 1:
-				return DCResult.fail("var.try_delete requires one argument: <name>")
+				return DCResult.fail("Requires one argument: <name>")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0

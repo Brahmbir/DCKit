@@ -40,7 +40,7 @@ func _if_cmd() -> DCDefinition:
 		"if",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 2 or ctx.args_length() > 3:
-				return DCResult.fail("if requires 2 or 3 arguments:  if (condition) (then) [else]")
+				return DCResult.fail("Requires 2 or 3 arguments:  if (condition) (then) [else]")
 
 			var condition := await ctx.arg(0)
 			if condition.truthy():
@@ -67,7 +67,7 @@ func _not_cmd() -> DCDefinition:
 		"not",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 1:
-				return DCResult.fail("not requires exactly one argument.")
+				return DCResult.fail("Requires exactly one argument.")
 
 			var result := await ctx.arg(0)
 			return _ok(not result.truthy()),
@@ -81,7 +81,7 @@ func _and_cmd() -> DCDefinition:
 		"and",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() == 0:
-				return DCResult.fail("and requires at least one argument.")
+				return DCResult.fail("Requires at least one argument.")
 
 			var last := DCResult.ok("")
 			for i in ctx.args_length():
@@ -101,7 +101,7 @@ func _or_cmd() -> DCDefinition:
 		"or",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() == 0:
-				return DCResult.fail("or requires at least one argument.")
+				return DCResult.fail("Requires at least one argument.")
 
 			var last := DCResult.ok("")
 			for i in ctx.args_length():
@@ -124,7 +124,7 @@ func _try_cmd() -> DCDefinition:
 		"try",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() == 0 or ctx.args_length() > 2:
-				return DCResult.fail("try requires 1 or 2 arguments:  try (command) [fallback]")
+				return DCResult.fail("Requires 1 or 2 arguments:  try (command) [fallback]")
 
 			var result := await ctx.arg(0)
 			if result.success:
@@ -152,7 +152,7 @@ func _repeat_cmd() -> DCDefinition:
 		"repeat",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 2:
-				return DCResult.fail("repeat requires at least 2 arguments: repeat N (command)...")
+				return DCResult.fail("Requires at least 2 arguments: repeat N (command)...")
 
 			var count_result := await ctx.arg(0)
 			if not count_result.success:
@@ -160,7 +160,7 @@ func _repeat_cmd() -> DCDefinition:
 
 			var count_string := count_result.text()
 			if not count_string.is_valid_float():
-				return DCResult.fail("repeat: N must be a number, got '%s'." % count_string)
+				return DCResult.fail("N must be a number, got '%s'." % count_string)
 
 			var count := int(float(count_string))
 			if count <= 0:
@@ -168,7 +168,7 @@ func _repeat_cmd() -> DCDefinition:
 
 			if count > MAX_REPEAT_COUNT:
 				return DCResult.fail(
-					"repeat: count %d exceeds the limit of %d." % [count, MAX_REPEAT_COUNT]
+					"Count %d exceeds the limit of %d." % [count, MAX_REPEAT_COUNT]
 				)
 
 			var last := DCResult.ok(null, "Success")
@@ -202,7 +202,7 @@ func _while_cmd() -> DCDefinition:
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 2:
 				return DCResult.fail(
-					"while requires at least 2 arguments: while (condition) (command)..."
+					"Requires at least 2 arguments: while (condition) (command)..."
 				)
 
 			var last := DCResult.ok(null, "Success")
@@ -239,7 +239,7 @@ func _cmp_eq_cmd() -> DCDefinition:
 		"cmp.eq",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 2:
-				return DCResult.fail("cmp.eq requires exactly 2 arguments.")
+				return DCResult.fail("Requires exactly 2 arguments.")
 
 			var pair := await _resolve_string_pair(ctx)
 			if not pair.success:
@@ -256,7 +256,7 @@ func _cmp_neq_cmd() -> DCDefinition:
 		"cmp.neq",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 2:
-				return DCResult.fail("cmp.neq requires exactly 2 arguments.")
+				return DCResult.fail("Requires exactly 2 arguments.")
 
 			var pair := await _resolve_string_pair(ctx)
 			if not pair.success:
@@ -308,7 +308,7 @@ func _cmp_in_cmd() -> DCDefinition:
 		"cmp.in",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 2:
-				return DCResult.fail("cmp.in requires at least 2 arguments: <value> <candidate>...")
+				return DCResult.fail("Requires at least 2 arguments: <value> <candidate>...")
 
 			var value_result := await ctx.arg(0)
 			if not value_result.success:
@@ -343,7 +343,7 @@ func _cmp_contains_cmd() -> DCDefinition:
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 2:
 				return DCResult.fail(
-					"cmp.contains requires exactly 2 arguments: <text> <substring>"
+					"Requires exactly 2 arguments: <text> <substring>"
 				)
 
 			var text_result := await ctx.arg(0)
@@ -368,7 +368,7 @@ func _cmp_empty_cmd() -> DCDefinition:
 		"cmp.empty",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 1:
-				return DCResult.fail("cmp.empty requires exactly 1 argument.")
+				return DCResult.fail("Requires exactly 1 argument.")
 
 			var result := await ctx.arg(0)
 			if not result.success:
@@ -389,9 +389,9 @@ func _numeric_comparison_cmd(
 		command_name,
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 2:
-				return DCResult.fail("%s requires exactly 2 arguments." % command_name)
+				return DCResult.fail("%s requires exactly 2 arguments.")
 
-			var pair := await _resolve_numeric_pair(ctx, command_name)
+			var pair := await _resolve_numeric_pair(ctx)
 			if not pair.success:
 				return DCResult.fail(pair.message)
 
@@ -422,7 +422,7 @@ func _resolve_string_pair(ctx: DCContext) -> _ValuePair:
 	return pair
 
 
-func _resolve_numeric_pair(ctx: DCContext, command_name: String) -> _ValuePair:
+func _resolve_numeric_pair(ctx: DCContext) -> _ValuePair:
 	var pair := _ValuePair.new()
 
 	var left := await ctx.arg(0)
@@ -439,11 +439,11 @@ func _resolve_numeric_pair(ctx: DCContext, command_name: String) -> _ValuePair:
 	var right_string := str(right.value)
 
 	if not left_string.is_valid_float():
-		pair.message = "%s: '%s' is not a number." % [command_name, left_string]
+		pair.message = "'%s' is not a number." % [ left_string]
 		return pair
 
 	if not right_string.is_valid_float():
-		pair.message = "%s: '%s' is not a number." % [command_name, right_string]
+		pair.message = "'%s' is not a number." % [ right_string]
 		return pair
 
 	pair.success = true

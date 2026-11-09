@@ -304,6 +304,7 @@ func _execute(
 		_active_ctx = null
 
 	var result := _normalise(raw_result)
+	result._stamp(definition.name)
 
 	# Don't spam the console with successful utility commands.
 	match definition.log_mode:
@@ -335,13 +336,9 @@ func _resolve_node(node, exec: _DCKitNS.Executor.Execution, root_ctx: DCContext)
 		# abort_root is temporarily set to the calling command's context.
 		var scoped := _DCKitNS.Executor.Execution.new("", exec.origin, root_ctx, exec.call_stack)
 		scoped.commands = [node]
-		var inner: DCResult = await _execute(
-			node,
-			scoped,
-			_DCKitNS.Executor.CallStack.FrameKind.ARGUMENT,
-		)
+		var inner: DCResult = await _execute(node, scoped, _DCKitNS.Executor.CallStack.FrameKind.ARGUMENT)
 		if not inner.success:
-			return DCResult.fail("Nested '%s' failed: %s" % [node.name, inner.message])
+			return inner
 		return DCResult.ok(inner.value)
 	return DCResult.from_literal("")
 
@@ -386,7 +383,7 @@ func _resolve_stored(
 		var result: DCResult = await _resolve_node(value.node, exec, root_ctx)
 		chain.erase(name)
 		if not result.success:
-			return DCResult.fail("Deferred '$%s': %s" % [name, result.message])
+			return DCResult.fail("Deferred '$%s': %s" % [name, result.full_message()])
 		return result
 	return _wrap_value(value)
 
@@ -410,7 +407,7 @@ func _resolve_ctor(
 	for part in node.parts:
 		var r: DCResult = await _resolve_node(part, exec, root_ctx)
 		if not r.success:
-			return DCResult.fail("Constructor '%s': %s" % [node.type_name, r.message])
+			return DCResult.fail("Constructor '%s': %s" % [node.type_name, r.full_message()])
 		parts.append(r)
 	var ctor_result = _ctor_reg.resolve(node.type_name, parts)
 	if ctor_result is DCResult:

@@ -2,9 +2,16 @@ class_name DCResult
 extends RefCounted
 
 var success: bool
+
 var value: Variant
+
 var message: String
+var _source := ""
+
 var literal: bool
+
+
+
 
 static func ok(v: Variant = null, msg := "") -> DCResult:
 	return _make(true, v, msg)
@@ -41,11 +48,23 @@ func truthy() -> bool:
 			return not (value.strip_edges().to_lower() in ["", "false", "0"])
 	return true
 
-func log_text() -> String:
-	if not success or not message.is_empty():
+## Failure text including the command that produced it. Use this when embedding or displaying.
+func full_message() -> String:
+	if success or _source.is_empty():
 		return message
-	return text()
+	return "%s: %s" % [_source, message]
 
+
+func log_text() -> String:
+	if not success:
+		return full_message()
+	return message if not message.is_empty() else text()
+
+
+## Executor only. First stamp wins, so a failure bubbling up through outer commands keeps its origin.
+func _stamp(p_source: String) -> void:
+	if not success and _source.is_empty():
+		_source = p_source
 
 func _to_string() -> String:
 	return "OK | %s" % var_to_str(value) if success else "FAIL | %s" % message

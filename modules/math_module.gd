@@ -30,7 +30,7 @@ func _add_cmd() -> DCDefinition:
 	return _fold_command(
 		"math.add",
 		"Adds two or more numbers from left to right.",
-		func(a: float, b: float) -> float: return a + b
+		func(a: float, b: float) -> Variant: return a + b
 	)
 
 
@@ -38,7 +38,7 @@ func _sub_cmd() -> DCDefinition:
 	return _fold_command(
 		"math.sub",
 		"Subtracts each following number from the first number, left to right.",
-		func(a: float, b: float) -> float: return a - b
+		func(a: float, b: float) -> Variant: return a - b
 	)
 
 
@@ -46,7 +46,7 @@ func _mul_cmd() -> DCDefinition:
 	return _fold_command(
 		"math.mul",
 		"Multiplies two or more numbers.",
-		func(a: float, b: float) -> float: return a * b
+		func(a: float, b: float) -> Variant: return a * b
 	)
 
 
@@ -54,7 +54,8 @@ func _div_cmd() -> DCDefinition:
 	return _fold_command(
 		"math.div",
 		"Divides the first number by each following number, left to right. Division by zero fails.",
-		func(a: float, b: float) -> float: return a / b
+		func(a: float, b: float) -> Variant:
+			return DCResult.fail("Division by zero.") if is_zero_approx(b) else a / b
 	)
 
 
@@ -62,16 +63,16 @@ func _mod_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"math.mod",
 		func(ctx: DCContext) -> DCResult:
-			var pair := await _resolve_pair(ctx, "math.mod", 2)
+			var pair := await _resolve_pair(ctx)
 			if not pair.success:
 				return pair.failure
 
 			if is_zero_approx(pair.b):
-				return DCResult.fail("math.mod: division by zero.")
+				return DCResult.fail("Division by zero.")
 
-			return DCResult.ok(fposmod(pair.a, pair.b), "Success"),
+			return DCResult.ok(fposmod(pair.a, pair.b)),
 		"Returns the positive modulo of two numbers. The divisor cannot be zero.",
-		[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")],
+		["a", "b"],
 	)
 
 
@@ -100,23 +101,18 @@ func _clamp_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"math.clamp",
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_values(ctx, "math.clamp", 3, 3)
+			var values := await _resolve_values(ctx, 3, 3)
 			if not values.success:
 				return values.failure
 
 			if values.numbers[1] > values.numbers[2]:
-				return DCResult.fail("math.clamp: minimum cannot exceed maximum.")
+				return DCResult.fail("Minimum cannot exceed maximum.")
 
 			return DCResult.ok(
-				clampf(values.numbers[0], values.numbers[1], values.numbers[2]),
-				"Success"
+				clampf(values.numbers[0], values.numbers[1], values.numbers[2])
 			),
 		"Clamps a value between a minimum and maximum.",
-		[
-			DCDefinition.Param.new("value"),
-			DCDefinition.Param.new("min"),
-			DCDefinition.Param.new("max"),
-		],
+		["value", "min", "max"],
 	)
 
 
@@ -145,16 +141,16 @@ func _sqrt_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"math.sqrt",
 		func(ctx: DCContext) -> DCResult:
-			var value := await _resolve_values(ctx, "math.sqrt", 1, 1)
-			if not value.success:
-				return value.failure
+			var values := await _resolve_values(ctx, 1, 1)
+			if not values.success:
+				return values.failure
 
-			if value.numbers[0] < 0.0:
-				return DCResult.fail("math.sqrt: value cannot be negative.")
+			if values.numbers[0] < 0.0:
+				return DCResult.fail("Value cannot be negative.")
 
-			return DCResult.ok(sqrt(value.numbers[0]), "Success"),
+			return DCResult.ok(sqrt(values.numbers[0])),
 		"Returns the square root. Negative values fail.",
-		[DCDefinition.Param.new("value")],
+		["value"],
 	)
 
 
@@ -162,178 +158,108 @@ func _pow_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"math.pow",
 		func(ctx: DCContext) -> DCResult:
-			var pair := await _resolve_pair(ctx, "math.pow", 2)
+			var pair := await _resolve_pair(ctx)
 			if not pair.success:
 				return pair.failure
 
-			return DCResult.ok(pow(pair.a, pair.b), "Success"),
+			return DCResult.ok(pow(pair.a, pair.b)),
 		"Raises the first number to the power of the second.",
-		[DCDefinition.Param.new("base"), DCDefinition.Param.new("exponent")],
+		["base", "exponent"],
 	)
 
 
-func _unary_command(
-	command_name: String,
-	description: String,
-	operation: Callable
-) -> DCDefinition:
+func _unary_command(cmd: String, description: String, operation: Callable) -> DCDefinition:
 	return DCDefinition.new(
-		command_name,
+		cmd,
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_values(ctx, command_name, 1, 1)
+			var values := await _resolve_values(ctx, 1, 1)
 			if not values.success:
 				return values.failure
 
-			var result: float = operation.call(values.numbers[0])
-			return DCResult.ok(result, "Success"),
+			return DCResult.ok(operation.call(values.numbers[0])),
 		description,
-		[DCDefinition.Param.new("value")],
+		["value"],
 	)
 
 
-func _fold_command(
-	command_name: String,
-	description: String,
-	operation: Callable
-) -> DCDefinition:
+## operation may return a DCResult to abort the fold.
+func _fold_command(cmd: String, description: String, operation: Callable) -> DCDefinition:
 	return DCDefinition.new(
-		command_name,
+		cmd,
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_values(ctx, command_name, 2, -1)
+			var values := await _resolve_values(ctx, 2, -1)
 			if not values.success:
 				return values.failure
 
-			var result: float = values.numbers[0]
+			var result: Variant = values.numbers[0]
+			for i in range(1, values.numbers.size()):
+				result = operation.call(result, values.numbers[i])
+				if result is DCResult:
+					return result
 
-			for index in range(1, values.numbers.size()):
-				var operand := values.numbers[index]
-
-				if command_name == "math.div" and is_zero_approx(operand):
-					return DCResult.fail("math.div: division by zero.")
-
-				result = operation.call(result, operand)
-
-			return DCResult.ok(result, "Success"),
+			return DCResult.ok(result),
 		description,
-		[
-			DCDefinition.Param.new("a"),
-			DCDefinition.Param.new("b_and_more")
-				.describe("Two or more numeric operands in total.")
-				.rest(),
-		],
+		[DCDefinition.Param.new("numbers").describe("Two or more numbers.").rest()],
 	)
 
 
-func _aggregate_command(
-	command_name: String,
-	description: String,
-	operation: Callable
-) -> DCDefinition:
+func _aggregate_command(cmd: String, description: String, operation: Callable) -> DCDefinition:
 	return DCDefinition.new(
-		command_name,
+		cmd,
 		func(ctx: DCContext) -> DCResult:
-			var values := await _resolve_values(ctx, command_name, 1, -1)
+			var values := await _resolve_values(ctx, 1, -1)
 			if not values.success:
 				return values.failure
 
 			var result: float = values.numbers[0]
+			for i in range(1, values.numbers.size()):
+				result = operation.call(result, values.numbers[i])
 
-			for index in range(1, values.numbers.size()):
-				result = operation.call(result, values.numbers[index])
-
-			return DCResult.ok(result, "Success"),
+			return DCResult.ok(result),
 		description,
-		[
-			DCDefinition.Param.new("values")
-				.describe("One or more numbers.")
-				.rest(),
-		],
+		[DCDefinition.Param.new("numbers").describe("One or more numbers.").rest()],
 	)
 
 
-func _resolve_pair(
-	ctx: DCContext,
-	command_name: String,
-	expected_count: int
-) -> _ResolvedNumbers:
-	var values := await _resolve_values(
-		ctx,
-		command_name,
-		expected_count,
-		expected_count
-	)
-
-	var pair := _ResolvedNumbers.new()
-	pair.success = values.success
-	pair.failure = values.failure
-
-	if values.success:
-		pair.a = values.numbers[0]
-		pair.b = values.numbers[1]
-
-	return pair
+func _resolve_pair(ctx: DCContext) -> _ResolvedNumbers:
+	var out := await _resolve_values(ctx, 2, 2)
+	if out.success:
+		out.a = out.numbers[0]
+		out.b = out.numbers[1]
+	return out
 
 
-func _resolve_values(
-	ctx: DCContext,
-	command_name: String,
-	min_count: int,
-	max_count: int
-) -> _ResolvedNumbers:
+func _resolve_values(ctx: DCContext, min_count: int, max_count: int) -> _ResolvedNumbers:
 	var out := _ResolvedNumbers.new()
 	var count := ctx.args_length()
 
 	if count < min_count or (max_count >= 0 and count > max_count):
-		var expected := (
-			str(min_count)
-			if min_count == max_count
-			else "at least %d" % min_count
-		)
-
-		out.failure = DCResult.fail(
-			"%s requires %s argument(s)." % [command_name, expected]
-		)
+		var expected := str(min_count) if min_count == max_count else "at least %d" % min_count
+		out.failure = DCResult.fail("Requires %s argument(s), got %d." % [expected, count])
 		return out
 
-	for index in count:
-		var result := await ctx.arg(index)
-
+	for i in count:
+		var result := await ctx.arg(i)
 		if not result.success:
 			out.failure = result
 			return out
 
 		var operand: Variant = result.value
-		var number: float
-
-		if typeof(operand) in [TYPE_INT, TYPE_FLOAT]:
-			number = float(operand)
-
-		elif typeof(operand) == TYPE_STRING:
-			if not operand.is_valid_float():
-				out.failure = DCResult.fail(
-					"%s: '%s' is not a number." % [command_name, operand]
-				)
-				return out
-
-			number = float(operand)
-
+		if operand is float or operand is int:
+			out.numbers.append(float(operand))
+		elif operand is String and operand.is_valid_float():
+			out.numbers.append(operand.to_float())
 		else:
-			out.failure = DCResult.fail(
-				"%s: '%s' is not a number." % [command_name, var_to_str(operand)]
-			)
+			out.failure = DCResult.fail("'%s' is not a number." % result.text())
 			return out
-
-		out.numbers.append(number)
 
 	out.success = true
 	return out
 
 
 class _ResolvedNumbers:
-	var success: bool = false
+	var success := false
 	var failure: DCResult
-
 	var numbers: Array[float] = []
-
-	var a: float = 0.0
-	var b: float = 0.0
+	var a := 0.0
+	var b := 0.0

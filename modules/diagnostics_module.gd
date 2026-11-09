@@ -44,7 +44,7 @@ func _profile() -> DCDefinition:
 		func(ctx: DCContext) -> DCResult:
 			var count := ctx.args_length()
 			if count == 0:
-				return DCResult.fail("profile requires at least one nested command.")
+				return DCResult.fail("Requires at least one nested command.")
 
 			_profiler.reset()
 			_profiler.enabled = true
