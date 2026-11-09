@@ -174,12 +174,13 @@ func _tree_cmd() -> DCDefinition:
 				if not depth_result.success:
 					return depth_result
 
-				var depth_input := depth_result.value
-
-				if typeof(depth_input) in [TYPE_INT, TYPE_FLOAT]:
+				var d: Variant = depth_result.value
+				if d is String and d.is_valid_int():
+					depth = d.to_int()
+				elif d is int or (d is float and is_equal_approx(d, roundf(d))):
+					depth = int(d)
+				else:
 					return DCResult.fail("Tree depth must be an integer.")
-
-				depth = int(depth_input)
 
 			if depth < 0 or depth > MAX_TREE_DEPTH:
 				return DCResult.fail("Tree depth must be between 0 and %d." % MAX_TREE_DEPTH)
