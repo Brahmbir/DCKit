@@ -14,7 +14,7 @@ var _dc_kit_ui: BackendInterface.UI_HOST_INTERFACE = null
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	if not FileAccess.file_exists(_backend_path):
+	if not ResourceLoader.exists(_backend_path):
 		if OS.is_debug_build():
 			push_warning(
 				"DCKit: backend script not found at '%s' — running without backend." % _backend_path

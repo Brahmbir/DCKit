@@ -234,6 +234,13 @@ func _while_cmd() -> DCDefinition:
 
 
 #region COMPARISONS
+func _compare_values(a: String, b: String) -> bool:
+	if a.is_valid_float() and b.is_valid_float():
+		return float(a) == float(b)
+
+	return a == b
+
+
 func _cmp_eq_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"cmp.eq",
@@ -245,8 +252,8 @@ func _cmp_eq_cmd() -> DCDefinition:
 			if not pair.success:
 				return DCResult.fail(pair.message)
 
-			return _ok(pair.a == pair.b),
-		"Returns [b]true[/b] when both values are equal (string comparison).",
+			return _ok(_compare_values(pair.a, pair.b)),
+		"Returns [b]true[/b] when both values are equal (numeric or string comparison).",
 		[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")],
 	)
 
@@ -261,8 +268,9 @@ func _cmp_neq_cmd() -> DCDefinition:
 			var pair := await _resolve_string_pair(ctx)
 			if not pair.success:
 				return DCResult.fail(pair.message)
-			return _ok(pair.a != pair.b),
-		"Returns [b]true[/b] when the two values differ (string comparison).",
+
+			return _ok(not _compare_values(pair.a, pair.b)),
+		"Returns [b]true[/b] when the two values differ (numeric or string comparison).",
 		[DCDefinition.Param.new("a"), DCDefinition.Param.new("b")],
 	)
 
@@ -342,9 +350,7 @@ func _cmp_contains_cmd() -> DCDefinition:
 		"cmp.contains",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() != 2:
-				return DCResult.fail(
-					"Requires exactly 2 arguments: <text> <substring>"
-				)
+				return DCResult.fail("Requires exactly 2 arguments: <text> <substring>")
 
 			var text_result := await ctx.arg(0)
 			if not text_result.success:
@@ -417,8 +423,9 @@ func _resolve_string_pair(ctx: DCContext) -> _ValuePair:
 		return pair
 
 	pair.success = true
-	pair.a = left.value
-	pair.b = right.value
+	pair.a = left.text()
+	pair.b = right.text()
+
 	return pair
 
 
@@ -439,11 +446,11 @@ func _resolve_numeric_pair(ctx: DCContext) -> _ValuePair:
 	var right_string := str(right.value)
 
 	if not left_string.is_valid_float():
-		pair.message = "'%s' is not a number." % [ left_string]
+		pair.message = "'%s' is not a number." % [left_string]
 		return pair
 
 	if not right_string.is_valid_float():
-		pair.message = "'%s' is not a number." % [ right_string]
+		pair.message = "'%s' is not a number." % [right_string]
 		return pair
 
 	pair.success = true

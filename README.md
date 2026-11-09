@@ -25,6 +25,10 @@ DCKit gives Godot 4 projects a full-featured in-game developer console — from 
 
 Everything is modular. Drop in the commands you need, skip the ones you don't, and extend without touching the core.
 
+## Requirements
+
+- Godot Engine 4.5 or later.
+
 ## Installation
 
 1. Copy the `dckit/` folder into your project's `addons` directory.

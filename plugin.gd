@@ -33,7 +33,8 @@ func _enable_plugin() -> void:
 	_DCKitSetting.set_dckit_settings_as_internal(false)
 
 	if not ProjectSettings.has_setting("autoload/" + _AUTOLOAD_NAME):
-		add_autoload_singleton(_AUTOLOAD_NAME, _AUTOLOAD_SCRIPT)
+		var path := (get_script() as Script).resource_path.get_base_dir().path_join(_AUTOLOAD_SCRIPT).simplify_path()
+		add_autoload_singleton(_AUTOLOAD_NAME, path)
 
 
 func _disable_plugin() -> void:

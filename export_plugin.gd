@@ -4,15 +4,16 @@ extends EditorExportPlugin
 const IGNORE_FILES := ["fonts/OFL.txt"]
 
 const INCLUDE_FILES := [
-	"ui_interface.gd",
-	"backend_interface.gd",
-	"dckit_autoload.gd",
 	"dc_analysis_result.gd",
-	"dc_result.gd",
-	"bb_code_utils.gd",
-	"command_definition.gd",
-	"dc_logger.gd",
 	"dc_context.gd",
+	"dc_module.gd",
+	"dc_result.gd",
+	"command_definition.gd",
+	"plain_command.gd",
+	"bb_code_utils.gd",
+	"backend_interface.gd",
+	"ui_interface.gd",
+	"dckit_autoload.gd",
 ]
 
 const TAG_INCLUDE := "dckit_include"
@@ -20,6 +21,8 @@ const TAG_EXCLUDE := "dckit_exclude"
 
 var _is_debug_export := false
 var _override := "" # "", "include", "exclude"
+
+var _root := ""
 
 
 func _get_name() -> String:
@@ -47,7 +50,7 @@ func _resolve_override(features: PackedStringArray) -> String:
 
 
 func _export_file(path: String, type: String, features: PackedStringArray) -> void:
-	if not path.contains("addons/dc_kit"):
+	if not path.begins_with(_root):
 		return
 
 	if _should_skip_file(path, _is_debug_export):
@@ -78,9 +81,11 @@ func _should_skip_file(path: String, is_debug: bool) -> bool:
 func _export_end() -> void:
 	_is_debug_export = false
 	_override = ""
+	_root = ""
 
 
 func _export_begin(features, is_debug, path, _flags):
+	_root = (get_script() as Script).resource_path.get_base_dir()
 	_is_debug_export = is_debug
 	_override = _resolve_override(features)
 

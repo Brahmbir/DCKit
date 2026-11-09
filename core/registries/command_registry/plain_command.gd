@@ -99,9 +99,9 @@ static func _coerce(v: Variant, type: int) -> DCResult:
 					"false", "no", "0":
 						return DCResult.ok(false)
 		TYPE_STRING:
-			return DCResult.ok(v)
+			return DCResult.ok(v if v is String else var_to_str(v))
 		TYPE_STRING_NAME:
-			return DCResult.ok(StringName(v))
+			return DCResult.ok(StringName(v if v is String else var_to_str(v)))
 		_:
 			if typeof(raw) == type:
 				return DCResult.ok(raw)
