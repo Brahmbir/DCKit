@@ -17,6 +17,7 @@ enum LogMode {
 }
 
 const BbCodeUtils = preload("../bb_code_utils.gd")
+const PlainCommand = preload("./plain_command.gd")
 
 ## Exact case as registered — key in registry.
 var name: String
@@ -52,6 +53,11 @@ var _deprecated := false
 var _deprecated_message := ""
 
 
+## Builds a definition from a plain function. See PlainCommand.
+static func from_function(p_name: String, fn: Callable, p_description: String = "") -> DCDefinition:
+	return PlainCommand.build(p_name, fn, p_description)
+
+
 func _init(
 	p_name: String,
 	p_handler: Callable,
@@ -78,6 +84,18 @@ func alias_many(names: PackedStringArray) -> DCDefinition:
 	for name in names:
 		if not _aliases.has(name):
 			_aliases.append(name)
+	return self
+
+
+func unalias(name: String) -> DCDefinition:
+	var i := _aliases.find(name)
+	if i >= 0:
+		_aliases.remove_at(i)
+	return self
+
+
+func clear_aliases() -> DCDefinition:
+	_aliases.clear()
 	return self
 
 
@@ -112,6 +130,15 @@ class Param extends RefCounted:
 		name = p_name
 		suggestor = p_suggestor
 
+	## name → value. Input matching a key resolves to its value before type coercion.
+	var choices: Dictionary = { }
+
+
+	## Marks this param as an enum and suggests its keys.
+	func enum_of(source: Dictionary) -> Param:
+		choices = source
+		return suggest(source.keys())
+
 
 	## Sets the param's BBCode description.
 	func describe(text: String) -> Param:
@@ -123,6 +150,13 @@ class Param extends RefCounted:
 	func suggest(source: Variant) -> Param:
 		if source is Callable:
 			suggestor = source
+		elif source is Dictionary:
+			choices = source
+			suggestor = func() -> Array[String]:
+				var out: Array[String] = []
+				for k in source:
+					out.append(str(k))
+				return out
 		elif source is Array:
 			var values: Array[String] = []
 			for v in source:
@@ -130,7 +164,7 @@ class Param extends RefCounted:
 			suggestor = func() -> Array[String]:
 				return values.duplicate()
 		else:
-			push_error("suggest() expects either Array[String] or Callable.")
+			push_error("suggest() expects Callable, Array or Dictionary.")
 		return self
 
 

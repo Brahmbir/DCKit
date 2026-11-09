@@ -35,6 +35,43 @@ func log_help(msg: String, details: String = "") -> void:
 	pass
 
 
+func register(p_name: String, fn: Callable, description: String = "") -> bool:
+	return false
+
+
+func set_param(
+	command: String,
+	index: int,
+	p_name: String,
+	suggestor: Variant = null,
+) -> DCDefinition.Param:
+	return null
+
+
+func remove_param(command: String, index: int) -> bool:
+	return false
+
+
+func get_aliases(command: String) -> PackedStringArray:
+	return PackedStringArray()
+
+
+func set_aliases(command: String, aliases: PackedStringArray) -> bool:
+	return false
+
+
+func add_alias(command: String, alias: String) -> bool:
+	return false
+
+
+func remove_alias(alias: String) -> bool:
+	return false
+
+
+func clear_aliases(command: String) -> void:
+	pass
+
+
 func register_def(def: DCDefinition) -> bool:
 	return false
 

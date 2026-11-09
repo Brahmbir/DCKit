@@ -85,6 +85,45 @@ func abort() -> void:
 
 
 # Command register API
+func register(p_name: String, fn: Callable, description: String = "") -> bool:
+	if not fn.is_valid():
+		push_warning("DCKit: register('%s') — invalid callable." % p_name)
+		return false
+	return register_def(DCDefinition.from_function(p_name, fn, description))
+
+
+func set_param(
+	command: String,
+	index: int,
+	p_name: String,
+	suggestor: Variant = null,
+) -> DCDefinition.Param:
+	return _cmd_reg.set_param(command, index, p_name, suggestor)
+
+
+func remove_param(command: String, index: int) -> bool:
+	return _cmd_reg.remove_param(command, index)
+
+
+func get_aliases(command: String) -> PackedStringArray:
+	return _cmd_reg.get_aliases(command)
+
+
+func set_aliases(command: String, aliases: PackedStringArray) -> bool:
+	return _cmd_reg.set_aliases(command, aliases)
+
+
+func add_alias(command: String, alias: String) -> bool:
+	return _cmd_reg.add_alias(command, alias)
+
+
+func remove_alias(alias: String) -> bool:
+	return _cmd_reg.remove_alias(alias)
+
+
+func clear_aliases(command: String) -> void:
+	_cmd_reg.clear_aliases(command)
+
 
 func register_def(def: DCDefinition) -> bool:
 	if not def:
@@ -186,7 +225,8 @@ func get_var_value(key: String, fallback: Variant = null) -> Variant:
 		_tracer.warn("get_var('%s') is a deferred variable, use 'await DCKit.resolve_var()'." % key)
 		return fallback
 	return _var_store.get_value(key, fallback)
-	
+
+
 func resolve_var(key: String) -> DCResult:
 	return await _executor.resolve_var(key)
 #endregion

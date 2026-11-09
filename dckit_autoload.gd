@@ -102,16 +102,43 @@ func log_help(msg: String, details: String = "") -> void:
 
 
 #region Definition Methods
-func register(
+func register(p_name: String, fn: Callable, description: String = "") -> bool:
+	return false if _guard() else _backend.register(p_name, fn, description)
+
+
+func set_param(
+	command: String,
+	index: int,
 	p_name: String,
-	handler: Callable,
-	description: String = "",
-	params: Array[DCDefinition.Param] = [],
-) -> bool:
-	if _guard():
-		return false
-	var def := DCDefinition.new(p_name, handler, description, params)
-	return register_def(def)
+	suggestor: Variant = null,
+) -> DCDefinition.Param:
+	return null if _guard() else _backend.set_param(command, index, p_name, suggestor)
+
+
+func remove_param(command: String, index: int) -> bool:
+	return false if _guard() else _backend.remove_param(command, index)
+
+
+func get_aliases(command: String) -> PackedStringArray:
+	return PackedStringArray() if _guard() else _backend.get_aliases(command)
+
+
+func set_aliases(command: String, aliases: PackedStringArray) -> bool:
+	return false if _guard() else _backend.set_aliases(command, aliases)
+
+
+func add_alias(command: String, alias: String) -> bool:
+	return false if _guard() else _backend.add_alias(command, alias)
+
+
+func remove_alias(alias: String) -> bool:
+	return false if _guard() else _backend.remove_alias(alias)
+
+
+func clear_aliases(command: String) -> void:
+	if not _guard():
+		_backend.clear_aliases(command)
+
 
 func register_def(def: DCDefinition) -> bool:
 	if _guard():
@@ -139,7 +166,6 @@ func unlock_command(p_name: String) -> void:
 
 
 #region Variable methods
-
 func set_var(key: String, value: String) -> bool:
 	if _guard():
 		return false
@@ -199,7 +225,6 @@ func resolve_var(key: String) -> DCResult:
 		return DCResult.fail("Console disabled")
 	return _backend.resolve_var(key)
 #endregion
-
 
 
 #region visibility API

@@ -28,19 +28,10 @@ func register(def: DCDefinition) -> bool:
 		push_warning("CommandRegistry: '%s' already registered — ignored." % def.name)
 		return false
 	_commands[def.name] = def
-
-	for a in def.aliases:
-		var aerr := _validate_name(a)
-		if aerr != "":
-			push_warning("CommandRegistry: alias '%s' for '%s' — %s" % [a, def.name, aerr])
-			continue
-		if _commands.has(a) or _aliases.has(a):
-			push_warning(
-				"CommandRegistry: alias '%s' for '%s' is already taken — ignored." % [a, def.name]
-			)
-			continue
-		_aliases[a] = def.name
-
+	var requested := def.aliases.duplicate()
+	def.clear_aliases()
+	for a in requested:
+		add_alias(def.name, a)
 	return true
 
 
@@ -59,6 +50,39 @@ func unregister(name: String) -> bool:
 	return true
 
 
+# Names (and optionally suggests for) the param at `index`. Pads any gap with argN.
+# Returns the Param so advanced callers can chain .describe() / .rest(). Null on failure.
+func set_param(
+	command: String,
+	index: int,
+	p_name: String,
+	suggestor: Variant = null,
+) -> DCDefinition.Param:
+	var def := get_definition(command)
+	if def == null or index < 0:
+		push_warning(
+			"CommandRegistry: set_param('%s', %d) — unknown command or bad index."
+			% [command, index]
+		)
+		return null
+	while def.params.size() <= index:
+		def.params.append(DCDefinition.Param.new("arg%d" % def.params.size()))
+	var p := def.params[index]
+	p.name = p_name
+	if suggestor != null:
+		p.suggest(suggestor) # Callable or Array
+	return p
+
+
+# Descriptive only: later params shift down. Doesn't change what the function accepts.
+func remove_param(command: String, index: int) -> bool:
+	var def := get_definition(command)
+	if def == null or index < 0 or index >= def.params.size():
+		return false
+	def.params.remove_at(index)
+	return true
+
+
 # lock/unlock accept both primary names and aliases.
 func lock(name: String) -> void:
 	var def := get_definition(name)
@@ -70,6 +94,60 @@ func unlock(name: String) -> void:
 	var def := get_definition(name)
 	if def != null:
 		def.locked = false
+
+
+func get_aliases(command: String) -> PackedStringArray:
+	var def := get_definition(command)
+	return def.aliases if def else PackedStringArray()
+
+
+func add_alias(command: String, alias: String) -> bool:
+	var def := get_definition(command)
+	if def == null:
+		push_warning("CommandRegistry: add_alias — '%s' not found." % command)
+		return false
+	var err := _validate_name(alias)
+	if err != "":
+		push_warning("CommandRegistry: alias '%s' for '%s' — %s" % [alias, def.name, err])
+		return false
+	if _commands.has(alias) or _aliases.has(alias):
+		push_warning(
+			"CommandRegistry: alias '%s' for '%s' is already taken — ignored." % [alias, def.name]
+		)
+		return false
+	def.alias(alias)
+	_aliases[alias] = def.name
+	return true
+
+
+func remove_alias(alias: String) -> bool:
+	if not _aliases.has(alias):
+		return false
+	var def: DCDefinition = _commands.get(_aliases[alias])
+	if def != null:
+		def.unalias(alias)
+	_aliases.erase(alias)
+	return true
+
+
+func clear_aliases(command: String) -> void:
+	var def := get_definition(command)
+	if def == null:
+		return
+	for a in def.aliases:
+		_aliases.erase(a)
+	def.clear_aliases()
+
+
+# Replaces all aliases. Returns false if any one was rejected (the rest still apply).
+func set_aliases(command: String, aliases: PackedStringArray) -> bool:
+	if get_definition(command) == null:
+		return false
+	clear_aliases(command)
+	var all_ok := true
+	for a in aliases:
+		all_ok = add_alias(command, a) and all_ok
+	return all_ok
 
 
 # Returns an invalid Callable when name (or alias) is unknown.
