@@ -37,14 +37,14 @@ func register(def: DCDefinition) -> bool:
 
 # Removes a command and all its aliases. Returns false + warns if locked or absent.
 func unregister(name: String) -> bool:
-	var def: DCDefinition = _commands.get(name)
+	var def: DCDefinition = get_definition(name)
 	if def == null:
 		push_warning("CommandRegistry: unregister('%s') — not found." % name)
 		return false
 	if def.locked:
 		push_warning("CommandRegistry: '%s' is locked — unregister denied." % name)
 		return false
-	_commands.erase(name)
+	_commands.erase(def.name)
 	for a in def.aliases:
 		_aliases.erase(a)
 	return true

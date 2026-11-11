@@ -39,7 +39,7 @@ func push(cmd: String) -> void:
 		return
 	if not _entries.is_empty() and _entries.back() == cmd:
 		return
-	if _entries.size() > max_size:
+	if _entries.size() >= max_size:
 		_entries.remove_at(0)
 	_entries.append(cmd)
 	changed.emit()

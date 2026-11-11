@@ -138,7 +138,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 		_DCKitNS.Registries
 		.ConstructorDef
 		.PartHint
-		.new("name", "<string>", "CSS color name (e.g. [b]red[/b]) or HTML hex (e.g. [b]#ff4400[/b], [b]#f40[/b])")
+		.new("name", "<string>", "CSS color name (e.g. [b]red[/b]) or HTML hex (e.g. [b]\"#ff4400\"[/b], [b]\"#f40\"[/b])")
 		.accepts([TYPE_STRING, TYPE_COLOR])
 	)
 

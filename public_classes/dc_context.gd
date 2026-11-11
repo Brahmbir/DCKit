@@ -147,10 +147,15 @@ func abort() -> void:
 
 ## Cooperative checkpoint for long loops. Yields one frame, then returns
 ## false if the context was aborted before or during that frame.
+var _last_yield :=0
 func step() -> bool:
 	if is_aborted():
 		return false
+	var now := Time.get_ticks_msec()
+	if now - _last_yield < 8:
+		return true
 	await Engine.get_main_loop().process_frame
+	_last_yield = Time.get_ticks_msec()
 	return not is_aborted()
 
 func await_or_abort(exec_signal: Signal) -> bool:

@@ -41,7 +41,7 @@ func _echo_cmd() -> DCDefinition:
 		"echo",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() == 0:
-				return DCResult.ok("''")
+				return DCResult.ok("")
 
 			var parts: PackedStringArray = []
 
@@ -101,12 +101,16 @@ func _abort_cmd() -> DCDefinition:
 			if ctx.args_length() == 0:
 				return DCResult.fail("Execution aborted.")
 
+			ctx.abort()
+
 			var result := await ctx.arg(0)
 			if not result.success:
-				return DCResult.fail("Execution aborted. reason:%s" % result.message)
+				return DCResult.fail("Execution aborted. reason: %s" % result.full_message())
 
-			ctx.abort()
-			return DCResult.fail("Execution aborted. reason:%s" % result.text()),
+			return DCResult.fail(
+				"Execution aborted.%s"
+				% [" reason: %s" % result.text() if not result.text().is_empty() else ""]
+			),
 		"Aborts the current command or script.",
 		[DCDefinition.Param.new("reason").describe("Optional reason.")],
 	)
@@ -131,7 +135,7 @@ func _time_cmd() -> DCDefinition:
 
 			return DCResult.ok(
 				elapsed_ms,
-				"%s\nExecuted in %.3f ms." % [result.full_message(), elapsed_ms],
+				"%s\nExecuted in %.3f ms." % [result.log_text(), elapsed_ms],
 			),
 		"Measures how long a nested command takes.",
 		[DCDefinition.Param.new("command").describe("Command to execute.")],

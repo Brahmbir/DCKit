@@ -136,9 +136,9 @@ func _try_cmd() -> DCDefinition:
 			if ctx.args_length() == 2:
 				return await ctx.arg(1)
 
-			return DCResult.ok("", "Success"),
+			return DCResult.ok(null, "Success"),
 		"Runs a command; on failure runs an optional fallback instead of "
-		+ "propagating the error. Returns empty string when the command fails "
+		+ "propagating the error. Returns null when the command fails "
 		+ "and no fallback is given.",
 		[DCDefinition.Param.new("command").describe("Command to attempt."), DCDefinition
 			.Param
@@ -241,7 +241,7 @@ func _while_cmd() -> DCDefinition:
 #region COMPARISONS
 func _compare_values(a: String, b: String) -> bool:
 	if a.is_valid_float() and b.is_valid_float():
-		return float(a) == float(b)
+		return is_equal_approx(float(a), float(b))
 
 	return a == b
 

@@ -92,7 +92,7 @@ func _replace_cmd() -> DCDefinition:
 		func(ctx: DCContext) -> DCResult:
 			var values := await _resolve_strings(ctx, 3, 3)
 			if not values.success:
-				return DCResult.fail(values.full_message())
+				return DCResult.fail(values.message)
 			return DCResult.ok(values.items[0].replace(values.items[1], values.items[2])),
 		"Replaces every occurrence of the search string with the replacement string.",
 		[DCDefinition.Param.new("text"), DCDefinition.Param.new("search"), DCDefinition.Param.new(
@@ -107,7 +107,7 @@ func _split_cmd() -> DCDefinition:
 		func(ctx: DCContext) -> DCResult:
 			var values := await _resolve_strings(ctx, 2, 3)
 			if not values.success:
-				return DCResult.fail(values.full_message())
+				return DCResult.fail(values.message)
 			var allow_empty := values.items.size() == 3 and values.items[2].to_lower() == "true"
 			var parts := values.items[0].split(values.items[1], allow_empty)
 			return DCResult.ok(parts),
@@ -126,7 +126,7 @@ func _join_cmd() -> DCDefinition:
 		func(ctx: DCContext) -> DCResult:
 			var values := await _resolve_strings(ctx, 2, -1)
 			if not values.success:
-				return DCResult.fail(values.full_message())
+				return DCResult.fail(values.message)
 			var delimiter := values.items[0]
 			var parts: PackedStringArray = []
 			for index in range(1, values.items.size()):
@@ -146,7 +146,7 @@ func _slice_cmd() -> DCDefinition:
 		func(ctx: DCContext) -> DCResult:
 			var values := await _resolve_strings(ctx, 2, 3)
 			if not values.success:
-				return DCResult.fail(values.full_message())
+				return DCResult.fail(values.message)
 
 			var start_text := values.items[1]
 			if not start_text.is_valid_int():
@@ -182,7 +182,7 @@ func _unary_string_command(
 		func(ctx: DCContext) -> DCResult:
 			var values := await _resolve_strings(ctx, 1, 1)
 			if not values.success:
-				return DCResult.fail(values.full_message())
+				return DCResult.fail(values.message)
 			return DCResult.ok(operation.call(values.items[0])),
 		description,
 		[DCDefinition.Param.new("value")],
@@ -199,7 +199,7 @@ func _binary_string_bool_command(
 		func(ctx: DCContext) -> DCResult:
 			var values := await _resolve_strings(ctx, 2, 2)
 			if not values.success:
-				return DCResult.fail(values.full_message())
+				return DCResult.fail(values.message)
 			return DCResult.ok(operation.call(values.items[0], values.items[1])),
 		description,
 		[DCDefinition.Param.new("text"), DCDefinition.Param.new("search")],

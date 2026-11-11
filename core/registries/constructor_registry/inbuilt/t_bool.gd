@@ -108,7 +108,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 						.validate(_bool_validator())
 						.suggest(
 							func(_p):
-								return ["true", "false", "yes", "no", "1", "0"],
+								return ["true", "false", "yes", "no", "1", "0", "on", "off"],
 						)
 						.accepts([TYPE_BOOL, TYPE_INT, TYPE_STRING])
 					)
