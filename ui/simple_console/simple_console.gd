@@ -133,6 +133,10 @@ func connect_feedback_controller(controller: _DCKitNS.UI.InputFeedbackController
 	input_component.cmd_text_changed.connect(controller.handle_text_changed)
 	input_component.cmd_caret_location_changed.connect(controller.handle_cursor_moved)
 
+	var highlighter: HighlighterBase = input_component.get_input_node().syntax_highlighter as HighlighterBase
+	if highlighter != null:
+		controller.analysis_changed.connect(highlighter.set_analysis)
+
 	controller.handle_text_changed("", 0)
 
 

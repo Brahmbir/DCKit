@@ -44,8 +44,9 @@ func set_completion_provider(provider: _DCKitNS.Core.AutoComplete) -> void:
 func handle_text_changed(text: String, cursor_pos: int) -> void:
 	if not enabled:
 		return
-	var analyzer = _analyzer_ref.get_ref()
-	if analyzer == null or not analyzer.has_method("analyze"):
+	var analyzer = _analyzer_ref.get_ref() as _DCKitNS.Analyzer.Analyzer
+	if analyzer == null:
+		push_error("[FeedbackController] analyzer is null")
 		return
 
 	_current_text = text

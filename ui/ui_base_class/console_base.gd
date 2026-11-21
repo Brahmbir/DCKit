@@ -3,6 +3,8 @@ extends Control
 
 signal ui_close_requested
 
+const HighlighterBase := preload("../ui_base_class/highlighter_base.gd")
+
 @export_category("components")
 @export var header_component: _DCKitNS.UI.HeaderComponentBase
 

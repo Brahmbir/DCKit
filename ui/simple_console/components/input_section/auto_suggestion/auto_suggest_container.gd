@@ -113,7 +113,7 @@ func accept() -> void:
 		return
 	var item = _items[_selected_index]
 	hide_popup()
-	item_accepted.emit(_start, item.label)
+	item_accepted.emit(_start, item.insert)
 
 
 func input_handler(event: InputEvent) -> bool:

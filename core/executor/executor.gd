@@ -50,9 +50,13 @@ signal state_changed
 
 const Profiler := preload("./profiler.gd")
 const Detail := _DCKitNS.Executor.StateTracker.Detail
+# Bare literals in [] and {} become int / float / bool / null (quoted text stays a String).
+const INFER_COLLECTION_LITERALS := true
 
-const _ORIGIN_USER := "user"
+# Errors shown when a run is rejected by analysis; the rest are summarised.
+const MAX_REPORTED_ERRORS := 5
 const _ORIGIN_SCRIPT := "script"
+const _ORIGIN_USER := "user"
 
 # Call-stack safety limits — tune per project. These bound recursion depth,
 # not total work (see header).
@@ -274,8 +278,7 @@ func _execute(
 			var_node.fallback = fallback
 			return await _resolve_node(var_node, exec, effective_root),
 	)
-	
-	
+
 	if is_root:
 		_active_ctx = cmd_ctx
 
@@ -329,6 +332,12 @@ func _resolve_node(node, exec: _DCKitNS.Executor.Execution, root_ctx: DCContext)
 		return DCResult.from_literal(node.value)
 	if node is _DCKitNS.Analyzer.Parser.VariableNode:
 		return await _resolve_variable(node, exec, root_ctx)
+	if node is _DCKitNS.Analyzer.Parser.TemplateNode:
+		return await _resolve_template(node, exec, root_ctx)
+	if node is _DCKitNS.Analyzer.Parser.ArrayNode:
+		return await _resolve_array(node, exec, root_ctx)
+	if node is _DCKitNS.Analyzer.Parser.DictNode:
+		return await _resolve_dict(node, exec, root_ctx)
 	if node is _DCKitNS.Analyzer.Parser.ConstructorNode:
 		return await _resolve_ctor(node, exec, root_ctx)
 	if node is _DCKitNS.Analyzer.Parser.CommandNode:
@@ -336,16 +345,22 @@ func _resolve_node(node, exec: _DCKitNS.Executor.Execution, root_ctx: DCContext)
 		# abort_root is temporarily set to the calling command's context.
 		var scoped := _DCKitNS.Executor.Execution.new("", exec.origin, root_ctx, exec.call_stack)
 		scoped.commands = [node]
-		var inner: DCResult = await _execute(node, scoped, _DCKitNS.Executor.CallStack.FrameKind.ARGUMENT)
+		var inner: DCResult = await _execute(
+			node,
+			scoped,
+			_DCKitNS.Executor.CallStack.FrameKind.ARGUMENT,
+		)
 		if not inner.success:
 			return inner
 		return DCResult.ok(inner.value)
+	if node is _DCKitNS.Analyzer.Parser.ErrorNode:
+		return DCResult.fail("Cannot evaluate an invalid expression.")
 	return DCResult.from_literal("")
 
 
-# $name        → missing = FAIL
-# $?name       → missing = ""
-# $?name:node  → missing = resolve fallback node recursively
+# $name  ${name}  ${name!}  → missing = FAIL
+# $name?  ${name?}           → missing = ""
+# $name:node  ${name:node}   → missing = resolve fallback node recursively
 func _resolve_variable(
 	node: _DCKitNS.Analyzer.Parser.VariableNode,
 	exec: _DCKitNS.Executor.Execution,
@@ -361,6 +376,89 @@ func _resolve_variable(
 			return await _resolve_node(node.fallback, exec, root_ctx)
 		return DCResult.from_literal("")
 	return DCResult.fail("Variable '$%s' is not defined." % node.name)
+
+
+# "text ${var}" — segments are rendered with DCResult.text(), the form the console prints.
+func _resolve_template(
+	node: _DCKitNS.Analyzer.Parser.TemplateNode,
+	exec: _DCKitNS.Executor.Execution,
+	root_ctx: DCContext,
+) -> DCResult:
+	var out := ""
+	for seg in node.segments:
+		if seg is _DCKitNS.Analyzer.Parser.StringNode:
+			out += seg.value
+			continue
+		var r: DCResult = await _resolve_variable(seg, exec, root_ctx)
+		if not r.success:
+			return DCResult.fail("In string: %s" % r.full_message())
+		out += r.text()
+	return DCResult.from_literal(out)
+
+
+# [a, b, c] → Array. Items resolve depth-first; the first failure short-circuits.
+func _resolve_array(
+	node: _DCKitNS.Analyzer.Parser.ArrayNode,
+	exec: _DCKitNS.Executor.Execution,
+	root_ctx: DCContext,
+) -> DCResult:
+	var out: Array = []
+	for i in node.items.size():
+		var item = node.items[i]
+		if item is _DCKitNS.Analyzer.Parser.StringNode:
+			out.append(_collection_literal(item))
+			continue
+		var r: DCResult = await _resolve_node(item, exec, root_ctx)
+		if not r.success:
+			return DCResult.fail("Array item %d: %s" % [i, r.full_message()])
+		out.append(r.value)
+	return DCResult.ok(out)
+
+
+# {key: value} → Dictionary. Keys are always Strings; a repeated key keeps the last value.
+func _resolve_dict(
+	node: _DCKitNS.Analyzer.Parser.DictNode,
+	exec: _DCKitNS.Executor.Execution,
+	root_ctx: DCContext,
+) -> DCResult:
+	var out := { }
+	for e in node.entries:
+		var key: String = e.key.value
+		if e.value is _DCKitNS.Analyzer.Parser.StringNode:
+			out[key] = _collection_literal(e.value)
+			continue
+		var r: DCResult = await _resolve_node(e.value, exec, root_ctx)
+		if not r.success:
+			return DCResult.fail("Dictionary key '%s': %s" % [key, r.full_message()])
+		out[key] = r.value
+	return DCResult.ok(out)
+
+
+# Bare literals inside [] and {} get their natural type, like JSON: 1 → int, 2.5 → float,
+# true / false / null, 0x1F, 0b101. Quoted text always stays a String. Command arguments are unaffected.
+func _collection_literal(node: _DCKitNS.Analyzer.Parser.StringNode) -> Variant:
+	var s := node.value
+	if node.quoted or not INFER_COLLECTION_LITERALS:
+		return s
+	if s.is_valid_int():
+		return s.to_int()
+	if s.is_valid_float():
+		return s.to_float()
+	if s.is_valid_hex_number(true):
+		return s.hex_to_int()
+	if (
+		s.begins_with("0b") and s.length() > 2
+		and s.substr(2).replace("0", "").replace("1", "").is_empty()
+	):
+		return s.bin_to_int()
+	match s:
+		"true":
+			return true
+		"false":
+			return false
+		"null":
+			return null
+	return s
 
 
 # The store hands back what it holds, unresolved:
@@ -416,6 +514,7 @@ func _resolve_ctor(
 		return DCResult.ok(ctor_result.value)
 	return DCResult.ok(ctor_result)
 
+
 # LOGGER STUBS
 # These define the interface the logger must implement.
 # See the "Log contract" section in the file header for when each fires.
@@ -447,13 +546,19 @@ func _normalise(raw) -> DCResult:
 
 func _format_errors(diagnostics: Array) -> String:
 	var msgs: Array = []
+	var total := 0
 	for d in diagnostics:
-		if d.severity == DCAnalysisResult.Diagnostic.Severity.ERROR:
-			msgs.append(d.message)
+		if d.severity != DCAnalysisResult.Diagnostic.Severity.ERROR:
+			continue
+		total += 1
+		if msgs.size() < MAX_REPORTED_ERRORS:
+			msgs.append(d.message if d.hint.is_empty() else "%s %s" % [d.message, d.hint])
+	if total > msgs.size():
+		msgs.append("(%d more error(s) not shown.)" % (total - msgs.size()))
 	return "\n".join(msgs) if not msgs.is_empty() else "Analysis failed."
 
 
 func _slice(raw: String, node: _DCKitNS.Analyzer.Parser.CommandNode) -> String:
 	var a := clampi(node.start_pos, 0, raw.length())
 	var b := clampi(node.end_pos, a, raw.length())
-	return raw.substr(a, b - a + 1)
+	return raw.substr(a, b - a)
