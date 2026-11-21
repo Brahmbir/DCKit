@@ -15,6 +15,58 @@ const _SEVERITY: Dictionary = {
 	"ERROR": _DCKitSetting.LoggerPrintThershold.ERROR,
 }
 
+const _BBCODE_TAGS: PackedStringArray = [
+	"table",
+	"cell",
+	"b",
+	"i",
+	"u",
+	"s",
+	"code",
+	"char",
+	"p",
+	"br",
+	"hr",
+	"center",
+	"left",
+	"right",
+	"fill",
+	"indent",
+	"url",
+	"hint",
+	"img",
+	"font",
+	"font_size",
+	"dropcap",
+	"opentype_features",
+	"lang",
+	"color",
+	"bgcolor",
+	"fgcolor",
+	"outline_size",
+	"outline_color",
+	"ul",
+	"ol",
+	"lb",
+	"rb",
+	"lrm",
+	"rlm",
+	"lre",
+	"rle",
+	"lro",
+	"rlo",
+	"pdf",
+	"alm",
+	"lri",
+	"rli",
+	"fsi",
+	"pdi",
+	"zwj",
+	"zwnj",
+	"wj",
+	"shy",
+]
+
 var print_threshold: String = _DCKitSetting.LoggerPrintThershold.find_key(
 	_DCKitSetting.get_logging_print_threshold()
 )
@@ -138,7 +190,9 @@ class LogEntry extends RefCounted:
 
 	func to_plain_text() -> String:
 		if _bbcode == null:
-			_bbcode = RegEx.create_from_string("\\[/?[a-z_]+(?:[= ][^\\]]*)?\\]")
+			_bbcode = RegEx.create_from_string(
+				"\\[/?(?:%s)(?:[= ][^\\]]*)?\\]" % "|".join(_BBCODE_TAGS)
+			)
 		return _bbcode.sub(content, "", true)
 
 

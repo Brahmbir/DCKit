@@ -90,7 +90,7 @@ func _get_var() -> DCDefinition:
 		"var.get",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() < 2:
-				return DCResult.fail("Requires two arguments: <n> <default>")
+				return DCResult.fail("Requires two arguments: <name> <default>")
 			var r0 := await ctx.arg(0)
 			if not r0.success:
 				return r0

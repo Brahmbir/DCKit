@@ -11,17 +11,18 @@ var _file: FileAccess
 
 func configure(log_dir: String, max_files: int, is_enabled: bool) -> void:
 	_log_dir = log_dir
-	_max_files = max_files
-	enabled = is_enabled
+	_max_files = maxi(max_files, 0)
+	enabled = is_enabled and _max_files > 0
 
 
 # Starts a fresh session file, deleting the oldest ones beyond max_files.
 func open_session() -> void:
 	_file = null
-	if not enabled:
+	if not enabled or _max_files == 0:
 		return
 
-	var err := DirAccess.make_dir_recursive_absolute(_log_dir)
+	var absolute_path := ProjectSettings.globalize_path(_log_dir)
+	var err := DirAccess.make_dir_recursive_absolute(absolute_path)
 	if err != OK:
 		push_warning("LogFileWriter: could not create '%s' (err %d)" % [_log_dir, err])
 		return
@@ -31,7 +32,8 @@ func open_session() -> void:
 	var stamp := Time.get_datetime_string_from_system(false, true) \
 			.replace(":", "-") \
 			.replace(" ", "_")
-	var path := _log_dir.path_join(stamp + _SUFFIX)
+	var filename := "%s_%d%s" % [stamp, OS.get_process_id(), _SUFFIX]
+	var path := _log_dir.path_join(filename)
 
 	_file = FileAccess.open(path, FileAccess.WRITE)
 	if _file == null:

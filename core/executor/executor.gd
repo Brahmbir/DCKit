@@ -146,7 +146,8 @@ func run(raw: String) -> DCResult:
 func abort() -> void:
 	for root in _script_roots.duplicate():
 		root.abort()
-	if _active_ctx != null:
+
+	if _active_ctx != null and not _active_ctx.is_aborted():
 		_active_ctx.abort()
 		command_aborted.emit()
 
@@ -281,8 +282,10 @@ func _execute(
 
 	if is_root:
 		_active_ctx = cmd_ctx
+		
+	var profiled := profiler != null and profiler.enabled
 
-	if profiler != null and profiler.enabled:
+	if profiled:
 		profiler.begin(node.name)
 
 	if definition.deprecated:
@@ -300,7 +303,7 @@ func _execute(
 
 	var raw_result = await handler.call(cmd_ctx)
 
-	if profiler != null and profiler.enabled:
+	if profiled:
 		profiler.end()
 
 	if is_root:

@@ -4,9 +4,10 @@ extends RefCounted
 enum LoggerPrintThershold {
 	OK = 0,
 	INFO = 1, # HELP as well,
-	FAIL = 2,
-	WARN = 3,
-	ERROR = 4,
+	HELP = 1,
+	WARN = 2,
+	ERROR = 3,
+	FAIL = 4,
 }
 
 enum ConsoleMode {
@@ -89,14 +90,14 @@ static func register_dckit_settings():
 	)
 
 	declare_setting(DEFAULT_CANVAS_LAYER, 9999, TYPE_INT)
-	
+
 	declare_setting(MODULES_LOGIC, true, TYPE_BOOL)
 	declare_setting(MODULES_MATH, true, TYPE_BOOL)
 	declare_setting(MODULES_STRING, true, TYPE_BOOL)
 	declare_setting(MODULES_UTILITY, true, TYPE_BOOL)
 	declare_setting(MODULES_BATCH, true, TYPE_BOOL)
 	declare_setting(MODULES_SYSTEM, true, TYPE_BOOL)
-	
+
 	declare_setting(BATCH_DIR, "res://batch_file", TYPE_STRING, PROPERTY_HINT_GLOBAL_DIR)
 
 	declare_setting(
@@ -120,11 +121,11 @@ static func register_dckit_settings():
 		PROPERTY_HINT_RANGE,
 		"0.5,3.0,0.05,suffix:x",
 	)
-	
+
 	declare_setting(FEEDBACK_ENABLED, true, TYPE_BOOL)
 	declare_setting(FEEDBACK_INFO_PANEL, true, TYPE_BOOL)
 	declare_setting(FEEDBACK_ERROR_PANEL, true, TYPE_BOOL)
-	
+
 	declare_setting(MAX_EXECUTION_DEPTH, 16, TYPE_INT, PROPERTY_HINT_RANGE, "1,32,1")
 	declare_setting(MAX_ARGUMENT_DEPTH, 32, TYPE_INT, PROPERTY_HINT_RANGE, "1,128,1")
 
@@ -171,17 +172,20 @@ static func set_setting(key: String, value: Variant) -> void:
 
 
 #region console
-static func get_console_mode() -> ConsoleMode:
-	return clampi(get_setting(CONSOLE_MODE, ConsoleMode.DOCK), 0, ConsoleMode.size() - 1)
+#region console
+static func get_console_mode(default: ConsoleMode = ConsoleMode.DOCK) -> ConsoleMode:
+	return _get_enum_setting(CONSOLE_MODE, ConsoleMode, default)
 
 
-static func get_window_edge() -> WindowEdge:
-	return clampi(get_setting(WINDOW_EDGE, WindowEdge.BOTTOM), 0, WindowEdge.size() - 1)
+static func get_window_edge(default: WindowEdge = WindowEdge.BOTTOM) -> WindowEdge:
+	return _get_enum_setting(WINDOW_EDGE, WindowEdge, default)
+#endregion
 
 
 static func get_default_canvas_layer() -> int:
 	return get_setting(DEFAULT_CANVAS_LAYER, 9999)
 #endregion
+
 
 #region Feedback
 ## Master switch: off = no analysis, auto-suggestion or panel updates while typing.
@@ -197,10 +201,12 @@ static func get_feedback_error_panel() -> bool:
 	return get_setting(FEEDBACK_ERROR_PANEL, true) as bool
 #endregion
 
+
 #region Modules
 static func is_module_enabled(key: String) -> bool:
 	return get_setting(key, true) as bool
 #endregion
+
 
 #region Batch Directory
 static func get_batch_directory() -> String:
@@ -248,15 +254,14 @@ static func get_logging_directory() -> String:
 
 
 static func get_logging_max_session_files() -> int:
-	return get_setting(LOGGING_MAX_SESSION_FILES, 5) as int
+	return mini(get_setting(LOGGING_MAX_SESSION_FILES, 5), 1) as int
 
 
-static func get_logging_print_threshold() -> LoggerPrintThershold:
-	return clampi(
-		get_setting(LOGGING_PRINT_THRESHOLD, LoggerPrintThershold.WARN),
-		0,
-		LoggerPrintThershold.size() - 1,
-	)
+static func get_logging_print_threshold(
+	default: LoggerPrintThershold = LoggerPrintThershold.WARN
+) -> LoggerPrintThershold:
+	return _get_enum_setting(LOGGING_PRINT_THRESHOLD, LoggerPrintThershold, default)
+#endregion
 #endregion
 
 
@@ -279,3 +284,11 @@ static func _enum_hint_string(obj):
 	for key in obj:
 		parts.append("%s:%d" % [key, obj[key]])
 	return ",".join(parts)
+
+
+## Returns the stored value only if it is an int that exists in the enum, otherwise `default`.
+static func _get_enum_setting(key: String, enum_dict: Dictionary, default: int) -> int:
+	var value: Variant = get_setting(key, default)
+	if typeof(value) == TYPE_INT and enum_dict.values().has(value):
+		return value
+	return default
