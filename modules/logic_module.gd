@@ -7,6 +7,16 @@ extends DCModule
 const MAX_REPEAT_COUNT: int = 1_000
 const MAX_WHILE_ITERS: int = 10_000
 
+const _INT_MAX: int = 9223372036854775807
+
+var _NUMBER_PARSERS: Array[Callable] = [
+	_parse_hex,
+	_parse_binary,
+	_parse_octal,
+	_parse_int,
+	_parse_float,
+]
+
 
 func get_id() -> String:
 	return "dckit_logic"
@@ -183,7 +193,6 @@ func _repeat_cmd() -> DCDefinition:
 					if not last.success:
 						return last
 			return last,
-
 		"Runs one or more commands [b]N[/b] times and returns the last result.\n"
 		+ "Each command is executed in order every iteration.\n"
 		+ "Stops immediately if any command fails.\n" + "Maximum %d repetitions." % MAX_REPEAT_COUNT,
@@ -239,19 +248,29 @@ func _while_cmd() -> DCDefinition:
 
 
 #region COMPARISONS
-func _compare_values(a: String, b: String) -> bool:
-	if a.is_valid_float() and b.is_valid_float():
-		return is_equal_approx(float(a), float(b))
+func _compare_values(a: Variant, b: Variant) -> bool:
+	var na: Variant = _to_number(a)
+	var nb: Variant = _to_number(b)
+	if na != null and nb != null:
+		if na is int and nb is int:
+			return na == nb
+		return float(na) == float(nb)
+	return _as_text(a) == _as_text(b)
 
-	return a == b
+
+func _as_text(v: Variant) -> String:
+	if v == null:
+		return ""
+	return v if v is String else var_to_str(v)
 
 
 func _cmp_eq_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"cmp.eq",
 		func(ctx: DCContext) -> DCResult:
-			if ctx.args_length() != 2:
-				return DCResult.fail("Requires exactly 2 arguments.")
+			var arity := _arity_error(ctx, 2)
+			if arity != null:
+				return arity
 
 			var pair := await _resolve_string_pair(ctx)
 			if not pair.success:
@@ -267,8 +286,9 @@ func _cmp_neq_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"cmp.neq",
 		func(ctx: DCContext) -> DCResult:
-			if ctx.args_length() != 2:
-				return DCResult.fail("Requires exactly 2 arguments.")
+			var arity := _arity_error(ctx, 2)
+			if arity != null:
+				return arity
 
 			var pair := await _resolve_string_pair(ctx)
 			if not pair.success:
@@ -284,7 +304,7 @@ func _cmp_gt_cmd() -> DCDefinition:
 	return _numeric_comparison_cmd(
 		"cmp.gt",
 		"Returns [b]true[/b] when [i]a[/i] > [i]b[/i] (numeric comparison).",
-		func(a: float, b: float) -> bool:
+		func(a: Variant, b: Variant) -> bool:
 			return a > b,
 	)
 
@@ -293,7 +313,7 @@ func _cmp_lt_cmd() -> DCDefinition:
 	return _numeric_comparison_cmd(
 		"cmp.lt",
 		"Returns [b]true[/b] when [i]a[/i] < [i]b[/i] (numeric comparison).",
-		func(a: float, b: float) -> bool:
+		func(a: Variant, b: Variant) -> bool:
 			return a < b,
 	)
 
@@ -302,7 +322,7 @@ func _cmp_gte_cmd() -> DCDefinition:
 	return _numeric_comparison_cmd(
 		"cmp.gte",
 		"Returns [b]true[/b] when [i]a[/i] ≥ [i]b[/i] (numeric comparison).",
-		func(a: float, b: float) -> bool:
+		func(a: Variant, b: Variant) -> bool:
 			return a >= b,
 	)
 
@@ -311,7 +331,7 @@ func _cmp_lte_cmd() -> DCDefinition:
 	return _numeric_comparison_cmd(
 		"cmp.lte",
 		"Returns [b]true[/b] when [i]a[/i] ≤ [i]b[/i] (numeric comparison).",
-		func(a: float, b: float) -> bool:
+		func(a: Variant, b: Variant) -> bool:
 			return a <= b,
 	)
 
@@ -354,8 +374,9 @@ func _cmp_contains_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"cmp.contains",
 		func(ctx: DCContext) -> DCResult:
-			if ctx.args_length() != 2:
-				return DCResult.fail("Requires exactly 2 arguments: <text> <substring>")
+			var arity := _arity_error(ctx, 2)
+			if arity != null:
+				return arity
 
 			var text_result := await ctx.arg(0)
 			if not text_result.success:
@@ -378,8 +399,9 @@ func _cmp_empty_cmd() -> DCDefinition:
 	return DCDefinition.new(
 		"cmp.empty",
 		func(ctx: DCContext) -> DCResult:
-			if ctx.args_length() != 1:
-				return DCResult.fail("Requires exactly 1 argument.")
+			var arity := _arity_error(ctx, 1)
+			if arity != null:
+				return arity
 
 			var result := await ctx.arg(0)
 			if not result.success:
@@ -399,8 +421,9 @@ func _numeric_comparison_cmd(
 	return DCDefinition.new(
 		command_name,
 		func(ctx: DCContext) -> DCResult:
-			if ctx.args_length() != 2:
-				return DCResult.fail("Requires exactly 2 arguments.")
+			var arity := _arity_error(ctx, 2)
+			if arity != null:
+				return arity
 
 			var pair := await _resolve_numeric_pair(ctx)
 			if not pair.success:
@@ -428,8 +451,8 @@ func _resolve_string_pair(ctx: DCContext) -> _ValuePair:
 		return pair
 
 	pair.success = true
-	pair.a = left.text()
-	pair.b = right.text()
+	pair.a = left.value
+	pair.b = right.value
 
 	return pair
 
@@ -447,21 +470,101 @@ func _resolve_numeric_pair(ctx: DCContext) -> _ValuePair:
 		pair.message = right.full_message()
 		return pair
 
-	var left_string := str(left.value)
-	var right_string := str(right.value)
-
-	if not left_string.is_valid_float():
-		pair.message = "'%s' is not a number." % [left_string]
+	var a: Variant = _to_number(left.value)
+	if a == null:
+		pair.message = "'%s' is not a number." % left.text()
 		return pair
 
-	if not right_string.is_valid_float():
-		pair.message = "'%s' is not a number." % [right_string]
+	var b: Variant = _to_number(right.value)
+	if b == null:
+		pair.message = "'%s' is not a number." % right.text()
 		return pair
 
 	pair.success = true
-	pair.a = float(left_string)
-	pair.b = float(right_string)
+	pair.a = a
+	pair.b = b
 	return pair
+#endregion
+
+
+#region NUMBER PARSING
+## Returns int/float, or null when [param v] isn't a number in any enabled format.
+func _to_number(v: Variant) -> Variant:
+	if v is int or v is float:
+		return v
+	if not v is String:
+		return null
+
+	var s := (v as String).strip_edges().to_lower()
+	for parser in _NUMBER_PARSERS:
+		var n: Variant = parser.call(s)
+		if n != null:
+			return n
+	return null
+
+
+## Null when OK. Too few args fails; extra args only warn and are never resolved.
+func _arity_error(ctx: DCContext, expected: int) -> DCResult:
+	var got := ctx.args_length()
+	if got < expected:
+		return DCResult.fail("Expected %d, but received %d." % [expected, got])
+	if got > expected:
+		_warn(ctx, "Expected %d, but received %d, ignoring the rest." % [expected, got])
+	return null
+
+
+func _warn(ctx: DCContext, msg: String) -> void:
+	DCKit.log_warn(msg, ctx.breadcrumb)
+
+
+func _parse_hex(s: String) -> Variant:
+	return _parse_prefixed(s, "0x", "0123456789abcdef")
+
+
+func _parse_binary(s: String) -> Variant:
+	return _parse_prefixed(s, "0b", "01")
+
+
+func _parse_octal(s: String) -> Variant:
+	return _parse_prefixed(s, "0o", "01234567")
+
+
+func _parse_int(s: String) -> Variant:
+	if not s.is_valid_int():
+		return null
+	var n := s.to_int()
+	var body := s.lstrip("+-").lstrip("0")
+	if body.length() > 18 and str(n).lstrip("-") != body:
+		return null # overflows int64, falls back to string comparison
+	return n
+
+
+func _parse_float(s: String) -> Variant:
+	if s.is_valid_int() or not s.is_valid_float():
+		return null # ints belong to _parse_int
+	var f := s.to_float()
+	return f if is_finite(f) else null
+
+
+func _parse_prefixed(s: String, prefix: String, digits: String) -> Variant:
+	var negative := s.begins_with("-")
+	if negative or s.begins_with("+"):
+		s = s.substr(1)
+	if not s.begins_with(prefix):
+		return null
+
+	var body := s.substr(prefix.length())
+	if body.is_empty():
+		return null
+
+	var base := digits.length()
+	var value := 0
+	for ch in body:
+		var d := digits.find(ch)
+		if d < 0 or value > (_INT_MAX - d) / base:
+			return null
+		value = value * base + d
+	return -value if negative else value
 #endregion
 
 

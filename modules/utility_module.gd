@@ -99,11 +99,11 @@ func _abort_cmd() -> DCDefinition:
 		"abort",
 		func(ctx: DCContext) -> DCResult:
 			if ctx.args_length() == 0:
+				ctx.abort()
 				return DCResult.fail("Execution aborted.")
 
-			ctx.abort()
-
 			var result := await ctx.arg(0)
+			ctx.abort()
 			if not result.success:
 				return DCResult.fail("Execution aborted. reason: %s" % result.full_message())
 
