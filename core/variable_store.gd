@@ -19,13 +19,11 @@ func get_value_raw(key: String) -> Variant:
 ## Real type back. Sync only: a Callable is called, a Deferred needs the
 ## executor (ctx.resolve_var / DCKit.resolve_var) and returns the fallback.
 func get_value(key: String, fallback: Variant = null) -> Variant:
-	var v: Variant = _vars.get(key)
-	if v == null:
+	if not _vars.has(key):
 		return fallback
+	var v: Variant = _vars[key]
 	if v is Callable:
-		if not v.is_valid():
-			return fallback # dead Callable counts as missing
-		return v.call()
+		return v.call() if v.is_valid() else fallback
 	if v is Deferred:
 		return fallback
 	return v

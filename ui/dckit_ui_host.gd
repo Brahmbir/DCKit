@@ -255,6 +255,14 @@ func _validate(key: String, entry: Dictionary, value) -> Variant:
 				return null
 			var num := clampf(float(value), entry.get("min", -INF), entry.get("max", INF))
 			return int(num) if entry["type"] == "int" else num
+		"color":
+			if value is Color:
+				return value
+			if (value is String or value is StringName) and Color.html_is_valid(value):
+				return Color.html(value)
+			_warn_bad_value(key, "Color or HTML hex", value)
+	return null
+
 	return null
 
 
