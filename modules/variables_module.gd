@@ -75,7 +75,7 @@ func _setd_var() -> DCDefinition:
 			var r := _vars.set_deferred_var(key, ctx.arg_node(1))
 			if not r.ok:
 				return DCResult.fail(r.message)
-			return DCResult.ok(null,"'%s' set as deferred." % key),
+			return DCResult.done("'%s' set as deferred." % key),
 		"Stores an expression [b]unresolved[/b]. It runs again every time the variable is read.",
 		[DCDefinition.Param.new("name").describe(
 				"Variable name. Must start with a letter or underscore."
@@ -164,7 +164,7 @@ func _delete_var() -> DCDefinition:
 				return DCResult.fail("Invalid variable name '%s'." % key)
 			if not _vars.delete(key):
 				return DCResult.fail("Variable '%s' does not exist." % key)
-			return DCResult.ok(),
+			return DCResult.done(),
 		"Deletes a variable, static or deferred. Fails if it does not exist.",
 		[DCDefinition.Param.new("name").suggest(_vars.get_keys)],
 	)
@@ -183,7 +183,7 @@ func _try_delete_var() -> DCDefinition:
 			if not _vars.is_valid_key(key):
 				return DCResult.fail("Invalid variable name '%s'." % key)
 			_vars.delete(key)
-			return DCResult.ok(),
+			return DCResult.done(),
 		"Deletes a variable if it exists. Succeeds silently when absent.",
 		[DCDefinition.Param.new("name").suggest(_vars.get_keys)],
 	)

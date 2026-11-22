@@ -88,7 +88,7 @@ func _wait_cmd() -> DCDefinition:
 			if was_aborted:
 				return DCResult.fail("Wait aborted.")
 
-			return DCResult.ok(null, "Waited %s." % duration_text),
+			return DCResult.done("Waited %s." % duration_text),
 		"Pauses execution for a duration.",
 		[DCDefinition.Param.new("duration").describe("Examples: 500ms, 2s, 1m")],
 	).as_utility()

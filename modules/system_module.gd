@@ -42,7 +42,7 @@ func _sys_info_cmd() -> DCDefinition:
 				]
 			)
 
-			return DCResult.ok(null, "\n".join(output)),
+			return DCResult.done("\n".join(output)),
 		"Displays Godot engine, operating system, build and renderer information.",
 		[],
 		true,
@@ -82,11 +82,14 @@ func _perf_cmd() -> DCDefinition:
 				% Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 			)
 
-			return DCResult.ok(null, "\n".join(output)),
+			return DCResult.done("\n".join(output)),
 		"Displays performance monitor values. Optionally specify one monitor.",
-		[DCDefinition.Param.new("monitor").describe(
-				"Optional: fps, memory, objects, resources, nodes, draw_calls."
-			)],
+		[
+			DCDefinition
+			.Param
+			.new("monitor")
+			.describe("Optional: fps, memory, objects, resources, nodes, draw_calls.")
+		],
 		true,
 	)
 
@@ -190,14 +193,21 @@ func _tree_cmd() -> DCDefinition:
 			if lines.size() >= MAX_TREE_LINES:
 				lines.append("... Output truncated.")
 
-			return DCResult.ok(null, "\n".join(lines)),
+			return DCResult.done("\n".join(lines)),
 		"Dumps the scene tree. Optionally specify a node path and maximum depth.",
-		[DCDefinition.Param.new("path").describe(
+		[
+			DCDefinition
+			.Param
+			.new("path")
+			.describe(
 				"Optional node path. Relative to the current main scene by default. "
 				+ "Use '/' to access the SceneTree root, or '.' to reference the current main scene."
-			), DCDefinition.Param.new("depth").describe(
-				"Optional maximum child depth. Defaults to %d." % DEFAULT_TREE_DEPTH
-			)],
+			),
+			DCDefinition
+			.Param
+			.new("depth")
+			.describe("Optional maximum child depth. Defaults to %d." % DEFAULT_TREE_DEPTH),
+		],
 		true,
 	)
 

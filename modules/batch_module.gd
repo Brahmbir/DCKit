@@ -99,7 +99,7 @@ func run(path: String, ctx: DCContext) -> DCResult:
 
 	file.close()
 
-	var last_result := DCResult.ok("")
+	var last_result := DCResult.done()
 
 	for entry: ScriptLine in lines:
 		if ctx.is_aborted():
@@ -108,7 +108,7 @@ func run(path: String, ctx: DCContext) -> DCResult:
 		# run_raw shares this command's call stack and abort scope, so nested
 		# commands show up as "bat > <cmd>" in the log and respect ctx.abort().
 		var results: Array = await ctx.run_raw(entry.command)
-		last_result = results.back() if not results.is_empty() else DCResult.ok(null)
+		last_result = results.back() if not results.is_empty() else DCResult.done()
 
 		if not last_result.success:
 			return DCResult.fail(
@@ -116,7 +116,7 @@ func run(path: String, ctx: DCContext) -> DCResult:
 			)
 
 	return (
-		DCResult.ok("Script '%s' completed successfully." % path)
+		DCResult.done("Script '%s' completed successfully." % path)
 		if last_result.success
 		else last_result
 	)

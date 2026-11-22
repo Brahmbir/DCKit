@@ -63,11 +63,16 @@ func _if_cmd() -> DCDefinition:
 		+ "A result is [b]truthy[/b] when it succeeds and its value is not "
 		+ "[code]\"\"[/code], [code]\"false\"[/code], or [code]\"0\"[/code].",
 		[
-			DCDefinition.Param.new("condition").describe(
-				"Command whose result determines the branch."
-			),
-			DCDefinition.Param.new("then").describe("Runs when the condition is truthy."),
-			DCDefinition.Param.new("else").describe("Runs when the condition is falsy. Optional."),
+			DCDefinition
+			.Param
+			.new("condition")
+			.describe("Command whose result determines the branch."),
+			DCDefinition.Param.new("then").describe("Runs when the condition is truthy.").block(),
+			DCDefinition
+			.Param
+			.new("else")
+			.describe("Runs when the condition is falsy. Optional.")
+			.block(),
 		],
 	)
 
@@ -93,7 +98,7 @@ func _and_cmd() -> DCDefinition:
 			if ctx.args_length() == 0:
 				return DCResult.fail("Requires at least one argument.")
 
-			var last := DCResult.ok("")
+			var last := DCResult.done("Success")
 			for i in ctx.args_length():
 				last = await ctx.arg(i)
 				if not last.truthy():
@@ -113,7 +118,7 @@ func _or_cmd() -> DCDefinition:
 			if ctx.args_length() == 0:
 				return DCResult.fail("Requires at least one argument.")
 
-			var last := DCResult.ok("")
+			var last := DCResult.done("Success")
 			for i in ctx.args_length():
 				last = await ctx.arg(i)
 				if last.truthy():
@@ -146,15 +151,19 @@ func _try_cmd() -> DCDefinition:
 			if ctx.args_length() == 2:
 				return await ctx.arg(1)
 
-			return DCResult.ok(null, "Success"),
+			return DCResult.done("Success"),
 		"Runs a command; on failure runs an optional fallback instead of "
 		+ "propagating the error. Returns null when the command fails "
 		+ "and no fallback is given.",
-		[DCDefinition.Param.new("command").describe("Command to attempt."), DCDefinition
+		[
+			DCDefinition.Param.new("command").describe("Command to attempt.").block(),
+			DCDefinition
 			.Param
 			.new("fallback")
-			.describe("Runs if the first command fails. Optional.")],
-	)
+			.describe("Runs if the first command fails. Optional.")
+			.block(),
+		],
+	).as_utility()
 #endregion
 
 
@@ -177,14 +186,14 @@ func _repeat_cmd() -> DCDefinition:
 
 			var count := int(float(count_string))
 			if count <= 0:
-				return DCResult.ok(null, "Success")
+				return DCResult.done("Success")
 
 			if count > MAX_REPEAT_COUNT:
 				return DCResult.fail(
 					"Count %d exceeds the limit of %d." % [count, MAX_REPEAT_COUNT]
 				)
 
-			var last := DCResult.ok(null, "Success")
+			var last := DCResult.done("Success")
 			for _iteration in count:
 				if not await ctx.step():
 					return DCResult.fail("Repeat aborted.")
@@ -197,14 +206,15 @@ func _repeat_cmd() -> DCDefinition:
 		+ "Each command is executed in order every iteration.\n"
 		+ "Stops immediately if any command fails.\n" + "Maximum %d repetitions." % MAX_REPEAT_COUNT,
 		[
-			DCDefinition.Param.new("count").describe(
-				"Number of iterations. Truncated to an integer."
-			),
+			DCDefinition
+			.Param
+			.new("count")
+			.describe("Number of iterations. Truncated to an integer."),
 			DCDefinition
 			.Param
 			.new("commands")
 			.describe("One or more commands to run each iteration.")
-			.rest(),
+			.rest().block(),
 		],
 	)
 
@@ -219,7 +229,7 @@ func _while_cmd() -> DCDefinition:
 					"Requires at least 2 arguments: while (condition) (command)..."
 				)
 
-			var last := DCResult.ok(null, "Success")
+			var last := DCResult.done("Success")
 			for _iteration in MAX_WHILE_ITERS:
 				if not await ctx.step():
 					return DCResult.fail("While aborted.")
@@ -241,7 +251,7 @@ func _while_cmd() -> DCDefinition:
 			.Param
 			.new("commands")
 			.describe("One or more commands executed each iteration.")
-			.rest(),
+			.rest().block(),
 		],
 	)
 #endregion
