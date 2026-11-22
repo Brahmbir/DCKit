@@ -47,6 +47,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 
 #region INTERNALS
 func _analyze(text: String) -> Array:
+	_parser.max_depth = _DCKitSetting.get_max_argument_depth()
 	var tokens := _lexer.lex(text)
 	_parser.parse_chain(tokens, text) # assigns the roles the lexer cannot know
 	return tokens

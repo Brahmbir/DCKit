@@ -291,6 +291,8 @@ func _close(c: int) -> bool:
 
 
 func _unclosed(k: int, at: int, rel_len: int, rel_msg: String) -> void:
+	if diagnostics.size() >= 100:
+		return
 	var open_at := _opens[k]
 	var closers := _closers_from(k)
 	var d: Diagnostic

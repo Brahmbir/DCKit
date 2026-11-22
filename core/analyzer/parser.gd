@@ -339,7 +339,12 @@ func _modifier(node: VariableNode, braced: bool) -> void:
 			node.end_pos = t.end
 			var n := _peek()
 			if _starts_value(n.type) and (braced or n.glued):
-				node.fallback = _parse_value()
+				if _too_deep():
+					node.fallback = _skip_too_deep()
+				else:
+					_push(-1, not _comma_ok.is_empty() and _comma_ok.back())
+					node.fallback = _parse_value()
+					_pop(-1)
 				node.end_pos = node.fallback.end_pos
 			elif not _in_key:
 				_error("Expected a fallback value after ':'.", t.start, 1) \
@@ -618,7 +623,7 @@ func _check_glued(node: AstNode) -> void:
 	if node.bad and node is ErrorNode:
 		return
 	var span := maxi(n.end - n.start, 1)
-	if node is VariableNode and node.fallback != null:
+	if node is VariableNode and node.fallback != null and not node.braced:
 		return # the fallback value already checked what follows it
 	if node is VariableNode and node.modifier.is_empty():
 		var d := _error("Text directly after '$%s'." % node.name, n.start, span) \
@@ -626,7 +631,7 @@ func _check_glued(node: AstNode) -> void:
 		if (n.type == TT.WORD or n.type == TT.NUMBER) and not _src.is_empty():
 			var joined := "\"${%s}%s\"" % [node.name, n.value.replace("\\", "\\\\")]
 			d.with_fix("Join into one string", node.start_pos, n.end, joined)
-	elif node is VariableNode:
+	elif node is VariableNode and not node.braced:
 		_error("Expected a space after '%s'." % node.modifier, n.start, span)
 	else:
 		_error("Expected a space before '%s'." % _text(n), n.start, span) \
