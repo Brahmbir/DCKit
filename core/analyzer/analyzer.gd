@@ -170,6 +170,16 @@ func _check_command(node: Nodes.CommandNode, out: Array) -> void:
 		if not def.deprecated_message.is_empty():
 			msg += " " + def.deprecated_message
 		out.append(_diag(msg, node.name_pos, span, Diagnostic.Severity.WARNING))
+	if def == null:
+		return
+	for i in node.args.size():
+		var p = null
+		if i < def.params.size():
+			p = def.params[i]
+		elif not def.params.is_empty() and def.params.back().is_rest:
+			p = def.params.back()
+		if p != null:
+			_check_spec(node.args[i], p.spec, out)
 
 
 func _check_constructor(node: Nodes.ConstructorNode, out: Array) -> void:
@@ -216,6 +226,147 @@ func _check_constructor(node: Nodes.ConstructorNode, out: Array) -> void:
 		) \
 				.with_hint("Accepted part counts: %s." % ", ".join(accepted.map(str))),
 	)
+
+
+#region SPEC RULES
+# The spec rules on what is already known while typing: literals. Variables and nested commands are
+# skipped here and checked at run time.
+func _check_spec(n, spec: Dictionary, out: Array) -> void:
+	if spec.is_empty() or n == null or n.bad:
+		return
+	var span := maxi(n.end_pos - n.start_pos, 1)
+	if n is Nodes.ArrayNode:
+		var count: int = n.items.size()
+		if spec.has("min") and count < spec["min"]:
+			out.append(
+				_diag(
+					"Needs at least %d item(s) (found %d)." % [spec["min"], count],
+					n.start_pos,
+					span,
+					Diagnostic.Severity.ERROR,
+				)
+			)
+		if spec.has("max") and count > spec["max"]:
+			out.append(
+				_diag(
+					"Takes at most %d item(s) (found %d)." % [spec["max"], count],
+					n.start_pos,
+					span,
+					Diagnostic.Severity.ERROR,
+				)
+			)
+		var seen := { }
+		for item in n.items:
+			if spec.get("unique", false) and item is Nodes.StringNode:
+				var key := [item.quoted, item.value]
+				if seen.has(key):
+					out.append(
+						_diag(
+							"Duplicate item '%s'." % item.value,
+							item.start_pos,
+							maxi(item.end_pos - item.start_pos, 1),
+							Diagnostic.Severity.WARNING,
+						) \
+								.with_related(
+							seen[key].start_pos,
+							maxi(seen[key].end_pos - seen[key].start_pos, 1),
+							"first used here",
+						),
+					)
+				else:
+					seen[key] = item
+			_check_spec(item, spec.get("items", { }), out)
+	elif n is Nodes.DictNode:
+		var fields: Dictionary = spec.get("fields", { })
+		var present := { }
+		for e in n.entries:
+			if not (e.key is Nodes.StringNode) or e.key.bad:
+				continue
+			var key: String = e.key.value
+			present[key] = true
+			var field = DCSpec.field_of(fields, key)
+			if field == null:
+				if not fields.is_empty():
+					var names: Array = fields.keys().map(
+						func(k):
+							return k.trim_suffix("!").trim_suffix("?"),
+					)
+					var near := _closest(key, names)
+					var d := _diag(
+						"Unknown key '%s'." % key,
+						e.key.start_pos,
+						maxi(e.key.end_pos - e.key.start_pos, 1),
+						Diagnostic.Severity.WARNING,
+					)
+					if not near.is_empty():
+						d.with_hint("Did you mean '%s'?" % near).with_fix(
+							"Change to '%s'" % near,
+							e.key.start_pos,
+							e.key.end_pos,
+							near,
+						)
+					out.append(d)
+			else:
+				_check_spec(e.value, field, out)
+		for f in fields:
+			var name: String = f.trim_suffix("!")
+			if f.ends_with("!") and not present.has(name):
+				var at: int = n.end_pos - 1 if not n.open else n.end_pos
+				var text := ("" if n.entries.is_empty() else ", ") + name + ": "
+				out.append(
+					_diag(
+						"Missing required key '%s'." % name,
+						n.start_pos,
+						1,
+						Diagnostic.Severity.ERROR,
+					) \
+							.with_fix("Add '%s'" % name, at, at, text),
+				)
+		if spec.has("max") and n.entries.size() > spec["max"]:
+			out.append(
+				_diag(
+					"Takes at most %d key(s) (found %d)." % [spec["max"], n.entries.size()],
+					n.start_pos,
+					span,
+					Diagnostic.Severity.ERROR,
+				)
+			)
+	elif n is Nodes.StringNode:
+		if spec.has("choices"):
+			var names: Array = spec["choices"].keys().map(str)
+			var typed := DCSpec._typed(n.value, spec)
+			if not DCSpec._in_choices(typed, spec["choices"]):
+				var d := _diag(
+					"Expected one of: %s." % ", ".join(PackedStringArray(names)),
+					n.start_pos,
+					span,
+					Diagnostic.Severity.ERROR,
+				)
+				var near := _closest(n.value, names)
+				if not near.is_empty():
+					d.with_hint("Did you mean '%s'?" % near).with_fix(
+						"Change to '%s'" % near,
+						n.start_pos,
+						n.end_pos,
+						near,
+					)
+				out.append(d)
+				return
+		var rules := { }
+		for k in ["type", "min", "max", "validate"]:
+			if spec.has(k):
+				rules[k] = spec[k]
+		var err := DCSpec.check(n.value, rules)
+		if not err.is_empty():
+			out.append(
+				_diag(
+					err[0].to_upper() + err.substr(1),
+					n.start_pos,
+					span,
+					Diagnostic.Severity.ERROR,
+				)
+			)
+#endregion
 
 
 # Nearest candidate by edit distance, or "" when nothing is close enough.

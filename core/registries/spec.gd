@@ -67,7 +67,6 @@ static func of(
 ## get_method_list() / get_property_list() return. A typed enum parameter is resolved through `obj`'s script.
 static func from_property(info: Dictionary, obj: Object = null) -> Dictionary:
 	var out := of(info.get("type", TYPE_NIL), info.get("hint", 0), info.get("hint_string", ""), obj)
-
 	if (
 		info.get("type") == TYPE_INT and (info.get("usage", 0) & PROPERTY_USAGE_CLASS_IS_ENUM)
 		and not out.has("choices")
@@ -187,6 +186,107 @@ static func _range(out: Dictionary, type: int, hint_string: String) -> void:
 		out["min"] = int(p[0].to_float()) if whole else p[0].to_float()
 	if not hint_string.contains("or_greater"):
 		out["max"] = int(p[1].to_float()) if whole else p[1].to_float()
+#endregion
+
+
+#region RULES
+## Runtime check of a resolved value against a spec. Returns "" when fine, else the first problem.
+## Order: choices, structure (size, unique, items / fields), then `validate`.
+static func check(value: Variant, spec: Dictionary) -> String:
+	if spec.is_empty():
+		return ""
+	var v = _typed(value, spec)
+	if spec.has("choices") and not _in_choices(v, spec["choices"]):
+		return "expected one of: %s." % ", ".join(PackedStringArray(spec["choices"].keys()))
+	var err := ""
+	if v is Array:
+		err = _check_array(v, spec)
+	elif v is Dictionary:
+		err = _check_dictionary(v, spec)
+	else:
+		err = _check_scalar(v, spec)
+	if err.is_empty() and spec.has("validate"):
+		var msg = spec["validate"].call(v)
+		err = msg if msg is String else ""
+	return err
+
+
+## The spec of dictionary key `key` ("key", "key?", "key!" or "*"), or null when the key is not allowed.
+static func field_of(fields: Dictionary, key: String) -> Variant:
+	for k in [key, key + "?", key + "!", "*"]:
+		if fields.has(k):
+			return fields[k]
+	return null
+
+
+static func _check_array(v: Array, spec: Dictionary) -> String:
+	var n := v.size()
+	if spec.has("min") and n < spec["min"]:
+		return "needs at least %d item(s) (got %d)." % [spec["min"], n]
+	if spec.has("max") and n > spec["max"]:
+		return "takes at most %d item(s) (got %d)." % [spec["max"], n]
+	var item: Dictionary = spec.get("items", { })
+	for i in n:
+		if spec.get("unique", false) and v.find(v[i]) != i:
+			return "item %d repeats '%s'." % [i, v[i]]
+		var err := check(v[i], item)
+		if not err.is_empty():
+			return "item %d: %s" % [i, err]
+	return ""
+
+
+static func _check_dictionary(v: Dictionary, spec: Dictionary) -> String:
+	var fields: Dictionary = spec.get("fields", { })
+	if spec.has("min") and v.size() < spec["min"]:
+		return "needs at least %d key(s) (got %d)." % [spec["min"], v.size()]
+	if spec.has("max") and v.size() > spec["max"]:
+		return "takes at most %d key(s) (got %d)." % [spec["max"], v.size()]
+	for key in v:
+		var field = field_of(fields, str(key))
+		if field == null:
+			if not fields.is_empty():
+				return "unknown key '%s'." % key
+			continue
+		var err := check(v[key], field)
+		if not err.is_empty():
+			return "key '%s': %s" % [key, err]
+	for f in fields:
+		if f.ends_with("!") and not v.has(f.trim_suffix("!")):
+			return "missing required key '%s'." % f.trim_suffix("!")
+	return ""
+
+
+static func _check_scalar(v: Variant, spec: Dictionary) -> String:
+	var n = v.length() if v is String else (v if (v is int or v is float) else null)
+	if n == null:
+		return ""
+	var unit := " character(s)" if v is String else ""
+	if spec.has("min") and n < spec["min"]:
+		return "must be at least %s%s." % [spec["min"], unit]
+	if spec.has("max") and n > spec["max"]:
+		return "must be at most %s%s." % [spec["max"], unit]
+	return ""
+
+
+# A bare literal is a String until its type says otherwise.
+static func _typed(v: Variant, spec: Dictionary) -> Variant:
+	if v is String:
+		var t: int = spec.get("type", TYPE_NIL)
+		if t == TYPE_INT and v.is_valid_int():
+			return v.to_int()
+		if (t == TYPE_FLOAT or t == TYPE_INT) and v.is_valid_float():
+			return v.to_float()
+		if t == TYPE_BOOL and (v == "true" or v == "false"):
+			return v == "true"
+	return v
+
+
+static func _in_choices(v: Variant, choices: Dictionary) -> bool:
+	if v is String:
+		for k in choices:
+			if str(k).nocasecmp_to(v) == 0:
+				return true
+	return choices.values().has(v)
 #endregion
 
 

@@ -257,7 +257,8 @@ func _execute(
 	_publish()
 
 	var resolver := func(raw_arg, ctx: DCContext) -> DCResult:
-		return await _resolve_node(raw_arg, exec, ctx)
+		var resolved: DCResult = await _resolve_node(raw_arg, exec, ctx)
+		return _enforce(resolved, definition, node.args.find(raw_arg))
 
 	var cmd_ctx := DCContext.new(
 		node.args,
@@ -514,13 +515,24 @@ func _collection_literal(node: _DCKitNS.Analyzer.Parser.StringNode) -> Variant:
 	):
 		return s.bin_to_int()
 	match s.strip_edges():
-		"true","1","yes","on":
+		"true":
 			return true
-		"false","0","no","off":
+		"false":
 			return false
 		"null":
 			return null
 	return s
+
+
+# The parameter's spec rules (choices, unique, min, max, required keys, validate) on a resolved argument.
+func _enforce(r: DCResult, def: DCDefinition, index: int) -> DCResult:
+	if not r.success or index < 0 or def.params.is_empty():
+		return r
+	if index >= def.params.size() and not def.params.back().is_rest:
+		return r
+	var p = def.params[mini(index, def.params.size() - 1)]
+	var err := DCSpec.check(r.value, p.spec)
+	return r if err.is_empty() else DCResult.fail("argument %d (%s): %s" % [index, p.name, err])
 
 
 # LOGGER STUBS

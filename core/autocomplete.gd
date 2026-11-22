@@ -384,7 +384,10 @@ func _collection_items(scope, loc: Dictionary, cur: int) -> Array:
 				[],
 			)
 		_:
-			return _key_items(spec.get("fields", { }), scope, loc, cur)
+			var keys := _key_items(spec.get("fields", { }), scope, loc, cur)
+			if spec.has("suggest"): # on a dictionary, suggest is the keys (for open maps)
+				keys.append_array(_open_keys(spec["suggest"], scope, loc, cur))
+			return keys
 
 
 func _value_items(
@@ -399,7 +402,7 @@ func _value_items(
 	var in_text: bool = loc.mode == Mode.STRING or loc.mode == Mode.TEMPLATE
 	var concrete: bool = spec.get("type", TYPE_NIL) != TYPE_NIL
 	if (
-		items.is_empty() and not spec.has("suggest") and not concrete and not in_text \
+			items.is_empty() and not spec.has("suggest") and not concrete and not in_text \
 				and not spec.has("items")
 		and not spec.has("fields")
 	):
@@ -437,6 +440,15 @@ func _key_items(fields: Dictionary, scope, loc: Dictionary, cur: int) -> Array:
 	return out
 
 
+func _open_keys(source, scope, loc: Dictionary, cur: int) -> Array:
+	var in_text: bool = loc.mode == Mode.STRING or loc.mode == Mode.TEMPLATE
+	var out: Array = []
+	for i in _suggested(source, loc, "key", scope.index, "k:%s" % [scope.path], scope.used_keys):
+		var insert: String = i.insert if in_text or _colon_follows(cur) else i.insert + ": "
+		out.append(CompletionItem.new(i.label, CompletionItem.Kind.KEY, i.detail, insert))
+	return out
+
+
 func _colon_follows(cur: int) -> bool:
 	var j := cur
 	while j < _input.length() and (_input[j] == " " or _input[j] == "\t"):
@@ -450,10 +462,7 @@ func _typed_items(type, loc: Dictionary) -> Array:
 		return []
 	if type == TYPE_BOOL:
 		var out: Array = []
-		for label in _rank(
-			{ "true": "", "false": "", "on": "", "off": "" },
-			loc.prefix,
-		):
+		for label in _rank({ "true": "", "false": "" }, loc.prefix):
 			out.append(
 				CompletionItem.new(label, CompletionItem.Kind.VALUE, "", _value_insert(label, loc))
 			)
@@ -522,11 +531,10 @@ func _value_insert(text: String, loc: Dictionary) -> String:
 			return text.replace("\\", "\\\\").replace("'", "\\'")
 		Mode.TEMPLATE:
 			return text.replace("\\", "\\\\").replace("\"", "\\\"").replace("${", "\\${")
-	return (
-		text
-		if _is_bare(text, loc.in_dict)
-		else "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
-	)
+	return text if _is_bare(text, loc.in_dict) else "'" + text.replace("\\", "\\\\").replace(
+		"'",
+		"\\'",
+	) + "'"
 
 
 func _is_bare(text: String, in_dict: bool) -> bool:
