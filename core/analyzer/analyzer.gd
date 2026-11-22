@@ -265,7 +265,7 @@ func _check_spec(n, spec: Dictionary, out: Array) -> void:
 							"Duplicate item '%s'." % item.value,
 							item.start_pos,
 							maxi(item.end_pos - item.start_pos, 1),
-							Diagnostic.Severity.WARNING,
+							Diagnostic.Severity.ERROR,
 						) \
 								.with_related(
 							seen[key].start_pos,
@@ -296,7 +296,7 @@ func _check_spec(n, spec: Dictionary, out: Array) -> void:
 						"Unknown key '%s'." % key,
 						e.key.start_pos,
 						maxi(e.key.end_pos - e.key.start_pos, 1),
-						Diagnostic.Severity.WARNING,
+						Diagnostic.Severity.ERROR,
 					)
 					if not near.is_empty():
 						d.with_hint("Did you mean '%s'?" % near).with_fix(
@@ -353,7 +353,7 @@ func _check_spec(n, spec: Dictionary, out: Array) -> void:
 				out.append(d)
 				return
 		var rules := { }
-		for k in ["type", "min", "max", "validate"]:
+		for k in ["type", "min", "max"]: #INFO "validate" is runtime only
 			if spec.has(k):
 				rules[k] = spec[k]
 		var err := DCSpec.check(n.value, rules)

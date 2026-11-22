@@ -206,8 +206,12 @@ static func check(value: Variant, spec: Dictionary) -> String:
 	else:
 		err = _check_scalar(v, spec)
 	if err.is_empty() and spec.has("validate"):
-		var msg = spec["validate"].call(v)
-		err = msg if msg is String else ""
+		var validate_func :Callable= spec["validate"]
+		
+		err = "validate function is not valid"
+		if validate_func.is_valid():
+			var result = validate_func.call(v)
+			err = result if result is String else ""
 	return err
 
 
@@ -257,6 +261,9 @@ static func _check_dictionary(v: Dictionary, spec: Dictionary) -> String:
 
 
 static func _check_scalar(v: Variant, spec: Dictionary) -> String:
+	var t: int = spec.get("type", TYPE_NIL)
+	if v is String and (t == TYPE_INT or t == TYPE_FLOAT or t == TYPE_BOOL):
+		return "" # unparseable as its type: _coerce reports that
 	var n = v.length() if v is String else (v if (v is int or v is float) else null)
 	if n == null:
 		return ""
@@ -276,6 +283,8 @@ static func _typed(v: Variant, spec: Dictionary) -> Variant:
 			return v.to_int()
 		if (t == TYPE_FLOAT or t == TYPE_INT) and v.is_valid_float():
 			return v.to_float()
+		if (t == TYPE_INT or t == TYPE_FLOAT) and v.is_valid_hex_number(true):
+			return v.hex_to_int()
 		if t == TYPE_BOOL and (v == "true" or v == "false"):
 			return v == "true"
 	return v
