@@ -18,18 +18,18 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 
 	var names: Array[String] = []
 	var types: Array[int] = []
-	var hints: Array[int] = []
-	var hint_strings: Array[String] = []
+	var sigs: Array[Dictionary] = [] # what each signature already says (see DCSpec.from_property)
+	var key_sigs: Array[Dictionary] = []
 	var params: Array[DCDefinition.Param] = []
 	var obj := fn.get_object()
 	for i in count:
 		var meta: Dictionary = margs[i] if i < margs.size() else { }
 		names.append(meta.get("name", "arg%d" % i))
 		types.append(meta.get("type", TYPE_NIL))
-		hints.append(meta.get("hint", 0))
-		hint_strings.append(meta.get("hint_string", ""))
 		var p := DCDefinition.Param.new(names[i])
-		p.spec = Spec.from_signature(types[i], hints[i], hint_strings[i]) # what the signature already says
+		sigs.append(Spec.from_property(meta, obj))
+		key_sigs.append(Spec.key_of(meta, obj))
+		p.spec = sigs[i]
 		var found := _detect_enum(obj, meta)
 		if not found.is_empty():
 			p.enum_of(found)
@@ -49,10 +49,12 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 			if not r.success:
 				return r
 			var p: DCDefinition.Param = slots[i]
-			var c := _coerce(_lookup(r.value, p.choices), types[i], hints[i], hint_strings[i])
+			var c := _coerce(_lookup(r.value, p.choices), types[i], sigs[i], key_sigs[i])
 			if not c.success:
-				var hint := "" if p.choices.is_empty() else " Try: %s." % ", ".join(
-					PackedStringArray(p.choices.keys())
+				var hint := (
+					""
+					if p.choices.is_empty()
+					else " Try: %s." % ", ".join(PackedStringArray(p.choices.keys()))
 				)
 				return DCResult.fail(
 					"%s: argument %d (%s) %s%s" % [p_name, i, p.name, c.message, hint]
@@ -89,7 +91,7 @@ static func _method_info(fn: Callable) -> Dictionary:
 	return { } # lambdas land here
 
 
-static func _coerce(v: Variant, type: int, hint := 0, hint_string := "") -> DCResult:
+static func _coerce(v: Variant, type: int, sig := { }, key_sig := { }) -> DCResult:
 	var raw = v
 	match type:
 		TYPE_NIL, TYPE_OBJECT:
@@ -120,9 +122,9 @@ static func _coerce(v: Variant, type: int, hint := 0, hint_string := "") -> DCRe
 				return DCResult.ok(raw != 0)
 			if raw is String:
 				match raw.strip_edges().to_lower():
-					"true", "yes", "1":
+					"true", "yes", "1","on":
 						return DCResult.ok(true)
-					"false", "no", "0":
+					"false", "no", "0","off":
 						return DCResult.ok(false)
 		TYPE_STRING:
 			return DCResult.ok(v if v is String else var_to_str(v))
@@ -130,24 +132,32 @@ static func _coerce(v: Variant, type: int, hint := 0, hint_string := "") -> DCRe
 			return DCResult.ok(StringName(v if v is String else var_to_str(v)))
 		TYPE_ARRAY:
 			if raw is Array:
-				return _coerce_array(raw, hint, hint_string)
+				return _coerce_array(raw, sig)
 		TYPE_DICTIONARY:
 			if raw is Dictionary:
-				return _coerce_dictionary(raw, hint, hint_string)
+				return _coerce_dictionary(raw, sig, key_sig)
 		_:
 			if typeof(raw) == type:
 				return DCResult.ok(raw)
 	return DCResult.fail("expected %s, got %s." % [type_string(type), type_string(typeof(raw))])
 
 
+# One item / value / key: an enum goes through its choices, anything else through its type.
+static func _coerce_spec(v: Variant, spec: Dictionary) -> DCResult:
+	if spec.has("choices"):
+		return _coerce_enum(v, spec["choices"])
+	return _coerce(v, spec.get("type", TYPE_NIL))
+
+
 # Array[T] parameters need a typed array: coerce every item, then build it.
-static func _coerce_array(raw: Array, hint: int, hint_string: String) -> DCResult:
-	var item_t := Spec.type_from_name(hint_string) if hint == PROPERTY_HINT_ARRAY_TYPE else -1
+static func _coerce_array(raw: Array, sig: Dictionary) -> DCResult:
+	var item: Dictionary = sig.get("items", { })
+	var item_t: int = item.get("type", TYPE_NIL)
 	if item_t <= TYPE_NIL:
 		return DCResult.ok(raw)
 	var out: Array = []
 	for i in raw.size():
-		var c := _coerce(raw[i], item_t)
+		var c := _coerce_spec(raw[i], item)
 		if not c.success:
 			return DCResult.fail("item %d %s" % [i, c.message])
 		out.append(c.value)
@@ -155,18 +165,16 @@ static func _coerce_array(raw: Array, hint: int, hint_string: String) -> DCResul
 
 
 # Dictionary[K, V] parameters likewise.
-static func _coerce_dictionary(raw: Dictionary, hint: int, hint_string: String) -> DCResult:
-	var parts := hint_string.split(";")
-	if hint != PROPERTY_HINT_DICTIONARY_TYPE or parts.size() != 2:
-		return DCResult.ok(raw)
-	var key_t := Spec.type_from_name(parts[0])
-	var val_t := Spec.type_from_name(parts[1])
+static func _coerce_dictionary(raw: Dictionary, sig: Dictionary, key_sig: Dictionary) -> DCResult:
+	var value_spec: Dictionary = sig.get("fields", { }).get("*", { })
+	var key_t: int = key_sig.get("type", TYPE_NIL)
+	var val_t: int = value_spec.get("type", TYPE_NIL)
 	if key_t <= TYPE_NIL or val_t <= TYPE_NIL:
 		return DCResult.ok(raw)
 	var out := { }
 	for k in raw:
-		var ck := _coerce(k, key_t)
-		var cv := _coerce(raw[k], val_t)
+		var ck := _coerce_spec(k, key_sig)
+		var cv := _coerce_spec(raw[k], value_spec)
 		if not ck.success:
 			return DCResult.fail("key '%s' %s" % [k, ck.message])
 		if not cv.success:

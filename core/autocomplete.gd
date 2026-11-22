@@ -4,6 +4,14 @@ extends RefCounted
 # completion popup) re-call get_completions() to pull the new list.
 signal autocomplete_need_update
 
+enum Mode {
+	NONE,
+	BARE,
+	VARIABLE,
+	STRING,
+	TEMPLATE,
+}
+
 const Spec := preload("./registries/spec.gd")
 const Nodes := _DCKitNS.Analyzer.Nodes
 const TT := _DCKitNS.Analyzer.Token.Type
@@ -11,8 +19,6 @@ const ScopeKind := DCAnalysisResult.Scope.Kind
 
 const MAX_ITEMS := 100
 const CACHE_LIMIT := 64
-
-enum Mode { NONE, BARE, VARIABLE, STRING, TEMPLATE }
 
 var _cmd_reg
 var _ctor_reg
@@ -60,7 +66,18 @@ func get_completions() -> Dictionary:
 		return { start = cur, items = [] }
 
 	var scope: DCAnalysisResult.Scope = _result.scope
-	var slot_id := str([scope.kind, scope.name, scope.type_name, scope.arg_index, scope.part_index, scope.index, scope.key, scope.path])
+	var slot_id := str(
+		[
+			scope.kind,
+			scope.name,
+			scope.type_name,
+			scope.arg_index,
+			scope.part_index,
+			scope.index,
+			scope.key,
+			scope.path,
+		]
+	)
 	if slot_id != _slot_id:
 		_slot_id = slot_id
 		_cache.clear()
@@ -152,7 +169,13 @@ func _command_items(prefix: String) -> Array:
 	for def in _cmd_reg.get_matching(prefix):
 		out.append(CompletionItem.new(def.name, CompletionItem.Kind.COMMAND, def.description))
 	for alias in _cmd_reg.get_alias_matches(prefix):
-		out.append(CompletionItem.new(alias.alias, CompletionItem.Kind.COMMAND_ALIAS, alias.def.description))
+		out.append(
+			CompletionItem.new(
+				alias.alias,
+				CompletionItem.Kind.COMMAND_ALIAS,
+				alias.def.description,
+			)
+		)
 	return out
 
 
@@ -190,7 +213,13 @@ func _param_items(scope, loc: Dictionary) -> Array:
 		if not def.params.back().is_rest:
 			return []
 		idx = def.params.size() - 1 # a rest parameter owns every later argument
-	return _spec_items(def.params[idx].spec, loc, "arg", scope.arg_index, "p:%s:%d" % [def.name, idx])
+	return _spec_items(
+		def.params[idx].spec,
+		loc,
+		"arg",
+		scope.arg_index,
+		"p:%s:%d" % [def.name, idx],
+	)
 
 
 func _part_items(scope, loc: Dictionary) -> Array:
@@ -201,15 +230,32 @@ func _part_items(scope, loc: Dictionary) -> Array:
 	for n in def.signatures.size():
 		var sig = def.signatures[n]
 		if scope.part_index < sig.parts.size():
-			out.append_array(_spec_items(sig.parts[scope.part_index].spec, loc, "arg", scope.part_index, "c:%s:%d:%d" % [def.name, n, scope.part_index]))
+			out.append_array(
+				_spec_items(
+					sig.parts[scope.part_index].spec,
+					loc,
+					"arg",
+					scope.part_index,
+					"c:%s:%d:%d" % [def.name, n, scope.part_index],
+				)
+			)
 	return out
 
 
 #region PROVIDERS
 # What a spec offers for one value: its `suggest`, else what its type implies (bool, constructor types).
-func _spec_items(spec: Dictionary, loc: Dictionary, kind: String, position, slot: String, exclude: Array = []) -> Array:
+func _spec_items(
+	spec: Dictionary,
+	loc: Dictionary,
+	kind: String,
+	position,
+	slot: String,
+	exclude: Array = [],
+) -> Array:
 	if spec.has("suggest"):
 		return _suggested(spec["suggest"], loc, kind, position, slot, exclude)
+	if spec.has("choices"): # an enum offers its names
+		return _suggested(spec["choices"].keys(), loc, kind, position, slot, exclude)
 	return _typed_items(spec.get("type"), loc)
 
 
@@ -217,7 +263,14 @@ func _spec_items(spec: Dictionary, loc: Dictionary, kind: String, position, slot
 ##   func()                 candidates, computed once while the cursor stays in the slot and ranked here
 ##   func(prefix)           live: called on every change, its order is final
 ##   func(prefix, context)  live, with suffix / previous arguments / siblings / collection path
-func _suggested(source, loc: Dictionary, kind: String, position, slot: String, exclude: Array) -> Array:
+func _suggested(
+	source,
+	loc: Dictionary,
+	kind: String,
+	position,
+	slot: String,
+	exclude: Array,
+) -> Array:
 	if source is Callable:
 		if not source.is_valid():
 			return []
@@ -245,7 +298,14 @@ func _suggested(source, loc: Dictionary, kind: String, position, slot: String, e
 	for label in names:
 		if exclude.has(label):
 			continue
-		out.append(CompletionItem.new(label, CompletionItem.Kind.VALUE, details[label], _value_insert(label, loc)))
+		out.append(
+			CompletionItem.new(
+				label,
+				CompletionItem.Kind.VALUE,
+				details[label],
+				_value_insert(label, loc),
+			)
+		)
 	return out
 
 
@@ -315,17 +375,34 @@ func _collection_items(scope, loc: Dictionary, cur: int) -> Array:
 			var exclude: Array = _siblings(scope) if spec.get("unique", false) else []
 			return _value_items(item, loc, "item", scope.index, "i:%s" % [scope.path], exclude)
 		ScopeKind.DICT_VALUE:
-			return _value_items(_field_spec(spec, scope.key), loc, "value", scope.key, "f:%s:%s" % [scope.path, scope.key], [])
+			return _value_items(
+				_field_spec(spec, scope.key),
+				loc,
+				"value",
+				scope.key,
+				"f:%s:%s" % [scope.path, scope.key],
+				[],
+			)
 		_:
 			return _key_items(spec.get("fields", { }), scope, loc, cur)
 
 
-func _value_items(spec: Dictionary, loc: Dictionary, kind: String, position, slot: String, exclude: Array) -> Array:
+func _value_items(
+	spec: Dictionary,
+	loc: Dictionary,
+	kind: String,
+	position,
+	slot: String,
+	exclude: Array,
+) -> Array:
 	var items := _spec_items(spec, loc, kind, position, slot, exclude)
 	var in_text: bool = loc.mode == Mode.STRING or loc.mode == Mode.TEMPLATE
 	var concrete: bool = spec.get("type", TYPE_NIL) != TYPE_NIL
-	if items.is_empty() and not spec.has("suggest") and not concrete and not in_text \
-			and not spec.has("items") and not spec.has("fields"):
+	if (
+		items.is_empty() and not spec.has("suggest") and not concrete and not in_text \
+				and not spec.has("items")
+		and not spec.has("fields")
+	):
 		return _type_items(loc.prefix) # nothing known about the value: offer constructor types
 	return items
 
@@ -373,13 +450,21 @@ func _typed_items(type, loc: Dictionary) -> Array:
 		return []
 	if type == TYPE_BOOL:
 		var out: Array = []
-		for label in _rank({ "true": "", "false": "" }, loc.prefix):
-			out.append(CompletionItem.new(label, CompletionItem.Kind.VALUE, "", _value_insert(label, loc)))
+		for label in _rank(
+			{ "true": "", "false": "", "on": "", "off": "" },
+			loc.prefix,
+		):
+			out.append(
+				CompletionItem.new(label, CompletionItem.Kind.VALUE, "", _value_insert(label, loc))
+			)
 		return out
 	if loc.mode == Mode.STRING or loc.mode == Mode.TEMPLATE or type == TYPE_NIL:
 		return []
 	var wanted := type_string(type)
-	return _type_items(loc.prefix).filter(func(i): return i.label == wanted)
+	return _type_items(loc.prefix).filter(
+		func(i):
+			return i.label == wanted,
+	)
 
 
 func _siblings(scope) -> Array:
@@ -437,7 +522,11 @@ func _value_insert(text: String, loc: Dictionary) -> String:
 			return text.replace("\\", "\\\\").replace("'", "\\'")
 		Mode.TEMPLATE:
 			return text.replace("\\", "\\\\").replace("\"", "\\\"").replace("${", "\\${")
-	return text if _is_bare(text, loc.in_dict) else "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
+	return (
+		text
+		if _is_bare(text, loc.in_dict)
+		else "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
+	)
 
 
 func _is_bare(text: String, in_dict: bool) -> bool:
@@ -445,7 +534,10 @@ func _is_bare(text: String, in_dict: bool) -> bool:
 		return false
 	for i in text.length():
 		var c := text.unicode_at(i)
-		if c <= 32 or c in [34, 35, 36, 39, 40, 41, 44, 59, 91, 93, 96, 123, 125] or (in_dict and c == 58):
+		if (
+			c <= 32 or c in [34, 35, 36, 39, 40, 41, 44, 59, 91, 93, 96, 123, 125]
+			or (in_dict and c == 58)
+		):
 			return false
 	return true
 

@@ -513,10 +513,10 @@ func _collection_literal(node: _DCKitNS.Analyzer.Parser.StringNode) -> Variant:
 		and s.substr(2).replace("0", "").replace("1", "").is_empty()
 	):
 		return s.bin_to_int()
-	match s:
-		"true":
+	match s.strip_edges():
+		"true","1","yes","on":
 			return true
-		"false":
+		"false","0","no","off":
 			return false
 		"null":
 			return null
