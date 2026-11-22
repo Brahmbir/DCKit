@@ -93,7 +93,9 @@ func _parse_command(open: Token) -> CommandNode:
 		cmd = CommandNode.new("", t.start)
 		cmd.bad = true
 		cmd.end_pos = t.start
-		_bad_command_start(t, open)
+		var stray := _bad_command_start(t, open)
+		if stray != null:
+			cmd.args.append(stray)
 
 	while true:
 		var a := _peek()
@@ -113,22 +115,23 @@ func _parse_command(open: Token) -> CommandNode:
 	return cmd
 
 
-func _bad_command_start(t: Token, open: Token) -> void:
+func _bad_command_start(t: Token, open: Token) -> AstNode:
 	if open != null and (t.type == TT.END or _is_stop(t.type)):
 		_error("Expected a command name after '('.", open.start, 1)
-		return
+		return null
 	match t.type:
 		TT.DOLLAR:
 			_error("Command name cannot be a variable. Use a static name.", t.start, 1)
-			_parse_value()
+			return _parse_value()
 		TT.STRING, TT.QUOTE_OPEN:
 			_error("Command name cannot be a string.", t.start, 1)
-			_parse_value()
+			return _parse_value()
 		TT.LPAREN, TT.LBRACKET, TT.LCURLY:
 			_error("Expected a command name, found '%s'." % _text(t), t.start, 1)
-			_parse_value()
+			return _parse_value()
 		_:
 			_unexpected(t, "Expected a command name, found '%s'.")
+			return null
 #endregion
 
 
@@ -246,9 +249,14 @@ func _parse_template() -> AstNode:
 		node.open = true
 		var at := _peek()
 		node.end_pos = at.start
-		_error("Unterminated string. Expected closing '\"'.", open.start, 1) \
-				.with_related(at.start, 0, "input ends here") \
-				.with_fix("Add closing '\"'", at.start, at.start, "\"")
+		var d := _error("Unterminated string. Expected closing '\"'.", open.start, 1) \
+				.with_related(at.start, 0, "input ends here")
+		if at.type == TT.SEMI:
+			d.with_hint(
+				"';' always ends the command, even inside ${...}. Quote it (';') to use it as text."
+			)
+		else:
+			d.with_fix("Add closing '\"'", at.start, at.start, "\"")
 	if interpolates:
 		return node
 	var text := ""
@@ -280,7 +288,8 @@ func _parse_variable() -> AstNode:
 
 func _parse_braced(node: VariableNode, dollar: Token) -> AstNode:
 	if _too_deep():
-		return _skip_too_deep()
+		dollar.role = Role.ERROR
+		return _skip_too_deep(dollar.start)
 	_next() # '{'
 	node.braced = true
 	_push(TT.RBRACE, false)
@@ -327,9 +336,18 @@ func _modifier(node: VariableNode, braced: bool) -> void:
 			node.is_silent = true
 			node.end_pos = t.end
 			if braced and _starts_value(_peek().type):
+				var v := _peek()
+				var has_colon: bool = (
+					v.type == TT.WORD and v.glued and String(v.value).begins_with(":")
+				)
 				_error("'?' takes no value.", t.start, 1) \
 						.with_hint("Did you mean ${%s:...} for a fallback?" % node.name) \
-						.with_fix("Use ':' for a fallback", t.start, t.end, ":")
+						.with_fix(
+					"Use ':' for a fallback",
+					t.start,
+					v.start + 1 if has_colon else t.end,
+					":",
+				)
 				node.fallback = _parse_value()
 				node.end_pos = node.fallback.end_pos
 		TT.COLON:
@@ -419,10 +437,10 @@ func _parse_entry() -> DictEntry:
 		_error("Expected ':' after the key.", e.key.start_pos, k_len) \
 				.with_hint("Write {key: value}.") \
 				.with_fix("Add ':'", e.key.end_pos, e.key.end_pos, ":")
-		e.value = _parse_value() if _starts_value(t.type) else ErrorNode.new(
-			e.key.end_pos,
-			e.key.end_pos,
-			true,
+		e.value = (
+			_parse_value()
+			if _starts_value(t.type)
+			else ErrorNode.new(e.key.end_pos, e.key.end_pos, true)
 		)
 	e.end_pos = maxi(e.end_pos, e.value.end_pos)
 	return e
@@ -550,9 +568,13 @@ func _close_or_report(
 		_unwind_text = ""
 	_unwind_text += close_text
 	var found := "input ends here" if t.type == TT.END else "found '%s' here" % _text(t)
-	_error("Unclosed %s. Expected '%s'." % [open_text, close_text], open_at, open_len) \
+	var d := _error("Unclosed %s. Expected '%s'." % [open_text, close_text], open_at, open_len) \
 			.with_related(t.start, 0 if t.type == TT.END else t.end - t.start, found) \
 			.with_fix("Add closing '%s'" % _unwind_text, t.start, t.start, _unwind_text)
+	if t.type == TT.SEMI:
+		d.with_hint(
+			"';' always ends the command, even inside brackets. Quote it (';') to use it as text."
+		)
 	return null
 
 
@@ -582,9 +604,9 @@ func _too_deep() -> bool:
 	return _closers.size() >= max_depth
 
 
-func _skip_too_deep() -> AstNode:
-	var start := _peek().start
-	_error("Nesting is too deep (the limit is %d levels)." % max_depth, start, 1)
+func _skip_too_deep(from := -1) -> AstNode:
+	var start := _peek().start if from < 0 else from
+	_error("Nesting is too deep (the limit is %d levels)." % max_depth, start, 1 if from < 0 else 2)
 	var depth := 0
 	while _peek().type != TT.END and _peek().type != TT.SEMI:
 		var ty := _peek().type

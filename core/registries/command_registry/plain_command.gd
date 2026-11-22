@@ -9,7 +9,12 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 	var info := _method_info(fn)
 	var margs: Array = info.get("args", [])
 	var count := fn.get_argument_count()
-	var required: int = count - info.get("default_args", []).size()
+
+	var unbound_defaults := maxi(
+		0,
+		info.get("default_args", []).size() - fn.get_bound_arguments_count(),
+	)
+	var required: int = count - unbound_defaults
 
 	var names: Array[String] = []
 	var types: Array[int] = []
@@ -46,17 +51,21 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 			var p: DCDefinition.Param = slots[i]
 			var c := _coerce(_lookup(r.value, p.choices), types[i], hints[i], hint_strings[i])
 			if not c.success:
-				var hint := "" if p.choices.is_empty() else " Try: %s." % ", ".join(PackedStringArray(p.choices.keys()))
-				return DCResult.fail("%s: argument %d (%s) %s%s" % [p_name, i, p.name, c.message, hint])
+				var hint := "" if p.choices.is_empty() else " Try: %s." % ", ".join(
+					PackedStringArray(p.choices.keys())
+				)
+				return DCResult.fail(
+					"%s: argument %d (%s) %s%s" % [p_name, i, p.name, c.message, hint]
+				)
 			values.append(c.value)
-		
+
 		var ret = await fn.callv(values)
 		if ret is DCResult:
 			return ret
 		return DCResult.ok(ret, "Success" if ret == null else "")
 
-
 	return DCDefinition.new(p_name, handler, p_description, params)
+
 
 static func _lookup(v: Variant, choices: Dictionary) -> Variant:
 	if choices.is_empty() or not (v is String):
@@ -67,6 +76,7 @@ static func _lookup(v: Variant, choices: Dictionary) -> Variant:
 			var val = choices[k]
 			return val.call() if val is Callable else val
 	return v
+
 
 static func _method_info(fn: Callable) -> Dictionary:
 	var obj := fn.get_object()
@@ -96,6 +106,13 @@ static func _coerce(v: Variant, type: int, hint := 0, hint_string := "") -> DCRe
 				return DCResult.ok(int(raw))
 			if raw is String and raw.is_valid_int():
 				return DCResult.ok(raw.to_int())
+			if raw is String and raw.is_valid_hex_number(true):
+				return DCResult.ok(raw.hex_to_int())
+		TYPE_COLOR:
+			if raw is Color:
+				return DCResult.ok(raw)
+			if raw is String and Color.html_is_valid(raw):
+				return DCResult.ok(Color.html(raw))
 		TYPE_BOOL:
 			if raw is bool:
 				return DCResult.ok(raw)
@@ -121,6 +138,7 @@ static func _coerce(v: Variant, type: int, hint := 0, hint_string := "") -> DCRe
 			if typeof(raw) == type:
 				return DCResult.ok(raw)
 	return DCResult.fail("expected %s, got %s." % [type_string(type), type_string(typeof(raw))])
+
 
 # Array[T] parameters need a typed array: coerce every item, then build it.
 static func _coerce_array(raw: Array, hint: int, hint_string: String) -> DCResult:

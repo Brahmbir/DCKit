@@ -1,4 +1,3 @@
-
 class_name DCContext
 extends RefCounted
 
@@ -31,6 +30,11 @@ var _raw_runner: Callable
 var _aborted: bool = false
 var _root_ctx: DCContext = null
 var _var_resolver: Callable
+
+## Cooperative checkpoint for long loops. Yields one frame, then returns
+## false if the context was aborted before or during that frame.
+var _last_yield := 0
+
 
 # Construction — executor only
 ## Constructs a context for one command invocation.
@@ -71,8 +75,10 @@ func arg(n: int, should_cache: bool = true) -> DCResult:
 			"Argument %d does not exist — command received %d argument(s)." \
 					% [n, _raw_args.size()]
 		)
+	if is_aborted():
+		return DCResult.fail("Aborted.")
 
-	if _cache.has(n):
+	if should_cache and _cache.has(n):
 		return _cache[n]
 
 	var result: DCResult = await _resolver.call(_raw_args[n], _root_ctx if _root_ctx else self)
@@ -116,6 +122,7 @@ func run_raw(raw: String) -> Array:
 		return [result]
 	return result
 
+
 ## Resolves a variable exactly like $name does: live values run, a failing
 ## deferred expression is reported. With [param fallback] (an unresolved node,
 ## e.g. ctx.arg_node(1)) a missing variable resolves the fallback instead of failing,
@@ -124,6 +131,7 @@ func resolve_var(key: String, fallback: Variant = null) -> DCResult:
 	if not _var_resolver.is_valid():
 		return DCResult.fail("resolve_var is not available in this context.")
 	return await _var_resolver.call(key, fallback)
+
 
 # Abort
 ## Returns whether this command has been aborted.
@@ -145,9 +153,7 @@ func abort() -> void:
 	_aborted = true
 	aborted.emit()
 
-## Cooperative checkpoint for long loops. Yields one frame, then returns
-## false if the context was aborted before or during that frame.
-var _last_yield :=0
+
 func step() -> bool:
 	if is_aborted():
 		return false
@@ -157,6 +163,7 @@ func step() -> bool:
 	await Engine.get_main_loop().process_frame
 	_last_yield = Time.get_ticks_msec()
 	return not is_aborted()
+
 
 func await_or_abort(exec_signal: Signal) -> bool:
 	var abort_source := _root_ctx if _root_ctx != null else self
@@ -174,6 +181,7 @@ func await_or_abort(exec_signal: Signal) -> bool:
 # Called by the executor right after construction — not for handler use.
 func _bind_raw_runner(fn: Callable) -> void:
 	_raw_runner = fn
+
 
 # next to _bind_raw_runner — executor only
 func _bind_var_resolver(fn: Callable) -> void:
