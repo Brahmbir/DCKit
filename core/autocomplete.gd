@@ -4,6 +4,7 @@ extends RefCounted
 # completion popup) re-call get_completions() to pull the new list.
 signal autocomplete_need_update
 
+const Spec := preload("./registries/spec.gd")
 const Nodes := _DCKitNS.Analyzer.Nodes
 const TT := _DCKitNS.Analyzer.Token.Type
 const ScopeKind := DCAnalysisResult.Scope.Kind
@@ -22,8 +23,10 @@ var _result = null # DCAnalysisResult
 var _input := ""
 var _cursor_pos := 0
 
-# Candidate lists of 0-argument providers, per slot.
+# Candidate lists of 0-argument providers. Valid while the cursor stays in one slot:
+# moving to another argument / item / key (or back) recomputes them.
 var _cache := { }
+var _slot_id := ""
 
 
 func _init(cmd_reg, ctor_reg, var_store) -> void:
@@ -32,7 +35,7 @@ func _init(cmd_reg, ctor_reg, var_store) -> void:
 	_var_store = var_store
 
 
-## (a variable set, a command run, the console opened).
+## Drops cached candidate lists (a slot change already does).
 func invalidate() -> void:
 	_cache.clear()
 
@@ -57,6 +60,10 @@ func get_completions() -> Dictionary:
 		return { start = cur, items = [] }
 
 	var scope: DCAnalysisResult.Scope = _result.scope
+	var slot_id := str([scope.kind, scope.name, scope.type_name, scope.arg_index, scope.part_index, scope.index, scope.key, scope.path])
+	if slot_id != _slot_id:
+		_slot_id = slot_id
+		_cache.clear()
 	var loc := _locate(_result.tokens, cur)
 	loc.in_dict = scope.kind == ScopeKind.DICT_KEY or scope.kind == ScopeKind.DICT_VALUE
 
@@ -73,11 +80,11 @@ func get_completions() -> Dictionary:
 					items = _command_items(loc.prefix)
 			else:
 				items = _param_items(scope, loc)
-				if not in_text:
+				if not in_text and _slot_spec(scope).is_empty():
 					items.append_array(_type_items(loc.prefix))
 		ScopeKind.CONSTRUCTOR:
 			items = _part_items(scope, loc)
-			if not in_text:
+			if not in_text and _slot_spec(scope).is_empty():
 				items.append_array(_type_items(loc.prefix))
 		ScopeKind.ARRAY_ITEM, ScopeKind.DICT_KEY, ScopeKind.DICT_VALUE:
 			items = _collection_items(scope, loc, cur)
@@ -183,8 +190,7 @@ func _param_items(scope, loc: Dictionary) -> Array:
 		if not def.params.back().is_rest:
 			return []
 		idx = def.params.size() - 1 # a rest parameter owns every later argument
-	var param = def.params[idx]
-	return _provided(param.suggestor, loc, _context(scope, loc), "p:%s:%d" % [def.name, idx], CompletionItem.Kind.VALUE)
+	return _spec_items(def.params[idx].spec, loc, "arg", scope.arg_index, "p:%s:%d" % [def.name, idx])
 
 
 func _part_items(scope, loc: Dictionary) -> Array:
@@ -192,55 +198,76 @@ func _part_items(scope, loc: Dictionary) -> Array:
 	if def == null:
 		return []
 	var out: Array = []
-	var ctx := _context(scope, loc)
 	for n in def.signatures.size():
 		var sig = def.signatures[n]
-		if scope.part_index >= sig.parts.size():
-			continue
-		var part = sig.parts[scope.part_index]
-		out.append_array(
-			_provided(part.suggestor, loc, ctx, "c:%s:%d:%d" % [def.name, n, scope.part_index], CompletionItem.Kind.VALUE),
-		)
+		if scope.part_index < sig.parts.size():
+			out.append_array(_spec_items(sig.parts[scope.part_index].spec, loc, "arg", scope.part_index, "c:%s:%d:%d" % [def.name, n, scope.part_index]))
 	return out
-#endregion
 
 
 #region PROVIDERS
-## A suggestion provider is a Callable that returns an Array of strings or a Dictionary { value: description }.
-##   func()                 candidates, computed once per slot and ranked here
+# What a spec offers for one value: its `suggest`, else what its type implies (bool, constructor types).
+func _spec_items(spec: Dictionary, loc: Dictionary, kind: String, position, slot: String, exclude: Array = []) -> Array:
+	if spec.has("suggest"):
+		return _suggested(spec["suggest"], loc, kind, position, slot, exclude)
+	return _typed_items(spec.get("type"), loc)
+
+
+## `suggest` is an Array of strings, a Dictionary { value: description }, or a Callable returning either:
+##   func()                 candidates, computed once while the cursor stays in the slot and ranked here
 ##   func(prefix)           live: called on every change, its order is final
-##   func(prefix, context)  live, with suffix / previous arguments / collection path
-func _provided(provider: Callable, loc: Dictionary, ctx: SuggestContext, slot: String, kind: int) -> Array:
-	if not provider.is_valid():
+##   func(prefix, context)  live, with suffix / previous arguments / siblings / collection path
+func _suggested(source, loc: Dictionary, kind: String, position, slot: String, exclude: Array) -> Array:
+	if source is Callable:
+		if not source.is_valid():
+			return []
+	elif not (source is Array or source is Dictionary):
 		return []
-	var arity := provider.get_argument_count()
+
+	# Once per slot: a static list is normalised, a main callback is called with (kind, position).
+	var key := "%s|%s|%s" % [slot, kind, position]
+	if not _cache.has(key) or not is_same(_cache[key][0], source): # a redefined parameter is picked up
+		if _cache.size() >= CACHE_LIMIT:
+			_cache.clear()
+		var made = _call(source, [kind, position]) if source is Callable else source
+		_cache[key] = [source, made if made is Callable else _normalize(made)]
+	var cached = _cache[key][1]
+
 	var names: Array
 	var details: Dictionary
-	if arity == 0:
-		var key := "%s|%s|%s" % [slot, ctx.args, ctx.path]
-		if not _cache.has(key):
-			if _cache.size() >= CACHE_LIMIT:
-				_cache.clear()
-			_cache[key] = _normalize(provider.call())
-		details = _cache[key]
-		names = _rank(details, loc.prefix)
-	else:
-		details = _normalize(provider.call(loc.prefix) if arity == 1 else provider.call(loc.prefix, ctx))
+	if cached is Callable: # a live callback: every change, its result is shown as it is
+		details = _normalize(_call(cached, [loc.prefix, loc.suffix]))
 		names = details.keys()
+	else:
+		details = cached
+		names = _rank(details, loc.prefix)
 	var out: Array = []
 	for label in names:
-		out.append(CompletionItem.new(label, kind, details[label], _value_insert(label, loc)))
+		if exclude.has(label):
+			continue
+		out.append(CompletionItem.new(label, CompletionItem.Kind.VALUE, details[label], _value_insert(label, loc)))
 	return out
+
+
+# Passes only as many arguments as the callback declares.
+func _call(fn: Callable, args: Array):
+	return fn.callv(args.slice(0, mini(fn.get_argument_count(), args.size())))
 
 
 func _normalize(raw) -> Dictionary:
 	var out := { }
-	if raw is Dictionary:
+	if raw is Dictionary: # { value: description }
 		for k in raw:
 			out[str(k)] = raw[k] if raw[k] is String else ""
-	elif raw is Array or raw is PackedStringArray:
+	elif raw is Array or raw is PackedStringArray: # values, or { value, desc } items
 		for v in raw:
-			out[str(v)] = ""
+			if v is Dictionary:
+				if v.has("value"):
+					out[str(v["value"])] = str(v.get("desc", ""))
+				else:
+					push_warning("A suggestion item needs a 'value' key.")
+			else:
+				out[str(v)] = ""
 	return out
 
 
@@ -259,7 +286,7 @@ func _rank(cands: Dictionary, prefix: String) -> Array:
 			b0.append(label)
 		elif l.begins_with(p):
 			b1.append(label)
-		elif l.contains(p):
+		elif p.length() >= 2 and l.contains(p): # one character would match almost everything
 			b2.append(label)
 		elif p.length() >= 3 and _subsequence(p, l): # fuzzy only once the prefix is long enough not to match everything
 			b3.append(label)
@@ -274,67 +301,54 @@ func _subsequence(needle: String, hay: String) -> bool:
 	return j == needle.length()
 
 
-func _context(scope, loc: Dictionary) -> SuggestContext:
-	var ctx := SuggestContext.new()
-	ctx.suffix = loc.suffix
-	var owner = scope if scope.owner == null else scope.owner
-	ctx.args = _prev_values(owner)
-	ctx.path = scope.path
-	ctx.key = scope.key
-	return ctx
-
-
 # Literal values of the arguments / parts before the slot (null for anything resolved at run time).
-func _prev_values(scope) -> Array:
-	var n = scope.node
-	if n == null:
-		return []
-	var nodes: Array = []
-	var limit := 0
-	if scope.kind == ScopeKind.COMMAND:
-		nodes = n.args
-		limit = scope.arg_index
-	elif scope.kind == ScopeKind.CONSTRUCTOR:
-		nodes = n.parts
-		limit = scope.part_index
-	var out: Array = []
-	for i in mini(limit, nodes.size()):
-		out.append(nodes[i].value if nodes[i] is Nodes.StringNode else null)
-	return out
-#endregion
-
-
 #region COLLECTIONS
-# Shapes are plain data on a parameter / part hint (an optional `shape` property):
-#   [T] array of T   { key: T, "opt?": T, "*": T } dictionary   TYPE_* constant   TYPE_NIL any
+# The spec of the collection under the cursor is found by walking the parameter's spec along scope.path.
+# A suggestion on an array spec applies to its items; `unique` hides values the array already holds.
 func _collection_items(scope, loc: Dictionary, cur: int) -> Array:
-	var shape = _shape_of(scope)
+	var spec := _collection_spec(scope)
 	match scope.kind:
 		ScopeKind.ARRAY_ITEM:
-			return _value_items(shape[0] if shape is Array and shape.size() == 1 else null, loc)
+			var item: Dictionary = spec.get("items", { })
+			if spec.has("suggest") and not item.has("suggest"):
+				item = Spec.merge(item, { "suggest": spec["suggest"] }) # a suggestion on an array is per item
+			var exclude: Array = _siblings(scope) if spec.get("unique", false) else []
+			return _value_items(item, loc, "item", scope.index, "i:%s" % [scope.path], exclude)
 		ScopeKind.DICT_VALUE:
-			return _value_items(_field_shape(shape, scope.key), loc)
+			return _value_items(_field_spec(spec, scope.key), loc, "value", scope.key, "f:%s:%s" % [scope.path, scope.key], [])
 		_:
-			return _key_items(shape, scope, loc, cur)
+			return _key_items(spec.get("fields", { }), scope, loc, cur)
 
 
-func _key_items(shape, scope, loc: Dictionary, cur: int) -> Array:
-	if not shape is Dictionary:
-		return []
+func _value_items(spec: Dictionary, loc: Dictionary, kind: String, position, slot: String, exclude: Array) -> Array:
+	var items := _spec_items(spec, loc, kind, position, slot, exclude)
+	var in_text: bool = loc.mode == Mode.STRING or loc.mode == Mode.TEMPLATE
+	var concrete: bool = spec.get("type", TYPE_NIL) != TYPE_NIL
+	if items.is_empty() and not spec.has("suggest") and not concrete and not in_text \
+			and not spec.has("items") and not spec.has("fields"):
+		return _type_items(loc.prefix) # nothing known about the value: offer constructor types
+	return items
+
+
+func _key_items(fields: Dictionary, scope, loc: Dictionary, cur: int) -> Array:
 	var cands := { }
 	var optional := { }
-	for k in shape:
+	for k in fields:
 		var key: String = str(k)
 		if key == "*":
 			continue
-		var is_opt := key.ends_with("?")
-		var name := key.trim_suffix("?")
+		var is_req := key.ends_with("!") # "hp!" required; "name" and "name?" optional
+		var name := key.trim_suffix("!").trim_suffix("?")
 		if scope.used_keys.has(name):
 			continue
-		var t = shape[k]
-		var type_text: String = type_string(t) if t is int and t != TYPE_NIL else ""
-		var detail := "%s%s" % ["optional" if is_opt else "required", (" · " + type_text) if not type_text.is_empty() else ""]
-		(optional if is_opt else cands)[name] = detail
+		var f: Dictionary = fields[k]
+		var parts: Array = ["required" if is_req else "optional"]
+		var t = f.get("type")
+		if t is int and t != TYPE_NIL:
+			parts.append(type_string(t))
+		if f.has("desc"):
+			parts.append(f["desc"])
+		(cands if is_req else optional)[name] = " · ".join(parts)
 	cands.merge(optional) # required keys first
 	var in_text: bool = loc.mode == Mode.STRING or loc.mode == Mode.TEMPLATE
 	var out: Array = []
@@ -353,60 +367,64 @@ func _colon_follows(cur: int) -> bool:
 	return j < _input.length() and _input[j] == ":"
 
 
-func _value_items(shape, loc: Dictionary) -> Array:
-	var in_text: bool = loc.mode == Mode.STRING or loc.mode == Mode.TEMPLATE
-	if shape is int and shape == TYPE_BOOL:
+# What a type alone implies: true / false for bool, the constructor for a constructor type.
+func _typed_items(type, loc: Dictionary) -> Array:
+	if not type is int:
+		return []
+	if type == TYPE_BOOL:
 		var out: Array = []
 		for label in _rank({ "true": "", "false": "" }, loc.prefix):
 			out.append(CompletionItem.new(label, CompletionItem.Kind.VALUE, "", _value_insert(label, loc)))
 		return out
-	if in_text or shape is Array or shape is Dictionary:
+	if loc.mode == Mode.STRING or loc.mode == Mode.TEMPLATE or type == TYPE_NIL:
 		return []
-	if shape is int and shape != TYPE_NIL:
-		var wanted := type_string(shape)
-		return _type_items(loc.prefix).filter(func(i): return i.label == wanted)
-	return _type_items(loc.prefix)
+	var wanted := type_string(type)
+	return _type_items(loc.prefix).filter(func(i): return i.label == wanted)
 
 
-func _shape_of(scope):
-	var shape = _slot_shape(scope.owner)
+func _siblings(scope) -> Array:
+	var out: Array = []
+	var n = scope.node
+	if n == null:
+		return out
+	for i in n.items.size():
+		if i != scope.index and n.items[i] is Nodes.StringNode:
+			out.append(n.items[i].value)
+	return out
+
+
+func _collection_spec(scope) -> Dictionary:
+	var spec := _slot_spec(scope.owner)
 	for step in scope.path:
-		if shape == null:
-			return null
-		if step is int:
-			shape = shape[0] if shape is Array and shape.size() == 1 else null
-		else:
-			shape = _field_shape(shape, step)
-	return shape
+		spec = spec.get("items", { }) if step is int else _field_spec(spec, step)
+	return spec
 
 
-func _slot_shape(owner):
+func _slot_spec(owner) -> Dictionary:
 	if owner == null:
-		return null
+		return { }
 	var def = owner.get_active()
 	if def == null:
-		return null
+		return { }
 	if owner.kind == ScopeKind.COMMAND:
 		if def.params.is_empty():
-			return null
-		var idx: int = mini(owner.arg_index, def.params.size() - 1)
-		return def.params[idx].get("shape")
+			return { }
+		return def.params[mini(owner.arg_index, def.params.size() - 1)].spec
 	for sig in def.signatures:
-		if owner.part_index < sig.parts.size():
-			var s = sig.parts[owner.part_index].get("shape")
-			if s != null:
-				return s
-	return null
+		if owner.part_index < sig.parts.size() and not sig.parts[owner.part_index].spec.is_empty():
+			return sig.parts[owner.part_index].spec
+	return { }
 
 
-func _field_shape(shape, key: String):
-	if not shape is Dictionary:
-		return null
-	if shape.has(key):
-		return shape[key]
-	if shape.has(key + "?"):
-		return shape[key + "?"]
-	return shape.get("*")
+func _field_spec(spec: Dictionary, key: String) -> Dictionary:
+	var fields: Dictionary = spec.get("fields", { })
+	if fields.has(key):
+		return fields[key]
+	if fields.has(key + "?"):
+		return fields[key + "?"]
+	if fields.has(key + "!"):
+		return fields[key + "!"]
+	return fields.get("*", { })
 #endregion
 
 
@@ -444,14 +462,6 @@ func _unique(items: Array) -> Array:
 			break
 	return out
 #endregion
-
-
-## Passed as the second argument of a live provider.
-class SuggestContext:
-	var suffix := "" # text of the token after the cursor
-	var args: Array = [] # literal values of the previous arguments / parts (null = not a literal)
-	var path: Array = [] # inside [] / {}: indexes and keys leading to the collection
-	var key := "" # inside {}: the key of the entry being edited
 
 
 class CompletionItem:

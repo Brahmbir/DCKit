@@ -1,7 +1,7 @@
 extends RefCounted
 
-const Lexer := preload("./lexer.gd")
-const Parser := preload("./parser.gd")
+const Lexer := _DCKitNS.Analyzer.Lexer
+const Parser := _DCKitNS.Analyzer.Parser
 const Nodes := _DCKitNS.Analyzer.Nodes
 const Diagnostic := DCAnalysisResult.Diagnostic
 const Scope := DCAnalysisResult.Scope
@@ -44,6 +44,20 @@ func analyze(input: String, cursor_pos := -1) -> DCAnalysisResult:
 	result.diagnostics = _finish(found, input.length())
 	result.scope = scope_at(result.ast, cursor_pos)
 	return result
+
+
+#region SCOPE
+## Where the cursor sits, derived from the AST. Slots are 0-based everywhere:
+## COMMAND arg_index is -1 on the name, CONSTRUCTOR part_index / ARRAY_ITEM index / DICT_* index
+## name the slot under the cursor (a finished item moves the cursor to the next slot).
+func scope_at(ast: Array, cursor: int) -> Scope:
+	for cmd in ast:
+		var limit: int = cmd.semi_pos if cmd.semi_pos >= 0 else FAR
+		if cursor <= limit:
+			return _command_scope(cmd, cursor)
+	var s := Scope.new()
+	s.kind = Scope.Kind.COMMAND
+	return s
 
 
 # Lexer and parser both report unclosed brackets/strings at the same span; keep the first.
@@ -103,12 +117,22 @@ func _check_variable(node: Nodes.VariableNode, out: Array) -> void:
 	if node.is_silent or _var_store == null or _var_store.has(node.name):
 		return
 	var span := maxi(node.end_pos - node.start_pos, 1)
-	var d := _diag("'$%s' is not defined." % node.name, node.start_pos, span, Diagnostic.Severity.WARNING)
+	var d := _diag(
+		"'$%s' is not defined." % node.name,
+		node.start_pos,
+		span,
+		Diagnostic.Severity.WARNING,
+	)
 	var near := _closest(node.name, _var_store.get_keys())
 	if not near.is_empty():
 		d.with_hint("Did you mean '$%s'?" % near)
 		if not node.braced:
-			d.with_fix("Change to '$%s'" % near, node.start_pos, node.start_pos + node.name.length() + 1, "$" + near)
+			d.with_fix(
+				"Change to '$%s'" % near,
+				node.start_pos,
+				node.start_pos + node.name.length() + 1,
+				"$" + near,
+			)
 	else:
 		d.with_hint("Use $%s? or ${%s:fallback} if it may be missing." % [node.name, node.name])
 	out.append(d)
@@ -119,18 +143,30 @@ func _check_command(node: Nodes.CommandNode, out: Array) -> void:
 		return
 	var span := node.name.length()
 	if not _cmd_reg.has(node.name):
-		var d := _diag("Unknown command '%s'." % node.name, node.name_pos, span, Diagnostic.Severity.ERROR)
-		var near := _closest(node.name, _cmd_reg.get_all().map(func(x): return x.name))
+		var d := _diag(
+			"Unknown command '%s'." % node.name,
+			node.name_pos,
+			span,
+			Diagnostic.Severity.ERROR,
+		)
+		var near := _closest(
+			node.name,
+			_cmd_reg.get_all().map(
+				func(x):
+					return x.name,
+			),
+		)
 		if not near.is_empty():
 			d.with_hint("Did you mean '%s'?" % near) \
-				.with_fix("Change to '%s'" % near, node.name_pos, node.name_pos + span, near)
+					.with_fix("Change to '%s'" % near, node.name_pos, node.name_pos + span, near)
 		out.append(d)
 		return
 	# Argument count is intentionally not validated — handlers are variadic by design.
 	var def: DCDefinition = _cmd_reg.get_definition(node.name)
 	if def != null and def.deprecated:
-		var msg := "'%s' is deprecated." % def.name if def.name == node.name \
-			else "Command '%s' (invoked as '%s') is deprecated." % [def.name, node.name]
+		var msg := "'%s' is deprecated." % def.name
+		if not (def.name == node.name):
+			msg = "Command '%s' (invoked as '%s') is deprecated." % [def.name, node.name]
 		if not def.deprecated_message.is_empty():
 			msg += " " + def.deprecated_message
 		out.append(_diag(msg, node.name_pos, span, Diagnostic.Severity.WARNING))
@@ -141,11 +177,22 @@ func _check_constructor(node: Nodes.ConstructorNode, out: Array) -> void:
 		return
 	var span := node.type_name.length()
 	if not _ctor_reg.knows(node.type_name):
-		var d := _diag("Unknown constructor type '%s'." % node.type_name, node.type_pos, span, Diagnostic.Severity.ERROR)
-		var near := _closest(node.type_name, _ctor_reg.get_all().map(func(x): return x.name))
+		var d := _diag(
+			"Unknown constructor type '%s'." % node.type_name,
+			node.type_pos,
+			span,
+			Diagnostic.Severity.ERROR,
+		)
+		var near := _closest(
+			node.type_name,
+			_ctor_reg.get_all().map(
+				func(x):
+					return x.name,
+			),
+		)
 		if not near.is_empty():
 			d.with_hint("Did you mean '%s'?" % near) \
-				.with_fix("Change to '%s'" % near, node.type_pos, node.type_pos + span, near)
+					.with_fix("Change to '%s'" % near, node.type_pos, node.type_pos + span, near)
 		out.append(d)
 		return
 	var def = _ctor_reg.get_def(node.type_name)
@@ -161,8 +208,13 @@ func _check_constructor(node: Nodes.ConstructorNode, out: Array) -> void:
 			accepted.append(n)
 	accepted.sort()
 	out.append(
-		_diag("'%s' has no signature for %d part(s)." % [node.type_name, count], node.type_pos, span, Diagnostic.Severity.WARNING) \
-			.with_hint("Accepted part counts: %s." % ", ".join(accepted.map(str))),
+		_diag(
+			"'%s' has no signature for %d part(s)." % [node.type_name, count],
+			node.type_pos,
+			span,
+			Diagnostic.Severity.WARNING,
+		) \
+				.with_hint("Accepted part counts: %s." % ", ".join(accepted.map(str))),
 	)
 
 
@@ -200,20 +252,6 @@ func _distance(a: String, b: String) -> int:
 func _diag(msg: String, pos: int, len: int, sev: int) -> Diagnostic:
 	return Diagnostic.new(msg, pos, len, sev, Diagnostic.Source.SEMANTIC)
 #endregion
-
-
-#region SCOPE
-## Where the cursor sits, derived from the AST. Slots are 0-based everywhere:
-## COMMAND arg_index is -1 on the name, CONSTRUCTOR part_index / ARRAY_ITEM index / DICT_* index
-## name the slot under the cursor (a finished item moves the cursor to the next slot).
-func scope_at(ast: Array, cursor: int) -> Scope:
-	for cmd in ast:
-		var limit: int = cmd.semi_pos if cmd.semi_pos >= 0 else FAR
-		if cursor <= limit:
-			return _command_scope(cmd, cursor)
-	var s := Scope.new()
-	s.kind = Scope.Kind.COMMAND
-	return s
 
 
 func _command_scope(cmd: Nodes.CommandNode, c: int) -> Scope:
@@ -331,8 +369,11 @@ func _slot(children: Array, c: int) -> int:
 func _is_finished(n) -> bool:
 	if n.open:
 		return false
-	return n is Nodes.CommandNode or n is Nodes.ConstructorNode or n is Nodes.ArrayNode \
-		or n is Nodes.DictNode or n is Nodes.TemplateNode or (n is Nodes.VariableNode and n.braced)
+	return (
+		n is Nodes.CommandNode or n is Nodes.ConstructorNode or n is Nodes.ArrayNode \
+				or n is Nodes.DictNode
+		or n is Nodes.TemplateNode or (n is Nodes.VariableNode and n.braced)
+	)
 
 
 func _bind_command(s: Scope) -> void:

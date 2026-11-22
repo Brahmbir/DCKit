@@ -63,7 +63,7 @@ static func part_hint(
 		.new(p_name, "<bool>", p_desc)
 		.validate(_bool_validator())
 		.suggest(
-			func(_p):
+			func():
 				return ["true", "false"],
 		)
 		.accepts([TYPE_BOOL, TYPE_INT, TYPE_STRING])
@@ -107,7 +107,7 @@ static func create() -> _DCKitNS.Registries.ConstructorDef:
 						+ "[b]false[/b] / [b]no[/b] / [b]0[/b]")
 						.validate(_bool_validator())
 						.suggest(
-							func(_p):
+							func():
 								return ["true", "false", "yes", "no", "1", "0", "on", "off"],
 						)
 						.accepts([TYPE_BOOL, TYPE_INT, TYPE_STRING])

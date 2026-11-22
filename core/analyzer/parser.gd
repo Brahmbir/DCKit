@@ -1,9 +1,8 @@
 extends RefCounted
 
-const Names := preload("./utils/names.gd")
 const Nodes := _DCKitNS.Analyzer.Nodes
+const Names := _DCKitNS.Analyzer.Names
 const Token := _DCKitNS.Analyzer.Token
-
 const TT := Token.Type
 const Role := Token.Role
 const Diagnostic := DCAnalysisResult.Diagnostic
@@ -174,7 +173,7 @@ func _parse_nested() -> AstNode:
 	var close := _close_or_report(open.start, 1, "'('", TT.RPAREN, ")")
 	_pop(TT.RPAREN)
 	cmd.open = close == null
-	cmd.end_pos = close.end if close != null else _peek().start
+	cmd.end_pos = close.end if close != null else _peek().start # open: where the closer would go
 	return cmd
 
 
@@ -220,7 +219,7 @@ func _parse_array() -> AstNode:
 			node.items.append(_parse_value()),
 	)
 	node.open = close == null
-	node.end_pos = close.end if close != null else _prev_end()
+	node.end_pos = close.end if close != null else _peek().start
 	return node
 
 
@@ -382,7 +381,7 @@ func _parse_dict() -> AstNode:
 					seen[k] = e,
 	)
 	node.open = close == null
-	node.end_pos = close.end if close != null else _prev_end()
+	node.end_pos = close.end if close != null else _peek().start
 	return node
 
 
@@ -400,7 +399,7 @@ func _parse_entry() -> DictEntry:
 		else:
 			_error("Expected a value after ':'.", e.colon_pos, 1)
 			e.value = ErrorNode.new(e.key.end_pos, e.key.end_pos, true)
-			e.end_pos = _peek().start
+			e.end_pos = _peek().start # the entry stays open until the next ',' or closer
 	elif t.type == TT.COLON:
 		_next()
 		e.colon_pos = t.start
@@ -409,16 +408,16 @@ func _parse_entry() -> DictEntry:
 		else:
 			_error("Expected a value after ':'.", t.start, 1)
 			e.value = ErrorNode.new(t.end, t.end, true)
-			e.end_pos = _peek().start
+			e.end_pos = _peek().start # the entry stays open until the next ',' or closer
 	else:
 		var k_len := maxi(e.key.end_pos - e.key.start_pos, 1)
 		_error("Expected ':' after the key.", e.key.start_pos, k_len) \
 				.with_hint("Write {key: value}.") \
 				.with_fix("Add ':'", e.key.end_pos, e.key.end_pos, ":")
-		e.value = (
-			_parse_value()
-			if _starts_value(t.type)
-			else ErrorNode.new(e.key.end_pos, e.key.end_pos, true)
+		e.value = _parse_value() if _starts_value(t.type) else ErrorNode.new(
+			e.key.end_pos,
+			e.key.end_pos,
+			true,
 		)
 	e.end_pos = maxi(e.end_pos, e.value.end_pos)
 	return e

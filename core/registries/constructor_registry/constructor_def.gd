@@ -129,12 +129,20 @@ class TypeSignature extends RefCounted:
 #   PartHint.new("x", "<float>", "World-space X component")
 #   PartHint.new("name", "<const>", "Named constant").suggest(fn).validate(fn)
 #   PartHint.new("pos", "<Vector2>").accepts([TYPE_VECTOR2, TYPE_STRING])
+const Spec := preload("../spec.gd")
+
+
 class PartHint extends RefCounted:
 	var name: String # Slot label shown in the info panel   e.g. "x"
 	var type_hint: String # Type label                           e.g. "<float>"
 	var description: String # BBCode — shown below the slot label
 	var validator: Callable # (value: String) -> String   empty string = valid
-	var suggestor: Callable # (prefix: String) -> Array[String]
+	var spec: Variant: # see Spec; assign any shorthand to replace it, suggest() adds to it
+		get:
+			return _spec
+		set(value):
+			_spec = Spec.normalize(value)
+	var _spec: Dictionary = { }
 	var accepted_types: Array # Array[int] TYPE_* constants — hint system only, never enforced
 
 
@@ -155,8 +163,8 @@ class PartHint extends RefCounted:
 		return self
 
 
-	func suggest(fn: Callable) -> PartHint:
-		suggestor = fn
+	func suggest(source: Variant) -> PartHint:
+		_spec = Spec.merge(_spec, Spec.normalize(source))
 		return self
 
 

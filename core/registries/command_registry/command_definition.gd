@@ -114,22 +114,30 @@ func as_utility() -> DCDefinition:
 
 
 ## One parameter slot on a command. Purely descriptive — validation is the handler's job.
+const Spec := preload("../spec.gd")
+
+
 class Param extends RefCounted:
 	## Display label shown in the info panel param list.
 	var name: String
 	## Optional BBCode description shown in the info panel below the param name.
 	## Leave empty when the param is self-explanatory from the command description (BBCode).
 	var description: String
-	## () -> Array[String]  |  null = no suggestions but never Signal.
-	## Called live by HintProvider on every keystroke. Keep it fast.
-	var suggestor: Callable
+	## What this parameter is and what to offer for it — see Spec. Assign any shorthand
+	## (Array, Callable, TYPE_*, Dictionary) to replace it; suggest() adds to it.
+	var spec: Variant:
+		get:
+			return _spec
+		set(value):
+			_spec = Spec.normalize(value)
+	var _spec: Dictionary = { }
 	## If true, this parameter consumes all remaining tokens.
 	var is_rest := false
 
 
-	func _init(p_name: String, p_suggestor := Callable()) -> void:
+	func _init(p_name: String, p_spec: Variant = null) -> void:
 		name = p_name
-		suggestor = p_suggestor
+		_spec = Spec.normalize(p_spec)
 
 	## name → value. Input matching a key resolves to its value before type coercion.
 	var choices: Dictionary = { }
@@ -147,25 +155,9 @@ class Param extends RefCounted:
 		return self
 
 
-	## Sets the suggestor from either a Callable or a plain Array of values.
+	## Adds to the spec. Array / Callable → suggestions, TYPE_* → type, Dictionary → a full spec.
 	func suggest(source: Variant) -> Param:
-		if source is Callable:
-			suggestor = source
-		elif source is Dictionary:
-			choices = source
-			suggestor = func() -> Array[String]:
-				var out: Array[String] = []
-				for k in source:
-					out.append(str(k))
-				return out
-		elif source is Array:
-			var values: Array[String] = []
-			for v in source:
-				values.append(str(v))
-			suggestor = func() -> Array[String]:
-				return values.duplicate()
-		else:
-			push_error("suggest() expects Callable, Array or Dictionary.")
+		_spec = Spec.merge(_spec, Spec.normalize(source))
 		return self
 
 

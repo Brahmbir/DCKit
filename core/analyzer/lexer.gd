@@ -1,11 +1,18 @@
 extends RefCounted
 
+enum Mode {
+	CODE,
+	TEMPLATE,
+	BRACE,
+	ARRAY,
+	DICT,
+	PAREN,
+}
+
 const Token := _DCKitNS.Analyzer.Token
 const TokenType := Token.Type
 const Role := Token.Role
 const Diagnostic := DCAnalysisResult.Diagnostic
-
-enum Mode { CODE, TEMPLATE, BRACE, ARRAY, DICT, PAREN }
 
 const C_BANG := 33
 const C_DQUOTE := 34
@@ -63,12 +70,14 @@ const _CLOSER := {
 }
 
 static var _cls: PackedByteArray = _build_cls()
+static var _role_of: PackedInt32Array = _build_roles()
 static var _number: RegEx = _build_number()
 
 var tokens: Array = []
 var diagnostics: Array = []
 
 var _s := ""
+var _last_end := -1
 var _n := 0
 var _i := 0
 var _modes: Array[int] = []
@@ -94,6 +103,14 @@ static func _build_cls() -> PackedByteArray:
 	return t
 
 
+static func _build_roles() -> PackedInt32Array:
+	var t := PackedInt32Array()
+	t.resize(TokenType.size())
+	for type in _ROLE:
+		t[type] = _ROLE[type]
+	return t
+
+
 static func _build_number() -> RegEx:
 	var r := RegEx.new()
 	r.compile("^[+-]?(?:0[xX][0-9a-fA-F]+|0[bB][01]+|(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?)$")
@@ -108,6 +125,7 @@ func lex(text: String) -> Array:
 	_i = 0
 	tokens = []
 	diagnostics = []
+	_last_end = -1
 	_modes = [Mode.CODE]
 	_opens = [0]
 
@@ -224,8 +242,8 @@ func _lex_string(quote: int) -> void:
 	_push(TokenType.STRING, start, _n, body)
 	var q := char(quote)
 	_diag("Unterminated string. Expected closing quote (%s)." % q, start, 1) \
-		.with_related(_n, 0, "input ends here") \
-		.with_fix("Add closing %s" % q, _n, _n, q)
+			.with_related(_n, 0, "input ends here") \
+			.with_fix("Add closing %s" % q, _n, _n, q)
 #endregion
 
 
@@ -319,8 +337,8 @@ func _lex_compact(start: int) -> void:
 			_i = end
 			return
 		_diag("Expected a variable name after '$'.", start, 1) \
-			.with_hint("To write a literal '$', put it in quotes: '$'.") \
-			.with_fix("Quote the '$'", start, start + 1, "'$'")
+				.with_hint("To write a literal '$', put it in quotes: '$'.") \
+				.with_fix("Quote the '$'", start, start + 1, "'$'")
 		return
 	var name_start := _i
 	while _i < _n and _has(_s.unicode_at(_i), F_IDC):
@@ -347,17 +365,18 @@ func _lex_braced(start: int) -> void:
 
 	if name.is_empty():
 		_diag("Empty variable name in '${...}'.", start, maxi(_i - start, 2)) \
-			.with_hint("Write a name between the braces, e.g. ${name}.")
+				.with_hint("Write a name between the braces, e.g. ${name}.")
 	else:
 		_push(TokenType.NAME, name_start, _i, name)
 		var bad := _first_invalid_name_char(name)
 		if bad >= 0:
 			tokens.back().role = Role.ERROR
 			var ch := name[bad]
-			var msg := "Variable names cannot start with a digit." if bad == 0 and ch.is_valid_int() \
-				else "Invalid character '%s' in variable name '%s'." % [ch, name]
+			var msg := "Variable names cannot start with a digit."
+			if not (bad == 0 and ch.is_valid_int()):
+				msg =  "Invalid character '%s' in variable name '%s'." % [ch, name]
 			_diag(msg, name_start + bad, 1) \
-				.with_hint("Names use letters, digits and '_', and cannot start with a digit.")
+					.with_hint("Names use letters, digits and '_', and cannot start with a digit.")
 	_skip_ws()
 	_modifier()
 
@@ -391,7 +410,6 @@ func _step_template() -> void:
 	var body := ""
 	var run := _i
 	var stop := 0 # 0 = end of input, 1 = closing quote, 2 = '${'
-
 	while _i < _n:
 		var c := _s.unicode_at(_i)
 		if c == C_DQUOTE:
@@ -431,16 +449,17 @@ func _hint_bare_dollar(at: int) -> void:
 		e += 1
 	var name := _s.substr(at + 1, e - at - 1)
 	_diag("'$%s' is not interpolated inside a string." % name, at, e - at, Diagnostic.Severity.HINT) \
-		.with_hint("Use ${%s} to insert the variable, or '\\$' for a literal dollar." % name) \
-		.with_fix("Change to ${%s}" % name, at, e, "${%s}" % name)
+			.with_hint("Use ${%s} to insert the variable, or '\\$' for a literal dollar." % name) \
+			.with_fix("Change to ${%s}" % name, at, e, "${%s}" % name)
 #endregion
 
 
 #region HELPERS
 func _push(type: int, start: int, end: int, value := "") -> void:
-	var t := Token.new(type, start, end, value, not tokens.is_empty() and tokens.back().end == start)
-	t.role = _ROLE.get(type, Role.NONE)
+	var t := Token.new(type, start, end, value, start == _last_end)
+	t.role = _role_of[type]
 	tokens.append(t)
+	_last_end = end
 
 
 func _punct(type: int) -> void:

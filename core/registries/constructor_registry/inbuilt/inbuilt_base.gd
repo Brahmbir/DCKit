@@ -33,7 +33,7 @@ static func const_part(const_names: Array) -> _DCKitNS.Registries.ConstructorDef
 		.new("name", "<const>", "One of: " + ", ".join(const_names))
 		.validate(_DCKitNS.Registries.ConstructorDef.PartHint.enum_validator(const_names))
 		.suggest(
-			func(_prefix: String) -> Array:
+			func() -> Array:
 				return const_names,
 		)
 		.accepts([TYPE_STRING])

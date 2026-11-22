@@ -1,5 +1,6 @@
 extends RefCounted
 
+
 ## Every node: exact source span [start_pos, end_pos) and two recovery flags.
 class AstNode:
 	var start_pos := -1
@@ -17,6 +18,7 @@ class CommandNode extends AstNode:
 	var name_pos: int
 	var args: Array = []
 	var semi_pos := -1 # top-level only: offset of the ';' that ended this command
+
 
 	func _init(p_name: String, p_start: int) -> void:
 		name = p_name
