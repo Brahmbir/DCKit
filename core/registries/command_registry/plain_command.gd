@@ -7,6 +7,7 @@ const Spec := preload("../spec.gd")
 
 static func build(p_name: String, fn: Callable, p_description: String) -> DCDefinition:
 	var info := _method_info(fn)
+	var returns_nothing := _returns_nothing(info)
 	var margs: Array = info.get("args", [])
 	var count := fn.get_argument_count()
 
@@ -64,6 +65,8 @@ static func build(p_name: String, fn: Callable, p_description: String) -> DCDefi
 		var ret = await fn.callv(values)
 		if ret is DCResult:
 			return ret
+		if returns_nothing and ret == null:
+			return DCResult.done("Success") # an untyped method looks like -> void, so a returned value wins
 		return DCResult.ok(ret, "Success" if ret == null else "")
 
 	return DCDefinition.new(p_name, handler, p_description, params)
@@ -79,6 +82,9 @@ static func _lookup(v: Variant, choices: Dictionary) -> Variant:
 			return val.call() if val is Callable else val
 	return v
 
+static func _returns_nothing(info: Dictionary) -> bool:
+	var r: Dictionary = info.get("return", { })
+	return not r.is_empty() and r.get("type", TYPE_NIL) == TYPE_NIL and (r.get("usage", 0) & PROPERTY_USAGE_NIL_IS_VARIANT) == 0
 
 static func _method_info(fn: Callable) -> Dictionary:
 	var obj := fn.get_object()

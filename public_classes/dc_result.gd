@@ -6,11 +6,19 @@ var success: bool
 var value: Variant
 
 var message: String
-var _source := ""
 
 var literal: bool
 
+## False only for results made with done(): the command succeeded and has nothing to hand back.
+var has_value := true
+var _source := ""
 
+
+## Success with no value (a message-only command). ok(null) stays a real null value.
+static func done(msg := "") -> DCResult:
+	var r := _make(true, null, msg)
+	r.has_value = false
+	return r
 
 
 static func ok(v: Variant = null, msg := "") -> DCResult:
@@ -25,6 +33,19 @@ static func from_literal(s: String) -> DCResult:
 	var r := _make(true, s, "")
 	r.literal = true
 	return r
+
+
+static func _make(p_success: bool, v: Variant, msg: String) -> DCResult:
+	var r := DCResult.new()
+	r.success = p_success
+	r.value = v
+	r.message = msg
+	return r
+
+
+func _to_string() -> String:
+	return "OK | %s" % var_to_str(value) if success else "FAIL | %s" % message
+
 
 func text() -> String:
 	if value == null:
@@ -48,6 +69,7 @@ func truthy() -> bool:
 			return not (value.strip_edges().to_lower() in ["", "false", "0"])
 	return true
 
+
 ## Failure text including the command that produced it. Use this when embedding or displaying.
 func full_message() -> String:
 	if success or _source.is_empty():
@@ -65,14 +87,3 @@ func log_text() -> String:
 func _stamp(p_source: String) -> void:
 	if not success and _source.is_empty():
 		_source = p_source
-
-func _to_string() -> String:
-	return "OK | %s" % var_to_str(value) if success else "FAIL | %s" % message
-
-
-static func _make(p_success: bool, v: Variant, msg: String) -> DCResult:
-	var r := DCResult.new()
-	r.success = p_success
-	r.value = v
-	r.message = msg
-	return r

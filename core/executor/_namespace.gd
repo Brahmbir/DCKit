@@ -129,7 +129,7 @@ class Execution:
 
 
 	func to_result() -> DCResult:
-		return results.back() if not results.is_empty() else DCResult.ok(null)
+		return results.back() if not results.is_empty() else DCResult.done()
 #endregion
 
 

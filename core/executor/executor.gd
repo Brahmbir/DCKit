@@ -189,7 +189,7 @@ func _run_execution(exec: _DCKitNS.Executor.Execution) -> DCResult:
 
 	exec.commands = analysis.ast
 	if exec.commands.is_empty():
-		return DCResult.ok(null)
+		return DCResult.done()
 
 	# Announce each step only when there are multiple commands in the chain.
 	# Single-command runs (including run_raw) are announced by their caller.
@@ -361,7 +361,10 @@ func _resolve_node(node, exec: _DCKitNS.Executor.Execution, root_ctx: DCContext)
 		)
 		if not inner.success:
 			return inner
+		if not inner.has_value:
+			return DCResult.done() # keep "no value" when the result is rebuilt
 		return DCResult.ok(inner.value)
+		
 	if node is _DCKitNS.Analyzer.Parser.ErrorNode:
 		return DCResult.fail("Cannot evaluate an invalid expression.")
 	return DCResult.from_literal("")
@@ -465,6 +468,8 @@ func _resolve_template(
 		var r: DCResult = await _resolve_variable(seg, exec, root_ctx)
 		if not r.success:
 			return DCResult.fail("In string: %s" % r.full_message())
+		if not r.has_value:
+			return DCResult.fail("In string: %s" % _no_value_text(seg))
 		out += r.text()
 	return DCResult.from_literal(out)
 
@@ -484,6 +489,8 @@ func _resolve_array(
 		var r: DCResult = await _resolve_node(item, exec, root_ctx)
 		if not r.success:
 			return DCResult.fail("Array item %d: %s" % [i, r.full_message()])
+		if not r.has_value:
+			return DCResult.fail("Array item %d: %s" % [i, _no_value_text(item)])
 		out.append(r.value)
 	return DCResult.ok(out)
 
@@ -503,6 +510,8 @@ func _resolve_dict(
 		var r: DCResult = await _resolve_node(e.value, exec, root_ctx)
 		if not r.success:
 			return DCResult.fail("Dictionary key '%s': %s" % [key, r.full_message()])
+		if not r.has_value:
+			return DCResult.fail("Dictionary key '%s': %s" % [key, _no_value_text(e.value)])
 		out[key] = r.value
 	return DCResult.ok(out)
 
@@ -541,6 +550,8 @@ func _enforce(r: DCResult, def: DCDefinition, index: int) -> DCResult:
 	if index >= def.params.size() and not def.params.back().is_rest:
 		return r
 	var p = def.params[mini(index, def.params.size() - 1)]
+	if not r.has_value and not p.is_block:
+		return DCResult.fail("argument %d (%s): the command returned no value." % [index, p.name])
 	var err := DCSpec.check(r.value, p.spec)
 	return r if err.is_empty() else DCResult.fail("argument %d (%s): %s" % [index, p.name, err])
 
@@ -566,6 +577,14 @@ func _log_result(result: DCResult, details: String = "") -> void:
 
 
 # HELPERS
+func _no_value_text(node) -> String:
+	if node is _DCKitNS.Analyzer.Parser.CommandNode:
+		return "'%s' returned no value." % node.name
+	if node is _DCKitNS.Analyzer.Parser.VariableNode:
+		return "'$%s' has no value." % node.name
+	return "the expression returned no value."
+
+
 func _normalise(raw) -> DCResult:
 	if raw is DCResult:
 		return raw

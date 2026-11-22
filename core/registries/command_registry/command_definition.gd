@@ -19,6 +19,9 @@ enum LogMode {
 const BbCodeUtils = preload("../bb_code_utils.gd")
 const PlainCommand = preload("./plain_command.gd")
 
+## One parameter slot on a command. Purely descriptive — validation is the handler's job.
+const Spec := preload("../spec.gd")
+
 ## Exact case as registered — key in registry.
 var name: String
 ## BBCode; shown in info panel — supports full formatting.
@@ -113,10 +116,6 @@ func as_utility() -> DCDefinition:
 	return self
 
 
-## One parameter slot on a command. Purely descriptive — validation is the handler's job.
-const Spec := preload("../spec.gd")
-
-
 class Param extends RefCounted:
 	## Display label shown in the info panel param list.
 	var name: String
@@ -133,6 +132,9 @@ class Param extends RefCounted:
 	var _spec: Dictionary = { }
 	## If true, this parameter consumes all remaining tokens.
 	var is_rest := false
+
+	## A body (statement) parameter: its command may return no value.
+	var is_block := false
 
 
 	func _init(p_name: String, p_spec: Variant = null) -> void:
@@ -164,4 +166,9 @@ class Param extends RefCounted:
 	## Marks this param as consuming all remaining tokens.
 	func rest() -> Param:
 		is_rest = true
+		return self
+
+
+	func block() -> Param:
+		is_block = true
 		return self
