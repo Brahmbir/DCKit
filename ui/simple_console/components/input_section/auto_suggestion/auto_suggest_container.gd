@@ -46,8 +46,6 @@ func populate() -> void:
 	if layout == Layout.PopUp:
 		_fit_popup_height()
 		_fit_popup_width()
-		
-
 
 	if has_items():
 		item_list.select(_selected_index)
@@ -160,14 +158,14 @@ func input_handler(event: InputEvent) -> bool:
 	return false
 
 
-func _on_scale_change(_v:=1):
+func _on_scale_change(_v := 1):
 	if item_list:
 		var space = _DCKitNS.UI.mobile_layout.get_scales().em_space(1)
 		item_list.add_theme_constant_override("icon_margin", space)
 
 		var px = _DCKitNS.UI.mobile_layout.get_scales().em_font(1.15)
 		item_list.fixed_icon_size = Vector2i(px, px)
-		
+
 		if layout == Layout.PopUp:
 			_fit_popup_height()
 			_fit_popup_width()
@@ -185,7 +183,7 @@ func _apply_layout_to_child() -> void:
 		item_list.auto_height = true
 		item_list.auto_width = false
 		item_list.fixed_column_width = 0
-	
+
 		item_list.max_columns = 0
 		item_list.custom_minimum_size = Vector2.ZERO
 
@@ -212,7 +210,7 @@ func _fit_popup_width() -> void:
 
 	var min_w = _DCKitNS.UI.mobile_layout.get_scales().em_font(10)
 	var max_w = _DCKitNS.UI.mobile_layout.get_scales().em_font(20)
-	
+
 	item_list.fixed_column_width = clampf(w, min_w, max_w)
 	item_list.custom_minimum_size.x = minf(w, min_w)
 

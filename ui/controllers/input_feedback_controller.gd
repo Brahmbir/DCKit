@@ -71,12 +71,13 @@ func handle_cursor_moved(cursor_pos: int) -> void:
 	if cursor_pos == _current_cursor:
 		return
 
-	var analyzer = _analyzer_ref.get_ref()
-	if analyzer == null or not analyzer.has_method("compute_scope"):
+	var analyzer = _analyzer_ref.get_ref() as _DCKitNS.Analyzer.Analyzer
+	if analyzer == null:
+		push_error("[FeedbackController] analyzer is null")
 		return
 
 	_current_cursor = cursor_pos
-	latest_analysis.scope = analyzer.compute_scope(latest_analysis.tokens, cursor_pos)
+	latest_analysis.scope = analyzer.scope_at(latest_analysis.ast, cursor_pos)
 
 	if signature_help_enabled:
 		_refresh_signature_help()

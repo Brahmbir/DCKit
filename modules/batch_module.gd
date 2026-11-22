@@ -204,7 +204,7 @@ func _collect_scripts(folder: String, relative: String, out: Array[String]) -> v
 		if dir.current_is_dir():
 			_collect_scripts(full, rel, out)
 		elif ext == "txt":
-			out.append("'%s'" % rel.get_basename())
+			out.append("%s" % rel.get_basename())
 
 	dir.list_dir_end()
 

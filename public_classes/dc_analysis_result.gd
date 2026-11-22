@@ -42,7 +42,6 @@ class Diagnostic:
 	var length: int = 1
 	var severity: int = Severity.ERROR
 	var source: int = Source.LEXER
-
 	var hint: String = ""
 	var related_pos: int = -1
 	var related_len: int = 0
@@ -102,6 +101,17 @@ class Diagnostic:
 		]
 
 
+## Replace source[start:end] with text, for every edit in `edits` (apply back to front).
+class Fix:
+	var title: String
+	var edits: Array # [{ start: int, end: int, text: String }]
+
+
+	func _init(p_title: String, p_edits: Array) -> void:
+		title = p_title
+		edits = p_edits
+
+
 class Scope:
 	enum Kind {
 		EMPTY,
@@ -121,21 +131,19 @@ class Scope:
 	var type_name: String = ""
 	# CONSTRUCTOR: 0-based part index
 	var part_index: int = 0
-	# → DCDefinition |  _DCKitNS.Registries.ConstructorDef | null
-	var _active_ref: WeakRef = WeakRef.new()
-	
 	# ARRAY_ITEM / DICT_KEY / DICT_VALUE: the COMMAND or CONSTRUCTOR scope whose argument slot holds
 	# the collection, and the keys (String) / indexes (int) leading from that slot to this collection.
 	var owner: Scope = null
 	var path: Array = []
 	# ARRAY_ITEM / DICT_*: 0-based item / entry slot under the cursor
 	var index: int = -1
-	# DICT_*: key of the entry under the cursor. used_keys: keys already present elsewhere in the dictionary.
+	# DICT_VALUE: key of the entry being edited. DICT_*: keys already present elsewhere in the dictionary.
 	var key: String = ""
 	var used_keys: Array = []
-	
 	# The AST node this scope is about (CommandNode / ConstructorNode / ArrayNode / DictNode), or null.
 	var node = null
+	# → DCDefinition |  _DCKitNS.Registries.ConstructorDef | null (collections: the owner's)
+	var _active_ref: WeakRef = WeakRef.new()
 
 
 	func get_active():
@@ -151,19 +159,20 @@ class Scope:
 			Kind.ARRAY_ITEM:
 				return "ARRAY_ITEM(index=%d path=%s in %s)" % [index, path, owner]
 			Kind.DICT_KEY:
-				return "DICT_KEY(key='%s' index=%d used=%s path=%s in %s)" % [key, index, used_keys, path, owner]
+				return "DICT_KEY(key='%s' index=%d used=%s path=%s in %s)" % [
+					key,
+					index,
+					used_keys,
+					path,
+					owner,
+				]
 			Kind.DICT_VALUE:
-				return "DICT_VALUE(key='%s' index=%d used=%s path=%s in %s)" % [key, index, used_keys, path, owner]
+				return "DICT_VALUE(key='%s' index=%d used=%s path=%s in %s)" % [
+					key,
+					index,
+					used_keys,
+					path,
+					owner,
+				]
 			_:
 				return "EMPTY"
-
-
-## Replace source[start:end] with text for every edit (apply back to front).
-class Fix:
-	var title: String
-	var edits: Array # [{ start: int, end: int, text: String }]
-
-
-	func _init(p_title: String, p_edits: Array) -> void:
-		title = p_title
-		edits = p_edits

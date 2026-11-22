@@ -15,7 +15,7 @@ var _cached_info: _DCKitNS.UI.Signature.SignatureInfo = null
 
 func update(scope: DCAnalysisResult.Scope) -> void:
 	var def = null
-	if scope != null and scope.has_method("get_active"):
+	if scope != null:
 		def = scope.get_active()
 	if def == null:
 		_clear()
@@ -64,7 +64,7 @@ func _build_info(def, kind: DCAnalysisResult.Scope.Kind) -> _DCKitNS.UI.Signatur
 				pi.index = i
 				pi.name = p.name
 				pi.description = p.description
-				pi.has_suggestions = p.suggestor.is_valid()
+				pi.has_suggestions = p.spec.has("suggest") # key name "suggest"
 				pi.is_rest = p.is_rest
 				c.params.append(pi)
 			return c
