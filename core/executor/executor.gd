@@ -375,23 +375,27 @@ func _resolve_variable(
 	exec: _DCKitNS.Executor.Execution,
 	root_ctx: DCContext,
 ) -> DCResult:
+	if not _vars.has(node.name):
+		if node.is_silent:
+			if node.fallback != null:
+				return await _resolve_node(node.fallback, exec, root_ctx)
+			return DCResult.from_literal("")
+		return DCResult.fail("Variable '$%s' is not defined." % node.name)
+
 	var value = _vars.get_value_raw(node.name)
-	var present := _vars.has(node.name) # a stored null is still defined
 	if value is Callable and not value.is_valid():
-		present = false # dead Callable counts as missing
-	if present:
-		var r: DCResult = await _resolve_stored(node.name, value, exec, root_ctx)
-		if node.fallback != null and r.success and _is_empty(r.value):
-			return await _resolve_node(node.fallback, exec, root_ctx) # ':' also covers null and ""
-		return r
-	if node.is_silent:
-		if node.fallback != null:
-			return await _resolve_node(node.fallback, exec, root_ctx)
-		return DCResult.from_literal("")
-	return DCResult.fail("Variable '$%s' is not defined." % node.name)
+		return DCResult.fail(
+			"Variable '$%s' is bound to a function that no longer exists." % node.name
+		)
+	var r: DCResult = await _resolve_stored(node.name, value, exec, root_ctx)
+	if node.fallback != null and r.success and _is_empty(r.value):
+		return await _resolve_node(node.fallback, exec, root_ctx) # ':' also covers null and ""
+	return r
+
 
 func _is_empty(v: Variant) -> bool:
 	return v == null or (v is String and v.is_empty())
+
 
 # The store hands back what it holds, unresolved:
 #   plain value → wrapped as before
