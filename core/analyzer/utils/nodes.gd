@@ -60,7 +60,7 @@ class VariableNode extends AstNode:
 	var name: String
 	var is_silent: bool # '?' or ':fallback' — a missing variable is not an error
 	var fallback = null # AstNode | null
-	var modifier := "" # "", "!", "?" or ":"
+	var modifier := "" # "", "?" or ":"
 	var braced := false
 
 

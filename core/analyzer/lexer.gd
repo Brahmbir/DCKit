@@ -14,7 +14,7 @@ const TokenType := Token.Type
 const Role := Token.Role
 const Diagnostic := DCAnalysisResult.Diagnostic
 
-const C_BANG := 33
+const C_DOT := 46 
 const C_DQUOTE := 34
 const C_HASH := 35
 const C_DOLLAR := 36
@@ -46,7 +46,6 @@ const _ROLE := {
 	TokenType.DOLLAR: Role.VAR_SIGIL,
 	TokenType.LBRACE: Role.VAR_SIGIL,
 	TokenType.RBRACE: Role.VAR_SIGIL,
-	TokenType.BANG: Role.VAR_SIGIL,
 	TokenType.QMARK: Role.VAR_SIGIL,
 	TokenType.COLON: Role.VAR_SIGIL,
 	TokenType.NAME: Role.VAR_NAME,
@@ -327,7 +326,7 @@ func _lex_variable() -> void:
 		_lex_compact(start)
 
 
-# $name  $name!  $name?  $name:fallback
+# $name (modifiers only exist inside braces: ${name?} ${name:fallback})
 func _lex_compact(start: int) -> void:
 	var c := _s.unicode_at(_i) if _i < _n else -1
 	if not _has(c, F_IDS):
@@ -335,7 +334,7 @@ func _lex_compact(start: int) -> void:
 			var end := _i
 			while end < _n and _has(_s.unicode_at(end), F_IDC):
 				end += 1
-			_diag("Variable names cannot start with a digit.", start, end - start)
+			_diag("Numbered variables ($1, $2 ...) are reserved for script arguments.", start, end - start)
 			_i = end
 			return
 		_diag("Expected a variable name after '$'.", start, 1) \
@@ -346,7 +345,6 @@ func _lex_compact(start: int) -> void:
 	while _i < _n and _has(_s.unicode_at(_i), F_IDC):
 		_i += 1
 	_push(TokenType.NAME, name_start, _i, _s.substr(name_start, _i - name_start))
-	_modifier()
 
 
 # ${name}  ${name!}  ${name?}  ${name:fallback}   (whitespace allowed inside)
@@ -360,7 +358,7 @@ func _lex_braced(start: int) -> void:
 	var name_start := _i
 	while _i < _n:
 		var c := _s.unicode_at(_i)
-		if _has(c, F_END) or c == C_RBRACE or c == C_COLON or c == C_QMARK or c == C_BANG:
+		if _has(c, F_END) or c == C_RBRACE or c == C_COLON or c == C_QMARK or c == C_DOT or c == C_LBRACKET:
 			break
 		_i += 1
 	var name := _s.substr(name_start, _i - name_start)
@@ -374,12 +372,20 @@ func _lex_braced(start: int) -> void:
 		if bad >= 0:
 			tokens.back().role = Role.ERROR
 			var ch := name[bad]
-			var msg := "Variable names cannot start with a digit."
-			if not (bad == 0 and ch.is_valid_int()):
-				msg =  "Invalid character '%s' in variable name '%s'." % [ch, name]
+			var msg := "Numbered variables ($1, $2 ...) are reserved for script arguments."
+			if ch == "!":
+				msg = "'!' is not a modifier."
+			elif not (bad == 0 and ch.is_valid_int()):
+				msg = "Invalid character '%s' in variable name '%s'." % [ch, name]
 			_diag(msg, name_start + bad, 1) \
-					.with_hint("Names use letters, digits and '_', and cannot start with a digit.")
+					.with_hint("Names use letters, digits and '_'. Use ${name?} for optional or ${name:fallback} for a default.")
 	_skip_ws()
+	if _i < _n and (_s.unicode_at(_i) == C_DOT or _s.unicode_at(_i) == C_LBRACKET):
+		var path_start := _i # reserved: ${name.key} and ${name[0]}
+		while _i < _n and not (_s.unicode_at(_i) in [C_RBRACE, C_COLON, C_QMARK]):
+			_i += 1
+		_diag("Reaching inside a variable is not supported yet.", path_start, _i - path_start) \
+				.with_hint("Read the whole variable with ${%s}." % name)
 	_modifier()
 
 
@@ -387,8 +393,6 @@ func _modifier() -> void:
 	if _i >= _n:
 		return
 	match _s.unicode_at(_i):
-		C_BANG:
-			_punct(TokenType.BANG)
 		C_QMARK:
 			_punct(TokenType.QMARK)
 		C_COLON:

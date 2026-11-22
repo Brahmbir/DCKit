@@ -280,7 +280,6 @@ func _parse_variable() -> AstNode:
 		_next()
 		node.name = t.value
 		node.end_pos = t.end
-		_modifier(node, false)
 		return node
 	dollar.role = Role.ERROR # the lexer already explained why
 	return ErrorNode.new(dollar.start, dollar.end)
@@ -302,7 +301,7 @@ func _parse_braced(node: VariableNode, dollar: Token) -> AstNode:
 		node.bad = name_t.role == Role.ERROR
 	else:
 		node.bad = true # empty name: reported by the lexer
-	_modifier(node, true)
+	_modifier(node)
 
 	var close: Token = null
 	var r := _peek()
@@ -323,19 +322,15 @@ func _parse_braced(node: VariableNode, dollar: Token) -> AstNode:
 	return node
 
 
-func _modifier(node: VariableNode, braced: bool) -> void:
+func _modifier(node: VariableNode) -> void:
 	var t := _peek()
 	match t.type:
-		TT.BANG:
-			_next()
-			node.modifier = "!"
-			node.end_pos = t.end
 		TT.QMARK:
 			_next()
 			node.modifier = "?"
 			node.is_silent = true
 			node.end_pos = t.end
-			if braced and _starts_value(_peek().type):
+			if _starts_value(_peek().type):
 				var v := _peek()
 				var has_colon: bool = (
 					v.type == TT.WORD and v.glued and String(v.value).begins_with(":")
@@ -355,18 +350,12 @@ func _modifier(node: VariableNode, braced: bool) -> void:
 			node.modifier = ":"
 			node.is_silent = true
 			node.end_pos = t.end
-			var n := _peek()
-			if _starts_value(n.type) and (braced or n.glued):
-				if _too_deep():
-					node.fallback = _skip_too_deep()
-				else:
-					_push(-1, not _comma_ok.is_empty() and _comma_ok.back())
-					node.fallback = _parse_value()
-					_pop(-1)
+			if _starts_value(_peek().type):
+				node.fallback = _parse_value()
 				node.end_pos = node.fallback.end_pos
-			elif not _in_key:
+			else:
 				_error("Expected a fallback value after ':'.", t.start, 1) \
-						.with_hint("Write ${name:value}, or remove the ':'.")
+						.with_hint("Write ${name:value}, or ${name?} for an optional variable.")
 #endregion
 
 
@@ -414,16 +403,7 @@ func _parse_entry() -> DictEntry:
 	e.end_pos = e.key.end_pos
 
 	var t := _peek()
-	if e.key is VariableNode and e.key.modifier == ":" and e.key.fallback == null:
-		e.colon_pos = e.key.end_pos - 1 # the variable swallowed the entry's ':'
-		var after := _peek()
-		if _starts_value(after.type):
-			e.value = _parse_value()
-		else:
-			_error("Expected a value after ':'.", e.colon_pos, 1)
-			e.value = ErrorNode.new(e.key.end_pos, e.key.end_pos, true)
-			e.end_pos = _peek().start # the entry stays open until the next ',' or closer
-	elif t.type == TT.COLON:
+	if t.type == TT.COLON:
 		_next()
 		e.colon_pos = t.start
 		if _starts_value(_peek().type):
@@ -645,16 +625,29 @@ func _check_glued(node: AstNode) -> void:
 	if node.bad and node is ErrorNode:
 		return
 	var span := maxi(n.end - n.start, 1)
-	if node is VariableNode and node.fallback != null and not node.braced:
-		return # the fallback value already checked what follows it
-	if node is VariableNode and node.modifier.is_empty():
+	if (
+		node is VariableNode and not node.braced and n.type == TT.WORD
+		and String(n.value).left(1) in ["?", "!", ":"]
+	):
+		var lead := String(n.value).left(1)
+		var d := _error(
+			"A variable modifier needs braces ('$%s%s')." % [node.name, lead],
+			n.start,
+			span,
+		) \
+				.with_hint(
+			"Write ${%s?} for optional, or ${%s:fallback} for a default." % [node.name, node.name]
+		)
+		if n.value == "?":
+			d.with_fix("Add braces", node.start_pos, n.end, "${%s?}" % node.name)
+		elif lead == ":" and String(n.value).length() > 1:
+			d.with_fix("Add braces", node.start_pos, n.end, "${%s%s}" % [node.name, n.value])
+	elif node is VariableNode and node.modifier.is_empty():
 		var d := _error("Text directly after '$%s'." % node.name, n.start, span) \
 				.with_hint("Join text with a string: \"${%s}...\"." % node.name)
 		if (n.type == TT.WORD or n.type == TT.NUMBER) and not _src.is_empty():
 			var joined := "\"${%s}%s\"" % [node.name, n.value.replace("\\", "\\\\")]
 			d.with_fix("Join into one string", node.start_pos, n.end, joined)
-	elif node is VariableNode and not node.braced:
-		_error("Expected a space after '%s'." % node.modifier, n.start, span)
 	else:
 		_error("Expected a space before '%s'." % _text(n), n.start, span) \
 				.with_hint(

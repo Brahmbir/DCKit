@@ -367,25 +367,31 @@ func _resolve_node(node, exec: _DCKitNS.Executor.Execution, root_ctx: DCContext)
 	return DCResult.from_literal("")
 
 
-# $name  ${name}  ${name!}  → missing = FAIL
-# $name?  ${name?}           → missing = ""
-# $name:node  ${name:node}   → missing = resolve fallback node recursively
+# $name  ${name}  → missing = FAIL
+# ${name?}        → missing = ""
+# ${name:node}    → missing = resolve fallback node recursively
 func _resolve_variable(
 	node: _DCKitNS.Analyzer.Parser.VariableNode,
 	exec: _DCKitNS.Executor.Execution,
 	root_ctx: DCContext,
 ) -> DCResult:
 	var value = _vars.get_value_raw(node.name)
+	var present := _vars.has(node.name) # a stored null is still defined
 	if value is Callable and not value.is_valid():
-		value = null # dead Callable counts as missing
-	if value != null:
-		return await _resolve_stored(node.name, value, exec, root_ctx)
+		present = false # dead Callable counts as missing
+	if present:
+		var r: DCResult = await _resolve_stored(node.name, value, exec, root_ctx)
+		if node.fallback != null and r.success and _is_empty(r.value):
+			return await _resolve_node(node.fallback, exec, root_ctx) # ':' also covers null and ""
+		return r
 	if node.is_silent:
 		if node.fallback != null:
 			return await _resolve_node(node.fallback, exec, root_ctx)
 		return DCResult.from_literal("")
 	return DCResult.fail("Variable '$%s' is not defined." % node.name)
 
+func _is_empty(v: Variant) -> bool:
+	return v == null or (v is String and v.is_empty())
 
 # The store hands back what it holds, unresolved:
 #   plain value → wrapped as before

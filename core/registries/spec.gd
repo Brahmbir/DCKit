@@ -206,8 +206,8 @@ static func check(value: Variant, spec: Dictionary) -> String:
 	else:
 		err = _check_scalar(v, spec)
 	if err.is_empty() and spec.has("validate"):
-		var validate_func :Callable= spec["validate"]
-		
+		var validate_func: Callable = spec["validate"]
+
 		err = "validate function is not valid"
 		if validate_func.is_valid():
 			var result = validate_func.call(v)

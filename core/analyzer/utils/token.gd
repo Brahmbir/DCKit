@@ -10,7 +10,6 @@ enum Type {
 	DOLLAR,
 	LBRACE,
 	NAME, # variable name
-	BANG,
 	QMARK,
 	COLON,
 	RBRACE,
